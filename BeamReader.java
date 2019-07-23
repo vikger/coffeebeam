@@ -62,12 +62,14 @@ public class BeamReader {
 	long chunklength = read32BitUnsigned();
 	System.out.println(Long.toString(chunklength));
 	switch (chunkname) {
+	case "Atom":
 	case "AtU8":
-	    System.out.println("----AtU8");
-	    new AtU8(readBytes((int) chunklength));
+	    new Atom(readBytes((int) chunklength));
+	    break;
+	case "Code":
+	    new Code(readBytes((int) chunklength));
 	    break;
 	default:
-	    System.out.println("----other");
 	    readBytes((int) chunklength);
 	    break;
 	}

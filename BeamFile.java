@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 
 public class BeamFile {
-    
+
 }
 
 class BeamObject extends ByteReader {
@@ -38,13 +38,21 @@ class ByteReader {
     }
 }
 
-class AtU8 extends BeamObject {
-    public AtU8(byte[] bytes) throws IOException {
+class Atom extends BeamObject {
+    public Atom(byte[] bytes) throws IOException {
 	super(bytes);
 	long count = read32BitUnsigned();
 	for (int i = 0; i < count; i++) {
 	    int length = readByte();
 	    System.out.println(new String(readBytes(length)));
 	}
+    }
+}
+
+class Code extends BeamObject {
+    public Code(byte[] bytes) throws IOException {
+	super(bytes);
+	long version = read32BitUnsigned();
+	System.out.println(Long.toString(version));
     }
 }
