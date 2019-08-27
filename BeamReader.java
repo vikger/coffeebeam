@@ -69,6 +69,14 @@ public class BeamReader {
 	case "Code":
 	    new Code(readBytes((int) chunklength));
 	    break;
+        case "Code":
+            System.out.println("----Code");
+            new Code(readBytes((int) chunklength));
+            break;
+        case "LitT":
+            System.out.println("----LitT");
+            new LitT(readBytes((int) chunklength));
+            break;
 	default:
 	    readBytes((int) chunklength);
 	    break;
