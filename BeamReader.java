@@ -66,9 +66,6 @@ public class BeamReader {
 	case "AtU8":
 	    new Atom(readBytes((int) chunklength));
 	    break;
-	case "Code":
-	    new Code(readBytes((int) chunklength));
-	    break;
         case "Code":
             System.out.println("----Code");
             new Code(readBytes((int) chunklength));
