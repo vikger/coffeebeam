@@ -273,7 +273,13 @@ class InternalTerm extends BeamObject {
                     break;
                 }
             }
-        } else {
+        } else { // bit 3 is 1
+            if ((b & 0x10) == 0) { // 1 continuation byte
+                int cont1 = readByte();
+                int value = ((b & 0xE0) << 8) + cont1;
+                System.out.print(value); // TODO: separate types
+            } else { // 2..8 continuation bytes
+            }
         }
         System.out.println();
     }
