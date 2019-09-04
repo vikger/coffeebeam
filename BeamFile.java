@@ -132,33 +132,53 @@ class InternalTerm extends BeamObject {
     public InternalTerm(InputStream stream) throws IOException {
         super(stream);
         int b = readByte();
-        System.out.print("byte: " + b);
+        System.out.print("---- [" + dec_to_bin(b) + "] ");
         if ((b & 0x08) == 0) { // no continuation
             switch (b & 0x07) {
             case 0: // literal
-                System.out.print(" literal " + ((b & 0xF0) >> 4));
+                System.out.print("literal " + ((b & 0xF0) >> 4));
                 break;
             case 1: // integer
-                System.out.print(" integer " + ((b & 0xF0) >> 4));
+                System.out.print("integer " + ((b & 0xF0) >> 4));
                 break;
             case 2: // atom
-                System.out.print(" atom " + ((b & 0xF0) >> 4));
+                System.out.print("atom " + ((b & 0xF0) >> 4));
                 break;
             case 3: // X register
-                System.out.print(" X register " + ((b & 0xF0) >> 4));
+                System.out.print("X register " + ((b & 0xF0) >> 4));
                 break;
             case 4: // Y register
-                System.out.print(" Y register " + ((b & 0xF0) >> 4));
+                System.out.print("Y register " + ((b & 0xF0) >> 4));
                 break;
             case 5: // label
-                System.out.print(" label " + ((b & 0xF0) >> 4));
+                System.out.print("label " + ((b & 0xF0) >> 4));
                 break;
             case 6: // character
-                System.out.print(" character " + ((b & 0xF0) >> 4));
+                System.out.print("character " + ((b & 0xF0) >> 4));
                 break;
+            case 7: // extended
+                System.out.print("extended - ");
+                int b2 = readByte();
+                switch ((b & 0xF0) >> 4) {
+                case 1: // list
+                    System.out.print("list " + b2);
+                case 2: // floating point register
+                    System.out.print("floating point register " + b2);
+                case 3: // allocation list
+                    System.out.print("allocation list " + b2);
+                case 4: // literal
+                    System.out.print("literal " + b2);
+                }
             }
         } else {
         }
         System.out.println();
+    }
+    private String dec_to_bin(int b) {
+        String result = "";
+        for (int i = 0; i < 8; i++) {
+            result = Integer.toString((b & (1 << i)) >> i) + result;
+        }
+        return result;
     }
 }
