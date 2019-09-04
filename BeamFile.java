@@ -97,7 +97,7 @@ class LitT extends BeamObject {
         System.out.println("Count: " + Integer.toString(count));
         for (int i = 0; i < count; i++) {
             int size = (int) read32BitUnsigned();
-            new Term(stream, size);
+            new Term(stream);
         }
     }
 }
@@ -141,27 +141,87 @@ class LocT extends BeamObject {
     }
 }
 
+class Attr extends BeamObject {
+    public Attr(InputStream s) throws IOException {
+        super(s);
+        new Term(stream);
+    }
+}
+
 class Term extends BeamObject {
-    public Term(InputStream stream, int len) throws IOException {
+    public Term(InputStream stream) throws IOException {
         super(stream);
-        switch (readByte()) {
+        int b;
+        switch (b = readByte()) {
         case 131: // external term format
-            int tag = readByte();
-            System.out.println("Tag: " + tag);
-            switch (tag) {
-            case 107: // STRING_EXT
-                int length = read16BitUnsigned();
-                String string = new String(readBytes(length));
-                System.out.println("STRING_EXT: " + string);
-                break;
-            default:
-                System.out.print("Term bytes");
-                for (int i = 0; i < len; i++) {
-                    System.out.print(" " + Integer.toString(readByte()));
-                }
-                System.out.println();
-                break;
+            read_term();
+            break;
+        default:
+            System.out.println("UNKNOWN term code " + b);
+            break;
+        }
+    }
+
+    private void read_term() throws IOException {
+        int tag = readByte();
+        switch (tag) {
+        case 82: // atom_cache_ref
+            int index = readByte();
+            System.out.println("ATOM_CACHE_REF: " + index);
+            break;
+        case 97: // small integer
+            int smallint = readByte();
+            System.out.println("SMALL_INTEGER_EXT: " + smallint);
+            break;
+        case 98: // integer
+            long biginteger = read32BitUnsigned();
+            System.out.println("INTEGER_EXT: " + biginteger);
+            break;
+        case 99: // FLOAT_EXT
+            byte[] floatstr = readBytes(31);
+            System.out.println("FLOAT_EXT: " + new String(floatstr));
+            break;
+        case 100: // ATOM_EXT
+            int atom_length = read16BitUnsigned();
+            byte[] atom_name = readBytes(atom_length);
+            System.out.println("ATOM: " + new String(atom_name));
+            break;
+        case 104: // SMALL_TUPLE_EXT
+            int small_tuple_arity = readByte();
+            System.out.print("SMALL_TUPLE_EXT(" + small_tuple_arity + "): ");
+            for (int i = 0; i < small_tuple_arity; i++) {
+                read_term();
             }
+            System.out.println("end SMALL_TUPLE_EXT");
+            break;
+        case 106: // NIL_EXT
+            System.out.println("NIL_EXT");
+            break;
+        case 107: // STRING_EXT
+            int length = read16BitUnsigned();
+            System.out.println("STRING_EXT: " + new String(readBytes(length)));
+            break;
+        case 108: // LIST_EXT
+            long list_length = read32BitUnsigned();
+            System.out.print("LIST_EXT(" + list_length + "): ");
+            for (long i = 0; i < list_length; i++) {
+                read_term();
+            }
+            read_term(); // tail
+            System.out.println("end LIST_EXT");
+            break;
+        case 110: // SMALL_BIG_EXT
+            int sb_length = readByte();
+            int sign  = readByte();
+            System.out.print("SMALL_BIG_EXT ");
+            for (int i = 0; i < sb_length; i++) {
+                System.out.print(readByte() + " ");
+                // TODO: calculate bignum
+            }
+            break;
+        default:
+            System.out.println("other " + tag);
+            System.out.println(" " + readByte());
             break;
         }
     }
@@ -213,7 +273,7 @@ class InternalTerm extends BeamObject {
         }
         System.out.println();
     }
-    private String dec_to_bin(int b) {
+    public static String dec_to_bin(int b) {
         String result = "";
         for (int i = 0; i < 8; i++) {
             result = Integer.toString((b & (1 << i)) >> i) + result;

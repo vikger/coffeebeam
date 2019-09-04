@@ -87,6 +87,10 @@ public class BeamReader {
             System.out.println("----LocT");
             new LocT(new ByteArrayInputStream(readBytes(chunklength)));
             break;
+        case "Attr":
+            System.out.println("----Attr");
+            new Attr(new ByteArrayInputStream(readBytes(chunklength)));
+            break;
 	default:
 	    readBytes((int) chunklength);
 	    break;
