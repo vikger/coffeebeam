@@ -1,6 +1,7 @@
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 
 public class BeamReader {
@@ -59,20 +60,20 @@ public class BeamReader {
     public void readChunk() throws IOException {
 	String chunkname = read4ByteString();
 	System.out.println(chunkname);
-	long chunklength = read32BitUnsigned();
-	System.out.println(Long.toString(chunklength));
+	int chunklength = (int) read32BitUnsigned();
+	System.out.println(Integer.toString(chunklength));
 	switch (chunkname) {
 	case "Atom":
 	case "AtU8":
-	    new Atom(readBytes((int) chunklength));
+	    new Atom(new ByteArrayInputStream(readBytes(chunklength)));
 	    break;
         case "Code":
             System.out.println("----Code");
-            new Code(readBytes((int) chunklength));
+            new Code(new ByteArrayInputStream(readBytes(chunklength)));
             break;
         case "LitT":
             System.out.println("----LitT");
-            new LitT(readBytes((int) chunklength));
+            new LitT(new ByteArrayInputStream(readBytes(chunklength)));
             break;
 	default:
 	    readBytes((int) chunklength);
@@ -110,7 +111,7 @@ public class BeamReader {
 
     public static void main(String[] args) {
 	try {
-	    BeamReader br = new BeamReader("example.beam");
+	    BeamReader br = new BeamReader(args[0]);
 	    BeamFile bf = br.read();
 	} catch (Exception e) {}
     }
