@@ -261,12 +261,16 @@ class InternalTerm extends BeamObject {
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
                     System.out.print("list " + b2);
+                    break;
                 case 2: // floating point register
                     System.out.print("floating point register " + b2);
+                    break;
                 case 3: // allocation list
                     System.out.print("allocation list " + b2);
+                    break;
                 case 4: // literal
                     System.out.print("literal " + b2);
+                    break;
                 }
             }
         } else {
