@@ -55,7 +55,7 @@ class Atom extends BeamObject {
 	long count = read32BitUnsigned();
 	for (int i = 0; i < count; i++) {
 	    int length = readByte();
-	    System.out.println(new String(readBytes(length)));
+	    System.out.println("[atom " + (i+1) + "] " + new String(readBytes(length)));
 	}
     }
 }
@@ -68,10 +68,10 @@ class Code extends BeamObject {
         long maxopcode = read32BitUnsigned();
         long labelcount = read32BitUnsigned();
         long funcount = read32BitUnsigned();
-        System.out.println(codeversion);
-        System.out.println(maxopcode);
-        System.out.println(labelcount);
-        System.out.println(funcount);
+        System.out.println("version: " + codeversion +
+                           ", maxopcode: " + maxopcode +
+                           ", labels: " + labelcount +
+                           ", functions: " + funcount);
         int opcode;
         while ((opcode = readByte()) != -1) {
             int arity = OpCode.arity(opcode);
@@ -98,6 +98,45 @@ class LitT extends BeamObject {
         for (int i = 0; i < count; i++) {
             int size = (int) read32BitUnsigned();
             new Term(stream, size);
+        }
+    }
+}
+
+class ImpT extends BeamObject {
+    public ImpT(InputStream s) throws IOException {
+        super(s);
+        int count = (int) read32BitUnsigned();
+        for (int i = 0; i < count; i++) {
+            int module = (int) read32BitUnsigned();
+            int function = (int) read32BitUnsigned();
+            int arity = (int) read32BitUnsigned();
+            System.out.println("[atom " + module + "] [atom " + function + "] / " + arity);
+        }
+    }
+}
+
+class ExpT extends BeamObject {
+    public ExpT(InputStream s) throws IOException {
+        super(s);
+        int count = (int) read32BitUnsigned();
+        for (int i = 0; i < count; i++) {
+            int name = (int) read32BitUnsigned();
+            int arity = (int) read32BitUnsigned();
+            int label = (int) read32BitUnsigned();
+            System.out.println("[atom " + name + "] / " + arity + ", label: " + label);
+        }
+    }
+}
+
+class LocT extends BeamObject {
+    public LocT(InputStream s) throws IOException {
+        super(s);
+        int count = (int) read32BitUnsigned();
+        for (int i = 0; i < count; i++) {
+            int function = (int) read32BitUnsigned();
+            int arity = (int) read32BitUnsigned();
+            int location = (int) read32BitUnsigned();
+            System.out.println("[atom " + function + "] / " + arity + ", label: " + location);
         }
     }
 }
