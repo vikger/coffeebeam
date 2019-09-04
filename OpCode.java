@@ -33,7 +33,7 @@ public class OpCode {
      "is_port", "is_nil", "is_binary", "is_constant", "is_list",
      "is_nonempty_list", "is_tuple", "test_arity", "select_val", "select_tuple_arity",
      "jump", "catch", "catch_end", "move", "get_list",
-     "get_tuple_elemenet", "set_tuple_element", "put_string", "put_list", "put_tuple",
+     "get_tuple_element", "set_tuple_element", "put_string", "put_list", "put_tuple",
      "put", "badmatch", "if_end", "case_end", "call_fun",
      "make_fun", "is_function", "call_ext_only", "bs_start_match", "bs_get_integer",
      "bs_get_float", "bs_get_binary", "bs_skip_bits", "bs_test_tail", "bs_save",
