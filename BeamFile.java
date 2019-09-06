@@ -210,10 +210,16 @@ class Term extends BeamObject {
             read_term(); // tail
             System.out.println("end LIST_EXT");
             break;
+        case 109: // BINARY_EXT
+            long binary_length = read32BitUnsigned();
+            System.out.println("BINARY_EXT(" + binary_length + "): ");
+            for (long j = 0; j < binary_length; j++) {
+                System.out.println(readByte() + " ");
+            }
         case 110: // SMALL_BIG_EXT
             int sb_length = readByte();
             int sign  = readByte();
-            System.out.print("SMALL_BIG_EXT ");
+            System.out.print("SMALL_BIG_EXT: ");
             for (int i = 0; i < sb_length; i++) {
                 System.out.print(readByte() + " ");
                 // TODO: calculate bignum
@@ -228,60 +234,62 @@ class Term extends BeamObject {
 }
 
 class InternalTerm extends BeamObject {
+    private String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
     public InternalTerm(InputStream stream) throws IOException {
         super(stream);
         int b = readByte();
         System.out.print("---- [" + dec_to_bin(b) + "] ");
-        if ((b & 0x08) == 0) { // no continuation
-            switch (b & 0x07) {
-            case 0: // literal
-                System.out.print("literal " + ((b & 0xF0) >> 4));
-                break;
-            case 1: // integer
-                System.out.print("integer " + ((b & 0xF0) >> 4));
-                break;
-            case 2: // atom
-                System.out.print("atom " + ((b & 0xF0) >> 4));
-                break;
-            case 3: // X register
-                System.out.print("X register " + ((b & 0xF0) >> 4));
-                break;
-            case 4: // Y register
-                System.out.print("Y register " + ((b & 0xF0) >> 4));
-                break;
-            case 5: // label
-                System.out.print("label " + ((b & 0xF0) >> 4));
-                break;
-            case 6: // character
-                System.out.print("character " + ((b & 0xF0) >> 4));
-                break;
-            case 7: // extended
-                System.out.print("extended - ");
-                int b2 = readByte();
+        // read tag
+        String tag = null;
+        int value = -1234;
+        boolean extended = false;
+
+        // read tag
+        tag = tags[b & 0x07];
+        extended = (b & 0x07) == 7;
+
+        // read value
+        if ((b & 0x08) != 0) { // bit 3 is 1, continuation
+            if ((b & 0x10) != 0) { // 2..8 continuation bytes
+                int following_bytes = (b & 0xE0) >> 5;
+                for (int i = 0; 9 < following_bytes; i++)
+                    readByte();
+                System.out.print("skipped(" + following_bytes + ") ");
+            } else { // 1 continuation byte
+                int cont1 = readByte();
+                System.out.print("[" + dec_to_bin(cont1) + "] ");
+                value = ((b & 0xE0) << 3) + cont1;
+            }
+        } else { // bit 3 is 0, no continuation
+            if (extended) {
+                value = readByte();
+                System.out.print("[" + dec_to_bin(value) + "] ");
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
-                    System.out.print("list " + b2);
+                    tag += "list";
+                    int list_size = value >> 4;
+                    tag += "(" + list_size + ")";
+                    for (int i = 0; i < list_size; i++) {
+                        System.out.print("list[" + (i+1) + "]: ");
+                        new InternalTerm(stream); // item
+                    }
+                    System.out.print("list end - ");
                     break;
                 case 2: // floating point register
-                    System.out.print("floating point register " + b2);
+                    tag += "floating point register";
                     break;
                 case 3: // allocation list
-                    System.out.print("allocation list " + b2);
+                    tag += "allocation list";
                     break;
                 case 4: // literal
-                    System.out.print("literal " + b2);
+                    tag += "literal";
                     break;
                 }
-            }
-        } else { // bit 3 is 1
-            if ((b & 0x10) == 0) { // 1 continuation byte
-                int cont1 = readByte();
-                int value = ((b & 0xE0) << 8) + cont1;
-                System.out.print(value); // TODO: separate types
-            } else { // 2..8 continuation bytes
+            } else {
+                value = (b & 0xF0) >> 4;
             }
         }
-        System.out.println();
+        System.out.println(tag + " " + value);
     }
     public static String dec_to_bin(int b) {
         String result = "";
