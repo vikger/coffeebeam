@@ -1,0 +1,33 @@
+@startuml
+
+BeamObject : print()
+
+BeamObject <|-- Term
+Term : toString()
+
+Term <|-- Number
+
+Number <|-- ErlInteger
+
+Number <|-- ErlFloat
+
+Term <|-- Atom
+
+Term <|-- List
+
+Beam o-- LiteralTable
+
+Beam o-- ImportTable
+
+Beam o-- ExportTable
+
+Beam o-- CodeTable
+
+Beam o-- Attribute
+
+@enduml
+
+
+
+
+
