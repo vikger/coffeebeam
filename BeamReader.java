@@ -16,7 +16,7 @@ public class BeamReader {
 	try {
 	    file = new FileInputStream(filename);
 	} catch (Exception e) {}
-	beamfile = new BeamFile();
+	beamfile = new BeamFile(filename);
     }
 
     public static int unsignedToBytes(byte b) {
@@ -62,37 +62,20 @@ public class BeamReader {
 	System.out.println(chunkname);
 	int chunklength = (int) read32BitUnsigned();
 	System.out.println(Integer.toString(chunklength));
+        ByteReader br = new ByteReader(new ByteArrayInputStream(readBytes(chunklength)));
 	switch (chunkname) {
 	case "Atom":
-	case "AtU8":
-	    new Atom(new ByteArrayInputStream(readBytes(chunklength)));
-	    break;
-        case "Code":
-            System.out.println("----Code");
-            new Code(new ByteArrayInputStream(readBytes(chunklength)));
-            break;
-        case "LitT":
-            System.out.println("----LitT");
-            new LitT(new ByteArrayInputStream(readBytes(chunklength)));
-            break;
-        case "ImpT":
-            System.out.println("----ImpT");
-            new ImpT(new ByteArrayInputStream(readBytes(chunklength)));
-            break;
-        case "ExpT":
-            System.out.println("----ExpT");
-            new ExpT(new ByteArrayInputStream(readBytes(chunklength)));
-            break;
-        case "LocT":
-            System.out.println("----LocT");
-            new LocT(new ByteArrayInputStream(readBytes(chunklength)));
-            break;
+	case "AtU8": beamfile.readAtom(br); break;
+        case "Code": beamfile.readCode(br); break;
+        case "LitT": beamfile.readLiterals(br); break;
+        case "ImpT": beamfile.readImports(br); break;
+        case "ExpT": beamfile.readExports(br); break;
+        case "LocT": beamfile.readLocalFunctions(br); break;
         case "Attr":
             System.out.println("----Attr");
-            new Attr(new ByteArrayInputStream(readBytes(chunklength)));
+            new Attr(br);
             break;
 	default:
-	    readBytes((int) chunklength);
 	    break;
 	}
 	readPadding(chunklength);
@@ -129,6 +112,7 @@ public class BeamReader {
 	try {
 	    BeamReader br = new BeamReader(args[0]);
 	    BeamFile bf = br.read();
+            bf.dump();
 	} catch (Exception e) {}
     }
 }

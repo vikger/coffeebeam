@@ -3,16 +3,138 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.zip.InflaterInputStream;
+import java.util.ArrayList;
 
 public class BeamFile {
+    private String filename;
+    private ArrayList<String> atoms;
+    private ArrayList<ExternalTerm> literals;
+    private ArrayList<Import> imports;
+    private ArrayList<Export> exports;
+    private ArrayList<LocalFunction> localFunctions;
 
-}
-
-class BeamObject extends ByteReader {
-    public BeamObject(InputStream s) {
-	super(s);
+    private BeamFile() {}
+    public BeamFile(String fn) {
+        filename = fn;
+        atoms = new ArrayList<String>();
+        literals = new ArrayList<ExternalTerm>();
+        imports = new ArrayList<Import>();
+        exports = new ArrayList<Export>();
+        localFunctions = new ArrayList<LocalFunction>();
     }
-    public void print() {}
+
+    public void readAtom(ByteReader br) throws IOException {
+	long count = br.read32BitUnsigned();
+	for (int i = 0; i < count; i++) {
+	    int length = br.readByte();
+	    atoms.add(new String(br.readBytes(length)));
+	}
+    }
+
+    public void readCode(ByteReader br) throws IOException {
+        long subsize = br.read32BitUnsigned();
+        long codeversion = br.read32BitUnsigned();
+        long maxopcode = br.read32BitUnsigned();
+        long labelcount = br.read32BitUnsigned();
+        long funcount = br.read32BitUnsigned();
+        System.out.println("version: " + codeversion +
+                           ", maxopcode: " + maxopcode +
+                           ", labels: " + labelcount +
+                           ", functions: " + funcount);
+        int opcode;
+        while ((opcode = br.readByte()) != -1) {
+            int arity = OpCode.arity(opcode);
+            System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
+            for (int j = 0; j < arity; j++) {
+                new InternalTerm(br.getStream());
+            }
+        }
+    }
+
+    public void readLiterals(ByteReader br) throws IOException {
+        int uncompressedSize = (int) br.read32BitUnsigned();
+        System.out.println(uncompressedSize);
+
+        InflaterInputStream iis = new InflaterInputStream(br.getStream());
+        byte[] uncompressed = new byte[uncompressedSize];
+        iis.read(uncompressed);
+        br = new ByteReader(new ByteArrayInputStream(uncompressed));
+        int count = (int) br.read32BitUnsigned();
+        System.out.println("Count: " + count);
+        for (int i = 0; i < count; i++) {
+            int size = (int) br.read32BitUnsigned();
+            // TODO: replace with final Term class
+            literals.add(new ExternalTerm(br.getStream()));
+        }
+    }
+
+    public void readImports(ByteReader br) throws IOException {
+        int count = (int) br.read32BitUnsigned();
+        for (int i = 0; i < count; i++) {
+            int module = (int) br.read32BitUnsigned();
+            int function = (int) br.read32BitUnsigned();
+            int arity = (int) br.read32BitUnsigned();
+            imports.add(new Import(module - 1, function - 1, arity));
+        }
+    }
+
+    public void readExports(ByteReader br) throws IOException {
+        int count = (int) br.read32BitUnsigned();
+        for (int i = 0; i < count; i++) {
+            int name = (int) br.read32BitUnsigned();
+            int arity = (int) br.read32BitUnsigned();
+            int label = (int) br.read32BitUnsigned();
+            exports.add(new Export(name - 1, arity, label));
+        }
+    }
+
+    public void readLocalFunctions(ByteReader br) throws IOException {
+        int count = (int) br.read32BitUnsigned();
+        for (int i = 0; i < count; i++) {
+            int function = (int) br.read32BitUnsigned();
+            int arity = (int) br.read32BitUnsigned();
+            int label = (int) br.read32BitUnsigned();
+            localFunctions.add(new LocalFunction(function - 1, arity, label));
+        }
+    }
+
+    public void dump() {
+        printAtoms();
+        //printLiterals();
+        printImports();
+        printExports();
+        printLocalFunctions();
+    }
+
+    private void printAtoms() {
+        for (int i = 0; i < atoms.size(); i++) {
+            System.out.println("Atom(" + i + "): " + atoms.get(i));
+        }
+    }
+
+    private void printLiterals() {
+    }
+
+    private void printImports() {
+        for (int i = 0; i < imports.size(); i++) {
+            Import imp = imports.get(i);
+            System.out.println("Import(" + i + "): [atom " + imp.getModule() + "]:[atom " + imp.getFunction() + "] / " + imp.getArity());
+        }
+    }
+
+    private void printExports() {
+        for (int i = 0; i < exports.size(); i++) {
+            Export exp = exports.get(i);
+            System.out.println("Export(" + i + "): [atom " + exp.getFunction() + "] / " + exp.getArity() + " - label " + exp.getLabel());
+        }
+    }
+
+    private void printLocalFunctions() {
+        for (int i = 0; i < localFunctions.size(); i++) {
+            LocalFunction loc = localFunctions.get(i);
+            System.out.println("LocalFunction(" + i + "): [atom " + loc.getFunction() + "] / " + loc.getArity() + " - label " + loc.getLabel());
+        }
+    }
 }
 
 class ByteReader {
@@ -20,6 +142,10 @@ class ByteReader {
 
     public ByteReader(InputStream s) {
 	stream = s;
+    }
+
+    public InputStream getStream() {
+        return stream;
     }
 
     public int read16BitUnsigned() throws IOException {
@@ -49,110 +175,57 @@ class ByteReader {
     }
 }
 
-class Atom extends BeamObject {
-    public Atom(InputStream s) throws IOException {
-	super(s);
-	long count = read32BitUnsigned();
-	for (int i = 0; i < count; i++) {
-	    int length = readByte();
-	    System.out.println("[atom " + (i+1) + "] " + new String(readBytes(length)));
-	}
+class Import {
+    int module, function, arity;
+    public Import(int m, int f, int a) {
+        module = m;
+        function = f;
+        arity = a;
+    }
+
+    public int getModule() { return module; }
+    public int getFunction() { return function; }
+    public int getArity() { return arity; }
+}
+
+class Export {
+    int function, arity, label;
+    public Export(int f, int a, int l) {
+        function = f;
+        arity = a;
+        label = l;
+    }
+
+    public int getFunction() { return function; }
+    public int getArity() { return arity; }
+    public int getLabel() { return label; }
+}
+
+class LocalFunction {
+    int function, arity, label;
+    public LocalFunction(int f, int a, int l) {
+        function = f;
+        arity = a;
+        label = l;
+    }
+
+    public int getFunction() { return function; }
+    public int getArity() { return arity; }
+    public int getLabel() { return label; }
+}
+
+class Attr {
+    public Attr(ByteReader br) throws IOException {
+        new ExternalTerm(br.getStream());
     }
 }
 
-class Code extends BeamObject {
-    public Code(InputStream s) throws IOException {
-	super(s);
-        long subsize = read32BitUnsigned();
-        long codeversion = read32BitUnsigned();
-        long maxopcode = read32BitUnsigned();
-        long labelcount = read32BitUnsigned();
-        long funcount = read32BitUnsigned();
-        System.out.println("version: " + codeversion +
-                           ", maxopcode: " + maxopcode +
-                           ", labels: " + labelcount +
-                           ", functions: " + funcount);
-        int opcode;
-        while ((opcode = readByte()) != -1) {
-            int arity = OpCode.arity(opcode);
-            System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
-            for (int j = 0; j < arity; j++) {
-                new InternalTerm(stream);
-            }
-        }
-    }
-}
-
-class LitT extends BeamObject {
-    public LitT(InputStream s) throws IOException {
-	super(s);
-	int uncompressedSize = (int) read32BitUnsigned();
-        System.out.println(uncompressedSize);
-
-        InflaterInputStream iis = new InflaterInputStream(stream);
-        byte[] uncompressed = new byte[uncompressedSize];
-        iis.read(uncompressed);
-        stream = new ByteArrayInputStream(uncompressed);
-        int count = (int) read32BitUnsigned();
-        System.out.println("Count: " + Integer.toString(count));
-        for (int i = 0; i < count; i++) {
-            int size = (int) read32BitUnsigned();
-            new Term(stream);
-        }
-    }
-}
-
-class ImpT extends BeamObject {
-    public ImpT(InputStream s) throws IOException {
-        super(s);
-        int count = (int) read32BitUnsigned();
-        for (int i = 0; i < count; i++) {
-            int module = (int) read32BitUnsigned();
-            int function = (int) read32BitUnsigned();
-            int arity = (int) read32BitUnsigned();
-            System.out.println("[atom " + module + "] [atom " + function + "] / " + arity);
-        }
-    }
-}
-
-class ExpT extends BeamObject {
-    public ExpT(InputStream s) throws IOException {
-        super(s);
-        int count = (int) read32BitUnsigned();
-        for (int i = 0; i < count; i++) {
-            int name = (int) read32BitUnsigned();
-            int arity = (int) read32BitUnsigned();
-            int label = (int) read32BitUnsigned();
-            System.out.println("[atom " + name + "] / " + arity + ", label: " + label);
-        }
-    }
-}
-
-class LocT extends BeamObject {
-    public LocT(InputStream s) throws IOException {
-        super(s);
-        int count = (int) read32BitUnsigned();
-        for (int i = 0; i < count; i++) {
-            int function = (int) read32BitUnsigned();
-            int arity = (int) read32BitUnsigned();
-            int location = (int) read32BitUnsigned();
-            System.out.println("[atom " + function + "] / " + arity + ", label: " + location);
-        }
-    }
-}
-
-class Attr extends BeamObject {
-    public Attr(InputStream s) throws IOException {
-        super(s);
-        new Term(stream);
-    }
-}
-
-class Term extends BeamObject {
-    public Term(InputStream stream) throws IOException {
-        super(stream);
+class ExternalTerm {
+    ByteReader br;
+    public ExternalTerm(InputStream s) throws IOException {
         int b;
-        switch (b = readByte()) {
+        br = new ByteReader(s);
+        switch (b = br.readByte()) {
         case 131: // external term format
             read_term();
             break;
@@ -163,31 +236,31 @@ class Term extends BeamObject {
     }
 
     private void read_term() throws IOException {
-        int tag = readByte();
+        int tag = br.readByte();
         switch (tag) {
         case 82: // atom_cache_ref
-            int index = readByte();
+            int index = br.readByte();
             System.out.println("ATOM_CACHE_REF: " + index);
             break;
         case 97: // small integer
-            int smallint = readByte();
+            int smallint = br.readByte();
             System.out.println("SMALL_INTEGER_EXT: " + smallint);
             break;
         case 98: // integer
-            long biginteger = read32BitUnsigned();
+            long biginteger = br.read32BitUnsigned();
             System.out.println("INTEGER_EXT: " + biginteger);
             break;
         case 99: // FLOAT_EXT
-            byte[] floatstr = readBytes(31);
+            byte[] floatstr = br.readBytes(31);
             System.out.println("FLOAT_EXT: " + new String(floatstr));
             break;
         case 100: // ATOM_EXT
-            int atom_length = read16BitUnsigned();
-            byte[] atom_name = readBytes(atom_length);
+            int atom_length = br.read16BitUnsigned();
+            byte[] atom_name = br.readBytes(atom_length);
             System.out.println("ATOM: " + new String(atom_name));
             break;
         case 104: // SMALL_TUPLE_EXT
-            int small_tuple_arity = readByte();
+            int small_tuple_arity = br.readByte();
             System.out.print("SMALL_TUPLE_EXT(" + small_tuple_arity + "): ");
             for (int i = 0; i < small_tuple_arity; i++) {
                 read_term();
@@ -198,11 +271,11 @@ class Term extends BeamObject {
             System.out.println("NIL_EXT");
             break;
         case 107: // STRING_EXT
-            int length = read16BitUnsigned();
-            System.out.println("STRING_EXT: " + new String(readBytes(length)));
+            int length = br.read16BitUnsigned();
+            System.out.println("STRING_EXT: " + new String(br.readBytes(length)));
             break;
         case 108: // LIST_EXT
-            long list_length = read32BitUnsigned();
+            long list_length = br.read32BitUnsigned();
             System.out.print("LIST_EXT(" + list_length + "): ");
             for (long i = 0; i < list_length; i++) {
                 read_term();
@@ -211,33 +284,33 @@ class Term extends BeamObject {
             System.out.println("end LIST_EXT");
             break;
         case 109: // BINARY_EXT
-            long binary_length = read32BitUnsigned();
+            long binary_length = br.read32BitUnsigned();
             System.out.println("BINARY_EXT(" + binary_length + "): ");
             for (long j = 0; j < binary_length; j++) {
-                System.out.println(readByte() + " ");
+                System.out.println(br.readByte() + " ");
             }
         case 110: // SMALL_BIG_EXT
-            int sb_length = readByte();
-            int sign  = readByte();
+            int sb_length = br.readByte();
+            int sign  = br.readByte();
             System.out.print("SMALL_BIG_EXT: ");
             for (int i = 0; i < sb_length; i++) {
-                System.out.print(readByte() + " ");
+                System.out.print(br.readByte() + " ");
                 // TODO: calculate bignum
             }
             break;
         default:
             System.out.println("other " + tag);
-            System.out.println(" " + readByte());
+            System.out.println(" " + br.readByte());
             break;
         }
     }
 }
 
-class InternalTerm extends BeamObject {
+class InternalTerm {
     private String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
     public InternalTerm(InputStream stream) throws IOException {
-        super(stream);
-        int b = readByte();
+        ByteReader br = new ByteReader(stream);
+        int b = br.readByte();
         System.out.print("---- [" + dec_to_bin(b) + "] ");
         // read tag
         String tag = null;
@@ -253,16 +326,16 @@ class InternalTerm extends BeamObject {
             if ((b & 0x10) != 0) { // 2..8 continuation bytes
                 int following_bytes = (b & 0xE0) >> 5;
                 for (int i = 0; 9 < following_bytes; i++)
-                    readByte();
+                    br.readByte();
                 System.out.print("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte
-                int cont1 = readByte();
+                int cont1 = br.readByte();
                 System.out.print("[" + dec_to_bin(cont1) + "] ");
                 value = ((b & 0xE0) << 3) + cont1;
             }
         } else { // bit 3 is 0, no continuation
             if (extended) {
-                value = readByte();
+                value = br.readByte();
                 System.out.print("[" + dec_to_bin(value) + "] ");
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
