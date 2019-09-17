@@ -12,6 +12,7 @@ public class BeamFile {
     private ArrayList<Import> imports;
     private ArrayList<Export> exports;
     private ArrayList<LocalFunction> localFunctions;
+    private ArrayList<ErlOp> codeTable;
 
     private BeamFile() {}
     public BeamFile(String fn) {
@@ -21,6 +22,7 @@ public class BeamFile {
         imports = new ArrayList<Import>();
         exports = new ArrayList<Export>();
         localFunctions = new ArrayList<LocalFunction>();
+        codeTable = new ArrayList<ErlOp>();
     }
 
     public void readAtom(ByteReader br) throws IOException {
@@ -45,9 +47,11 @@ public class BeamFile {
         while ((opcode = br.readByte()) != -1) {
             int arity = OpCode.arity(opcode);
             System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
+            ArrayList<ErlTerm> terms = new ArrayList<ErlTerm>();
             for (int j = 0; j < arity; j++) {
-                new InternalTerm(br);
+                terms.add(InternalTerm.read(br));
             }
+            codeTable.add(new ErlOp(opcode, terms));
         }
     }
 
@@ -104,6 +108,7 @@ public class BeamFile {
         printImports();
         printExports();
         printLocalFunctions();
+        printCodeTable();
     }
 
     private void printAtoms() {
@@ -133,6 +138,17 @@ public class BeamFile {
         for (int i = 0; i < localFunctions.size(); i++) {
             LocalFunction loc = localFunctions.get(i);
             System.out.println("LocalFunction(" + i + "): [atom " + loc.getFunction() + "] / " + loc.getArity() + " - label " + loc.getLabel());
+        }
+    }
+
+    private void printCodeTable() {
+        for (int i = 0; i < codeTable.size(); i++) {
+            ErlOp erlop = codeTable.get(i);
+            System.out.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
+            for (int j = 0; j < erlop.args.size(); j++) {
+                ErlTerm arg = erlop.args.get(j);
+                System.out.println("---- " + arg.toString());
+            }
         }
     }
 }
@@ -217,6 +233,124 @@ class LocalFunction {
 class Attr {
     public Attr(ByteReader br) throws IOException {
         new ExternalTerm(br.getStream());
+    }
+}
+
+class ErlOp {
+    int opcode;
+    ArrayList <ErlTerm> args;
+    public ErlOp(int oc, ArrayList<ErlTerm> a) {
+        opcode = oc;
+        args = a;
+    }
+}
+
+abstract class ErlTerm {
+    private String tag;
+    private ErlTerm() {}
+    public ErlTerm(String t) { tag = t; }
+    public abstract String toString();
+    public String getTag() { return tag; }
+}
+
+class GenericErlTerm extends ErlTerm {
+    int value;
+    public GenericErlTerm(String tag, int v) {
+        super(tag);
+        value = v;
+    }
+
+    public String toString() {
+        return "term(" + getTag() + "): " + value;
+    }
+}
+
+ class ErlInt extends ErlTerm {
+     int value;
+
+     public ErlInt(String tag, int v) {
+         super(tag);
+         value = v;
+     }
+
+     public String toString() {
+         return "integer(" + value + ")";
+     }
+ }
+
+class ErlAtom extends ErlTerm {
+    private boolean indexed;
+    private int index;
+    private String value;
+    public ErlAtom(String tag, String v) {
+        super(tag);
+        indexed = false;
+        value = v;
+    }
+
+    public ErlAtom(String tag, int i) {
+        super(tag);
+        indexed = true;
+        index = i;
+    }
+
+    public String toString() {
+        if (indexed) return "atom(" + index + ")";
+        else return value;
+    }
+}
+
+class ErlList extends ErlTerm {
+    ArrayList<ErlTerm> list;
+    // TODO: tail for LIST_EXT
+    public ErlList(String tag) {
+        super(tag);
+        list = new ArrayList<ErlTerm>();
+    }
+    public void add(ErlTerm item) {
+        list.add(item);
+    }
+    public String toString() {
+        String str = "[";
+        for (int i = 0; i < list.size(); i++) {
+            if (i == 0)
+                str += list.get(i);
+            else
+                str += ", " + list.get(i);
+        }
+        str += "]";
+        return str;
+    }
+}
+
+class ErlNil extends ErlTerm {
+    public ErlNil() {
+        super("NIL");
+    }
+
+    public String toString() {
+        return "[]";
+    }
+}
+
+class ErlLiteral extends ErlTerm {
+    private int value;
+    public ErlLiteral(String tag, int v) {
+        super(tag);
+    }
+    public String toString() {
+        return "literal(" + value + ")";
+    }
+}
+
+class ErlLabel extends ErlTerm {
+    private int value;
+    public ErlLabel(int v) {
+        super("label");
+        value = v;
+    }
+    public String toString() {
+        return "label(" + value + ")";
     }
 }
 
@@ -307,17 +441,18 @@ class ExternalTerm {
 }
 
 class InternalTerm {
-    private String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
-    public InternalTerm(ByteReader br) throws IOException {
+    public static ErlTerm read(ByteReader br) throws IOException {
+        String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
         System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
-        String tag = null;
+        String tagname = null;
         int value = -1234;
         boolean extended = false;
 
         // read tag
-        tag = tags[b & 0x07];
+        int tag = b & 0x07;
+        tagname = tags[tag];
         extended = (b & 0x07) == 7;
 
         // read value
@@ -331,6 +466,15 @@ class InternalTerm {
                 int cont1 = br.readByte();
                 System.out.print("[" + BeamDebug.dec_to_bin(cont1) + "] ");
                 value = ((b & 0xE0) << 3) + cont1;
+                switch (tag) {
+                case 0: return new ErlInt("literal", value);
+                case 1: return new ErlInt("integer", value);
+                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom("atom", value - 1);
+                case 3: return new GenericErlTerm("X register", value);
+                case 4: return new GenericErlTerm("Y register", value);
+                case 5: return new ErlLabel(value);
+                case 6: return new ErlInt("character", value);
+                }
             }
         } else { // bit 3 is 0, no continuation
             if (extended) {
@@ -338,29 +482,39 @@ class InternalTerm {
                 System.out.print("[" + BeamDebug.dec_to_bin(value) + "] ");
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
-                    tag += "list";
+                    tagname += "list";
                     int list_size = value >> 4;
-                    tag += "(" + list_size + ")";
+                    tagname += "(" + list_size + ")";
+                    ErlList list = new ErlList(tagname);
                     for (int i = 0; i < list_size; i++) {
                         System.out.print("list[" + (i+1) + "]: ");
-                        new InternalTerm(br); // item
+                        list.add(read(br)); // item
                     }
                     System.out.print("list end - ");
-                    break;
+                    return list;
                 case 2: // floating point register
-                    tag += "floating point register";
+                    tagname += "floating point register";
                     break;
                 case 3: // allocation list
-                    tag += "allocation list";
+                    tagname += "allocation list";
                     break;
                 case 4: // literal
-                    tag += "literal";
-                    break;
+                    return new ErlLiteral("extended literal", value);
                 }
             } else {
                 value = (b & 0xF0) >> 4;
+                switch (tag) {
+                case 0: return new ErlInt("literal", value);
+                case 1: return new ErlInt("integer", value);
+                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom("atom", value - 1);
+                case 3: return new GenericErlTerm("X register", value);
+                case 4: return new GenericErlTerm("Y register", value);
+                case 5: return new ErlLabel(value);
+                case 6: return new ErlInt("character", value); // TODO: character type?
+                }
             }
         }
-        System.out.println(tag + " " + value);
+        System.out.println(tagname + " " + value);
+        return new GenericErlTerm(tagname, value);
     }
 }
