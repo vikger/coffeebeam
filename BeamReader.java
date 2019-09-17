@@ -107,12 +107,4 @@ public class BeamReader {
 	    readChunk();
 	return beamfile;
     }
-
-    public static void main(String[] args) {
-	try {
-	    BeamReader br = new BeamReader(args[0]);
-	    BeamFile bf = br.read();
-            bf.dump();
-	} catch (Exception e) {}
-    }
 }

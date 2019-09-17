@@ -162,6 +162,10 @@ public class BeamFile {
             System.out.println("labelRefs " + i + " -> " + labelRefs.get(i));
         }
     }
+
+    public String getModuleName() {
+        return atoms.get(0);
+    }
 }
 
 class ByteReader {
