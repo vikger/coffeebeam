@@ -166,6 +166,23 @@ public class BeamFile {
     public String getModuleName() {
         return atoms.get(0);
     }
+
+    public int getLabel(String function, int argc) {
+        for (int i = 0; i < exports.size(); i++) {
+            Export exp = exports.get(i);
+            if (atoms.get(exp.getFunction()).equals(function) && exp.getArity() == argc)
+                return exp.getLabel();
+        }
+        return -1;
+    }
+
+    public int getLabelRef(int label) {
+        return labelRefs.get(label);
+    }
+
+    public ErlOp getOp(int index) {
+        return codeTable.get(index);
+    }
 }
 
 class ByteReader {
@@ -378,6 +395,9 @@ class Xregister extends ErlTerm {
     public String toString() {
         return "X(" + index + ")";
     }
+    public int getIndex() {
+        return index;
+    }
 }
 
 class Yregister extends ErlTerm {
@@ -388,6 +408,9 @@ class Yregister extends ErlTerm {
     }
     public String toString() {
         return "Y(" + index + ")";
+    }
+    public int getIndex() {
+        return index;
     }
 }
 

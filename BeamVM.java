@@ -15,11 +15,20 @@ public class BeamVM {
         System.out.println("BeamVM: loaded '" + bf.getModuleName() + "'");
     }
 
+    public BeamModule getModule(String name) {
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i).name.equals(name)) return modules.get(i);
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
 	try {
             BeamVM vm = new BeamVM();
             vm.load(args[0]);
-	} catch (Exception e) {}
+            ErlProcess p = new ErlProcess(vm);
+            p.apply("example", "greeting");
+	} catch (Exception e) { System.out.println(e.toString()); }
     }
 }
 
