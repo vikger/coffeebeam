@@ -13,6 +13,7 @@ public class BeamFile {
     private ArrayList<Export> exports;
     private ArrayList<LocalFunction> localFunctions;
     private ArrayList<ErlOp> codeTable;
+    private ArrayList<Integer> labelRefs;
 
     private BeamFile() {}
     public BeamFile(String fn) {
@@ -23,6 +24,7 @@ public class BeamFile {
         exports = new ArrayList<Export>();
         localFunctions = new ArrayList<LocalFunction>();
         codeTable = new ArrayList<ErlOp>();
+        labelRefs = new ArrayList<Integer>(); labelRefs.add(0);
     }
 
     public void readAtom(ByteReader br) throws IOException {
@@ -52,6 +54,8 @@ public class BeamFile {
                 terms.add(InternalTerm.read(br));
             }
             codeTable.add(new ErlOp(opcode, terms));
+            if (opcode == 1)
+                labelRefs.add(codeTable.size() - 1);
         }
     }
 
@@ -109,6 +113,7 @@ public class BeamFile {
         printExports();
         printLocalFunctions();
         printCodeTable();
+        printLabelRefs();
     }
 
     private void printAtoms() {
@@ -149,6 +154,12 @@ public class BeamFile {
                 ErlTerm arg = erlop.args.get(j);
                 System.out.println("---- " + arg.toString());
             }
+        }
+    }
+
+    public void printLabelRefs() {
+        for (int i = 0; i < labelRefs.size(); i++) {
+            System.out.println("labelRefs " + i + " -> " + labelRefs.get(i));
         }
     }
 }
