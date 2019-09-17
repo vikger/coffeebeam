@@ -42,7 +42,8 @@ public class ErlProcess {
             case "X register": x_reg.set(((Xregister) reg).getIndex(), op.args.get(0)); return null;
             case "Y register": y_reg.set(((Yregister) reg).getIndex(), op.args.get(0)); return null;
             }
-        default: System.out.println("UNKNOWN op: " + op.opcode);
+        case 153: return null; // skip line
+        default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
         }
         return null;
     }
