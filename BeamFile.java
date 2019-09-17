@@ -311,7 +311,7 @@ class InternalTerm {
     public InternalTerm(InputStream stream) throws IOException {
         ByteReader br = new ByteReader(stream);
         int b = br.readByte();
-        System.out.print("---- [" + dec_to_bin(b) + "] ");
+        System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
         String tag = null;
         int value = -1234;
@@ -330,13 +330,13 @@ class InternalTerm {
                 System.out.print("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte
                 int cont1 = br.readByte();
-                System.out.print("[" + dec_to_bin(cont1) + "] ");
+                System.out.print("[" + BeamDebug.dec_to_bin(cont1) + "] ");
                 value = ((b & 0xE0) << 3) + cont1;
             }
         } else { // bit 3 is 0, no continuation
             if (extended) {
                 value = br.readByte();
-                System.out.print("[" + dec_to_bin(value) + "] ");
+                System.out.print("[" + BeamDebug.dec_to_bin(value) + "] ");
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
                     tag += "list";
@@ -363,12 +363,5 @@ class InternalTerm {
             }
         }
         System.out.println(tag + " " + value);
-    }
-    public static String dec_to_bin(int b) {
-        String result = "";
-        for (int i = 0; i < 8; i++) {
-            result = Integer.toString((b & (1 << i)) >> i) + result;
-        }
-        return result;
     }
 }
