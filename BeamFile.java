@@ -365,6 +365,28 @@ class ErlLabel extends ErlTerm {
     }
 }
 
+class Xregister extends ErlTerm {
+    private int index;
+    public Xregister(int i) {
+        super("X register");
+        index = i;
+    }
+    public String toString() {
+        return "X(" + index + ")";
+    }
+}
+
+class Yregister extends ErlTerm {
+    private int index;
+    public Yregister(int i) {
+        super("Y register");
+        index = i;
+    }
+    public String toString() {
+        return "Y(" + index + ")";
+    }
+}
+
 class ExternalTerm {
     ByteReader br;
     public ExternalTerm(InputStream s) throws IOException {
@@ -481,8 +503,8 @@ class InternalTerm {
                 case 0: return new ErlInt("literal", value);
                 case 1: return new ErlInt("integer", value);
                 case 2: if (value == 0) return new ErlNil(); else return new ErlAtom("atom", value - 1);
-                case 3: return new GenericErlTerm("X register", value);
-                case 4: return new GenericErlTerm("Y register", value);
+                case 3: return new Xregister(value);
+                case 4: return new Yregister(value);
                 case 5: return new ErlLabel(value);
                 case 6: return new ErlInt("character", value);
                 }
@@ -518,8 +540,8 @@ class InternalTerm {
                 case 0: return new ErlInt("literal", value);
                 case 1: return new ErlInt("integer", value);
                 case 2: if (value == 0) return new ErlNil(); else return new ErlAtom("atom", value - 1);
-                case 3: return new GenericErlTerm("X register", value);
-                case 4: return new GenericErlTerm("Y register", value);
+                case 3: return new Xregister(value);
+                case 4: return new Yregister(value);
                 case 5: return new ErlLabel(value);
                 case 6: return new ErlInt("character", value); // TODO: character type?
                 }
