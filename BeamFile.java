@@ -46,7 +46,7 @@ public class BeamFile {
             int arity = OpCode.arity(opcode);
             System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
             for (int j = 0; j < arity; j++) {
-                new InternalTerm(br.getStream());
+                new InternalTerm(br);
             }
         }
     }
@@ -308,8 +308,7 @@ class ExternalTerm {
 
 class InternalTerm {
     private String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
-    public InternalTerm(InputStream stream) throws IOException {
-        ByteReader br = new ByteReader(stream);
+    public InternalTerm(ByteReader br) throws IOException {
         int b = br.readByte();
         System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
@@ -344,7 +343,7 @@ class InternalTerm {
                     tag += "(" + list_size + ")";
                     for (int i = 0; i < list_size; i++) {
                         System.out.print("list[" + (i+1) + "]: ");
-                        new InternalTerm(stream); // item
+                        new InternalTerm(br); // item
                     }
                     System.out.print("list end - ");
                     break;
