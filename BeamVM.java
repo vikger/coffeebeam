@@ -22,13 +22,11 @@ public class BeamVM {
         return null;
     }
 
-    public static void main(String[] args) {
-	try {
-            BeamVM vm = new BeamVM();
-            vm.load(args[0]);
-            ErlProcess p = new ErlProcess(vm);
-            p.apply("example", "module_info");
-	} catch (Exception e) { System.out.println(e.toString()); }
+    public static void main(String[] args) throws Exception {
+        BeamVM vm = new BeamVM();
+        vm.load(args[0]);
+        ErlProcess p = new ErlProcess(vm);
+        p.apply("example", "greeting");
     }
 }
 
