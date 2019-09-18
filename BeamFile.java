@@ -72,7 +72,7 @@ public class BeamFile {
         for (int i = 0; i < count; i++) {
             int size = (int) br.read32BitUnsigned();
             // TODO: replace with final Term class
-            literals.add(new ExternalTerm(br.getStream()));
+            literals.add(new ExternalTerm(br));
         }
     }
 
@@ -264,7 +264,7 @@ class LocalFunction {
 
 class Attr {
     public Attr(ByteReader br) throws IOException {
-        new ExternalTerm(br.getStream());
+        new ExternalTerm(br);
     }
 }
 
@@ -334,13 +334,18 @@ class ErlAtom extends ErlTerm {
 
 class ErlList extends ErlTerm {
     ArrayList<ErlTerm> list;
+    ErlTerm tail;
     // TODO: tail for LIST_EXT
     public ErlList(String tag) {
         super(tag);
         list = new ArrayList<ErlTerm>();
+        tail = new ErlNil();
     }
     public void add(ErlTerm item) {
         list.add(item);
+    }
+    public void setTail(ErlTerm t) {
+        tail = t;
     }
     public String toString() {
         String str = "[";
@@ -416,9 +421,9 @@ class Yregister extends ErlTerm {
 
 class ExternalTerm {
     ByteReader br;
-    public ExternalTerm(InputStream s) throws IOException {
+    public ExternalTerm(ByteReader _br) throws IOException {
         int b;
-        br = new ByteReader(s);
+        br = _br;
         switch (b = br.readByte()) {
         case 131: // external term format
             read_term();
