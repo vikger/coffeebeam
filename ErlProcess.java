@@ -37,10 +37,12 @@ public class ErlProcess {
         switch (op.opcode) {
         case 19: return x_reg.get(0);
         case 64:
+            ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
-            switch (reg.getTag()) {
-            case "X register": x_reg.set(((Xregister) reg).getIndex(), op.args.get(0)); return null;
-            case "Y register": y_reg.set(((Yregister) reg).getIndex(), op.args.get(0)); return null;
+            if (reg instanceof Xregister) {
+                x_reg.set(((Xregister) reg).getIndex(), value); return null;
+            } else if (reg instanceof Yregister) {
+                y_reg.set(((Yregister) reg).getIndex(), value); return null;
             }
         case 153: return null; // skip line
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
@@ -48,11 +50,14 @@ public class ErlProcess {
         return null;
     }
 
-    private void move(Xregister source, Xregister dest) {
-    }
-
-    private void move(ErlTerm source, Xregister dest) {
-        x_reg.set(dest.getIndex(), source);
+    private ErlTerm getValue(ErlTerm source) {
+        if (source instanceof Xregister) {
+            return x_reg.get(((Xregister) source).getIndex());
+        } else if (source instanceof Yregister) {
+            return y_reg.get(((Yregister) source).getIndex());
+        } else {
+            return source;
+        }
     }
 }
 
