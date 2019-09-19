@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class BeamFile {
     private String filename;
     private ArrayList<String> atoms;
-    private ArrayList<ExternalTerm> literals;
+    private ArrayList<ErlTerm> literals;
     private ArrayList<Import> imports;
     private ArrayList<Export> exports;
     private ArrayList<LocalFunction> localFunctions;
@@ -19,7 +19,7 @@ public class BeamFile {
     public BeamFile(String fn) {
         filename = fn;
         atoms = new ArrayList<String>();
-        literals = new ArrayList<ExternalTerm>();
+        literals = new ArrayList<ErlTerm>();
         imports = new ArrayList<Import>();
         exports = new ArrayList<Export>();
         localFunctions = new ArrayList<LocalFunction>();
@@ -71,8 +71,7 @@ public class BeamFile {
         System.out.println("Count: " + count);
         for (int i = 0; i < count; i++) {
             int size = (int) br.read32BitUnsigned();
-            // TODO: replace with final Term class
-            literals.add(new ExternalTerm(br));
+            literals.add(ExternalTerm.read(br));
         }
     }
 
@@ -122,13 +121,14 @@ public class BeamFile {
             if (atom.isIndexed()) return new ErlAtom("atom", atoms.get(atom.getIndex()));
             else return term;
         } else if (term instanceof ErlLiteral) {
-            return new ErlAtom("atom", "literalvalue"); // TODO: return literals value
+            ErlLiteral literal = (ErlLiteral) term;
+            return literals.get(literal.getValue());
         } else return term;
     }
 
     public void dump() {
         printAtoms();
-        //printLiterals();
+        printLiterals();
         printImports();
         printExports();
         printLocalFunctions();
@@ -143,6 +143,9 @@ public class BeamFile {
     }
 
     private void printLiterals() {
+        for (int i = 0; i < literals.size(); i++) {
+            System.out.println("Literal(" + i + "): " + literals.get(i).toString());
+        }
     }
 
     private void printImports() {
@@ -284,7 +287,7 @@ class LocalFunction {
 
 class Attr {
     public Attr(ByteReader br) throws IOException {
-        new ExternalTerm(br);
+        ExternalTerm.read(br);
     }
 }
 
@@ -387,6 +390,32 @@ class ErlList extends ErlTerm {
     }
 }
 
+class ErlTuple extends ErlTerm {
+    ArrayList<ErlTerm> elements;
+
+    public ErlTuple() {
+        super("tuple");
+        elements = new ArrayList<ErlTerm>();
+    }
+    public ErlTerm get(int i) {
+        return elements.get(i);
+    }
+    public void add(ErlTerm element) {
+        elements.add(element);
+    }
+    public String toString() {
+        String str = "{";
+        for (int i = 0; i < elements.size(); i++) {
+            if (i == 0)
+                str += elements.get(i);
+            else
+                str += ", " + elements.get(i);
+        }
+        str += "}";
+        return str;
+    }
+}
+
 class ErlNil extends ErlTerm {
     public ErlNil() {
         super("NIL");
@@ -408,6 +437,9 @@ class ErlLiteral extends ErlTerm {
     public String toString() {
         return "literal(" + value + ")";
     }
+    public int getValue() {
+        return value;
+    }
 }
 
 class ErlLabel extends ErlTerm {
@@ -419,6 +451,12 @@ class ErlLabel extends ErlTerm {
     public String toString() {
         return "label(" + value + ")";
     }
+}
+
+class ErlString extends ErlTerm {
+    private String value;
+    public ErlString(String v) { super("string"); value = v; }
+    public String toString() { return value; }
 }
 
 class Xregister extends ErlTerm {
@@ -450,21 +488,21 @@ class Yregister extends ErlTerm {
 }
 
 class ExternalTerm {
-    ByteReader br;
-    public ExternalTerm(ByteReader _br) throws IOException {
+    static ByteReader br;
+
+    public static ErlTerm read(ByteReader _br) throws IOException {
         int b;
         br = _br;
         switch (b = br.readByte()) {
         case 131: // external term format
-            read_term();
-            break;
+            return read_term();
         default:
             System.out.println("UNKNOWN term code " + b);
-            break;
+            return null;
         }
     }
 
-    private void read_term() throws IOException {
+    private static ErlTerm read_term() throws IOException {
         int tag = br.readByte();
         switch (tag) {
         case 82: // atom_cache_ref
@@ -473,8 +511,7 @@ class ExternalTerm {
             break;
         case 97: // small integer
             int smallint = br.readByte();
-            System.out.println("SMALL_INTEGER_EXT: " + smallint);
-            break;
+            return new ErlInt("integer", smallint);
         case 98: // integer
             long biginteger = br.read32BitUnsigned();
             System.out.println("INTEGER_EXT: " + biginteger);
@@ -486,32 +523,27 @@ class ExternalTerm {
         case 100: // ATOM_EXT
             int atom_length = br.read16BitUnsigned();
             byte[] atom_name = br.readBytes(atom_length);
-            System.out.println("ATOM: " + new String(atom_name));
-            break;
+            return new ErlAtom("atom", new String(atom_name));
         case 104: // SMALL_TUPLE_EXT
+            ErlTuple tuple = new ErlTuple();
             int small_tuple_arity = br.readByte();
-            System.out.print("SMALL_TUPLE_EXT(" + small_tuple_arity + "): ");
             for (int i = 0; i < small_tuple_arity; i++) {
-                read_term();
+                tuple.add(read_term());
             }
-            System.out.println("end SMALL_TUPLE_EXT");
-            break;
+            return tuple;
         case 106: // NIL_EXT
-            System.out.println("NIL_EXT");
-            break;
+            return new ErlNil();
         case 107: // STRING_EXT
             int length = br.read16BitUnsigned();
-            System.out.println("STRING_EXT: " + new String(br.readBytes(length)));
-            break;
+            return new ErlString(new String(br.readBytes(length)));
         case 108: // LIST_EXT
+            ErlList list = new ErlList("list");
             long list_length = br.read32BitUnsigned();
-            System.out.print("LIST_EXT(" + list_length + "): ");
             for (long i = 0; i < list_length; i++) {
-                read_term();
+                list.add(read_term());
             }
-            read_term(); // tail
-            System.out.println("end LIST_EXT");
-            break;
+            list.setTail(read_term()); // tail
+            return list;
         case 109: // BINARY_EXT
             long binary_length = br.read32BitUnsigned();
             System.out.println("BINARY_EXT(" + binary_length + "): ");
@@ -532,6 +564,8 @@ class ExternalTerm {
             System.out.println(" " + br.readByte());
             break;
         }
+        System.out.println("UNKNOWN ext_term " + tag);
+        return new GenericErlTerm("unknown", tag);
     }
 }
 
