@@ -51,7 +51,7 @@ public class BeamFile {
             System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
             ArrayList<ErlTerm> terms = new ArrayList<ErlTerm>();
             for (int j = 0; j < arity; j++) {
-                terms.add(InternalTerm.read(br));
+                terms.add(InternalTerm.read(br, getModuleName()));
             }
             codeTable.add(new ErlOp(opcode, terms));
             if (opcode == 1)
@@ -371,9 +371,12 @@ class ErlNil extends ErlTerm {
 }
 
 class ErlLiteral extends ErlTerm {
+    private String module;
     private int value;
-    public ErlLiteral(String tag, int v) {
+    public ErlLiteral(String tag, String m, int v) {
         super(tag);
+        module = m;
+        value = v;
     }
     public String toString() {
         return "literal(" + value + ")";
@@ -506,7 +509,7 @@ class ExternalTerm {
 }
 
 class InternalTerm {
-    public static ErlTerm read(ByteReader br) throws IOException {
+    public static ErlTerm read(ByteReader br, String module) throws IOException {
         String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
         System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
@@ -553,7 +556,7 @@ class InternalTerm {
                     ErlList list = new ErlList(tagname);
                     for (int i = 0; i < list_size; i++) {
                         System.out.print("list[" + (i+1) + "]: ");
-                        list.add(read(br)); // item
+                        list.add(read(br, module)); // item
                     }
                     System.out.print("list end - ");
                     return list;
@@ -564,7 +567,7 @@ class InternalTerm {
                     tagname += "allocation list";
                     break;
                 case 4: // literal
-                    return new ErlLiteral("extended literal", value);
+                    return new ErlLiteral("extended literal", module, value);
                 }
             } else {
                 value = (b & 0xF0) >> 4;
