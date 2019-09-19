@@ -14,6 +14,7 @@ public class BeamFile {
     private ArrayList<LocalFunction> localFunctions;
     private ArrayList<ErlOp> codeTable;
     private ArrayList<Integer> labelRefs;
+    private ErlTerm attributes;
 
     private BeamFile() {}
     public BeamFile(String fn) {
@@ -105,6 +106,10 @@ public class BeamFile {
         }
     }
 
+    public void readAttributes(ByteReader br) throws IOException {
+        attributes = ExternalTerm.read(br);
+    }
+
     public void removeRefs() {
         for (int i = 0; i < codeTable.size(); i++) {
             ErlOp op = codeTable.get(i);
@@ -134,6 +139,7 @@ public class BeamFile {
         printLocalFunctions();
         printCodeTable();
         printLabelRefs();
+        printAttributes();
     }
 
     private void printAtoms() {
@@ -184,6 +190,10 @@ public class BeamFile {
         for (int i = 0; i < labelRefs.size(); i++) {
             System.out.println("labelRefs " + i + " -> " + labelRefs.get(i));
         }
+    }
+
+    public void printAttributes() {
+        System.out.println("Attributes: " + attributes.toString());
     }
 
     public String getModuleName() {
@@ -285,12 +295,6 @@ class LocalFunction {
     public int getLabel() { return label; }
 }
 
-class Attr {
-    public Attr(ByteReader br) throws IOException {
-        ExternalTerm.read(br);
-    }
-}
-
 class ErlOp {
     int opcode;
     ArrayList <ErlTerm> args;
@@ -320,7 +324,13 @@ class GenericErlTerm extends ErlTerm {
     }
 }
 
-class ErlInt extends ErlTerm {
+abstract class ErlNumber extends ErlTerm {
+    public ErlNumber(String tag) {
+        super(tag);
+    }
+}
+
+class ErlInt extends ErlNumber {
     int value;
 
     public ErlInt(String tag, int v) {
@@ -334,6 +344,34 @@ class ErlInt extends ErlTerm {
 
     public int getValue() {
         return value;
+    }
+}
+
+class ErlBigNum extends ErlNumber {
+    boolean positive = false;
+    ArrayList<Integer> segments;
+
+    public ErlBigNum(int s) {
+        super("bignum");
+        if (s == 0) positive = true;
+        segments = new ArrayList<Integer>();
+    }
+
+    public void addSegment(int seg) {
+        segments.add(seg);
+    }
+
+    public long getValue() {
+        long value = 0;
+        for (int i = 0; i < segments.size(); i++) {
+            value += segments.get(i) * (1 << (8 * i));
+        }
+        if (!positive) value = -value;
+        return value;
+    }
+
+    public String toString() {
+        return Long.toString(getValue());
     }
 }
 
@@ -552,13 +590,20 @@ class ExternalTerm {
             }
         case 110: // SMALL_BIG_EXT
             int sb_length = br.readByte();
-            int sign  = br.readByte();
-            System.out.print("SMALL_BIG_EXT: ");
+            int sign = br.readByte();
+            ErlBigNum num = new ErlBigNum(sign);
             for (int i = 0; i < sb_length; i++) {
-                System.out.print(br.readByte() + " ");
-                // TODO: calculate bignum
+                num.addSegment(br.readByte());
             }
-            break;
+            return num;
+        case 111: // LARGE_BIG_EXT
+            long lb_length = br.read32BitUnsigned();
+            int signl = br.readByte();
+            ErlBigNum numl = new ErlBigNum(signl);
+            for (int i = 0; i < lb_length; i++) {
+                numl.addSegment(br.readByte());
+            }
+            return numl;
         default:
             System.out.println("other " + tag);
             System.out.println(" " + br.readByte());

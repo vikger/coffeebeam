@@ -71,10 +71,7 @@ public class BeamReader {
         case "ImpT": beamfile.readImports(br); break;
         case "ExpT": beamfile.readExports(br); break;
         case "LocT": beamfile.readLocalFunctions(br); break;
-        case "Attr":
-            System.out.println("----Attr");
-            new Attr(br);
-            break;
+        case "Attr": beamfile.readAttributes(br); break;
 	default:
 	    break;
 	}
