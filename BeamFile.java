@@ -106,6 +106,26 @@ public class BeamFile {
         }
     }
 
+    public void removeRefs() {
+        for (int i = 0; i < codeTable.size(); i++) {
+            ErlOp op = codeTable.get(i);
+            for (int j = 0; j < op.args.size(); j++) {
+                ErlTerm term = op.args.get(j);
+                op.args.set(j, convertTerm(term));
+            }
+        }
+    }
+
+    private ErlTerm convertTerm(ErlTerm term) {
+        if (term instanceof ErlAtom) {
+            ErlAtom atom = (ErlAtom) term;
+            if (atom.isIndexed()) return new ErlAtom("atom", atoms.get(atom.getIndex()));
+            else return term;
+        } else if (term instanceof ErlLiteral) {
+            return new ErlAtom("atom", "literalvalue"); // TODO: return literals value
+        } else return term;
+    }
+
     public void dump() {
         printAtoms();
         //printLiterals();
@@ -297,18 +317,22 @@ class GenericErlTerm extends ErlTerm {
     }
 }
 
- class ErlInt extends ErlTerm {
-     int value;
+class ErlInt extends ErlTerm {
+    int value;
 
-     public ErlInt(String tag, int v) {
-         super(tag);
-         value = v;
-     }
+    public ErlInt(String tag, int v) {
+        super(tag);
+        value = v;
+    }
 
-     public String toString() {
-         return "integer(" + value + ")";
-     }
- }
+    public String toString() {
+        return "integer(" + value + ")";
+    }
+
+    public int getValue() {
+        return value;
+    }
+}
 
 class ErlAtom extends ErlTerm {
     private boolean indexed;
@@ -330,6 +354,9 @@ class ErlAtom extends ErlTerm {
         if (indexed) return "atom(" + index + ")";
         else return value;
     }
+
+    public boolean isIndexed() { return indexed; }
+    public int getIndex() { return index; }
 }
 
 class ErlList extends ErlTerm {

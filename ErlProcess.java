@@ -50,7 +50,7 @@ public class ErlProcess {
                 y_reg.set(((Yregister) reg).getIndex(), value); ip++; return null;
             }
         case 78:
-            System.out.println(op.args.get(0).toString());
+            int module = ((ErlInt) op.args.get(1)).getValue();
             ip++;
             return null;
         case 153: ip++; return null; // skip line
