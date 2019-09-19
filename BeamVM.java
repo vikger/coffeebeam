@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class BeamVM {
     private ArrayList<BeamModule> modules;
+    private static final ErlTerm[] NO_ARGS = {};
     public BeamVM() {
         modules = new ArrayList<BeamModule>();
     }
@@ -26,7 +27,7 @@ public class BeamVM {
         BeamVM vm = new BeamVM();
         vm.load(args[0]);
         ErlProcess p = new ErlProcess(vm);
-        p.apply("example", "greeting");
+        p.apply("example", "greeting", NO_ARGS);
     }
 }
 

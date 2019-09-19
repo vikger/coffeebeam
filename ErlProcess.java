@@ -12,11 +12,15 @@ public class ErlProcess {
         y_reg = new Register();
     }
 
-    public void apply(String module, String function) {
+    public void apply(String module, String function, ErlTerm[] args) {
         file = vm.getModule(module).file;
-        int label = file.getLabel(function, 0); // TODO: add arguments to apply
+        int argc = args.length;
+        int label = file.getLabel(function, argc);
         ip = file.getLabelRef(label);
-        System.out.println("apply " + module + ":" + function + " ip: " + ip);
+        System.out.println("apply " + module + ":" + function + "/" + argc + " ip: " + ip);
+        for (int i = 0; i < argc; i++) {
+            x_reg.set(i, args[i]);
+        }
         run();
     }
 
@@ -24,7 +28,6 @@ public class ErlProcess {
         ErlTerm result = null;
 
         while (result == null) {
-            ip++; // step over label
             System.out.println("ip -> " + ip);
             ErlOp op = file.getOp(ip);
             result = execute(op);
@@ -33,21 +36,27 @@ public class ErlProcess {
     }
 
     public ErlTerm execute(ErlOp op) {
-        System.out.println("execute op " + op.opcode);
+        System.out.println("execute op " + op.opcode + " " + OpCode.name(op.opcode));
         switch (op.opcode) {
+        case 1: ip++; return null; // skip label
+            // case 7 call_ext: save module, ip, x, y on stack
         case 19: return x_reg.get(0);
         case 64:
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
             if (reg instanceof Xregister) {
-                x_reg.set(((Xregister) reg).getIndex(), value); return null;
+                x_reg.set(((Xregister) reg).getIndex(), value); ip++; return null;
             } else if (reg instanceof Yregister) {
-                y_reg.set(((Yregister) reg).getIndex(), value); return null;
+                y_reg.set(((Yregister) reg).getIndex(), value); ip++; return null;
             }
-        case 153: return null; // skip line
+        case 78:
+            System.out.println(op.args.get(0).toString());
+            ip++;
+            return null;
+        case 153: ip++; return null; // skip line
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
         }
-        return null;
+        ip++; return null;
     }
 
     private ErlTerm getValue(ErlTerm source) {
