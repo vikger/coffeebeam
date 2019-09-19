@@ -52,7 +52,7 @@ public class BeamFile {
             System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
             ArrayList<ErlTerm> terms = new ArrayList<ErlTerm>();
             for (int j = 0; j < arity; j++) {
-                terms.add(InternalTerm.read(br, getModuleName()));
+                terms.add(InternalTerm.read(br, this));
             }
             codeTable.add(new ErlOp(opcode, terms));
             if (opcode == 1)
@@ -108,27 +108,6 @@ public class BeamFile {
 
     public void readAttributes(ByteReader br) throws IOException {
         attributes = ExternalTerm.read(br);
-    }
-
-    public void removeRefs() {
-        for (int i = 0; i < codeTable.size(); i++) {
-            ErlOp op = codeTable.get(i);
-            for (int j = 0; j < op.args.size(); j++) {
-                ErlTerm term = op.args.get(j);
-                op.args.set(j, convertTerm(term));
-            }
-        }
-    }
-
-    private ErlTerm convertTerm(ErlTerm term) {
-        if (term instanceof ErlAtom) {
-            ErlAtom atom = (ErlAtom) term;
-            if (atom.isIndexed()) return new ErlAtom("atom", atoms.get(atom.getIndex()));
-            else return term;
-        } else if (term instanceof ErlLiteral) {
-            ErlLiteral literal = (ErlLiteral) term;
-            return literals.get(literal.getValue());
-        } else return term;
     }
 
     public void dump() {
@@ -199,6 +178,10 @@ public class BeamFile {
     public String getModuleName() {
         return atoms.get(0);
     }
+
+    public String getAtomName(int index) { return atoms.get(index); }
+
+    public ErlTerm getLiteral(int index) { return literals.get(index); }
 
     public int getLabel(String function, int argc) {
         for (int i = 0; i < exports.size(); i++) {
@@ -306,18 +289,22 @@ class ErlOp {
 
 abstract class ErlTerm {
     private String tag;
+    boolean reference = false;
     private ErlTerm() {}
     public ErlTerm(String t) { tag = t; }
     public abstract String toString();
     public String getTag() { return tag; }
+    public boolean isReference() { return reference; }
 }
 
 class GenericErlTerm extends ErlTerm {
     int value;
-    public GenericErlTerm(String tag, int v) {
-        super(tag);
+    public GenericErlTerm(int v) {
+        super("generic");
         value = v;
     }
+
+    public boolean isReference() { return false; }
 
     public String toString() {
         return "term(" + getTag() + "): " + value;
@@ -333,8 +320,8 @@ abstract class ErlNumber extends ErlTerm {
 class ErlInt extends ErlNumber {
     int value;
 
-    public ErlInt(String tag, int v) {
-        super(tag);
+    public ErlInt(int v) {
+        super("integer");
         value = v;
     }
 
@@ -376,36 +363,39 @@ class ErlBigNum extends ErlNumber {
 }
 
 class ErlAtom extends ErlTerm {
-    private boolean indexed;
     private int index;
     private String value;
-    public ErlAtom(String tag, String v) {
-        super(tag);
-        indexed = false;
+    private BeamFile beamfile;
+    public ErlAtom(String v) {
+        super("atom");
         value = v;
     }
 
-    public ErlAtom(String tag, int i) {
-        super(tag);
-        indexed = true;
+    public ErlAtom(BeamFile bf, int i) {
+        super("atom");
         index = i;
+        reference = true;
+        beamfile = bf;
     }
 
     public String toString() {
-        if (indexed) return "atom(" + index + ")";
+        if (reference) return getValue();
         else return value;
     }
 
-    public boolean isIndexed() { return indexed; }
     public int getIndex() { return index; }
+    public String getValue() {
+        if (reference) return beamfile.getAtomName(index);
+        return value;
+    }
 }
 
 class ErlList extends ErlTerm {
     ArrayList<ErlTerm> list;
     ErlTerm tail;
     // TODO: tail for LIST_EXT
-    public ErlList(String tag) {
-        super(tag);
+    public ErlList() {
+        super("list");
         list = new ArrayList<ErlTerm>();
         tail = new ErlNil();
     }
@@ -465,18 +455,19 @@ class ErlNil extends ErlTerm {
 }
 
 class ErlLiteral extends ErlTerm {
-    private String module;
+    private BeamFile beamfile;
     private int value;
-    public ErlLiteral(String tag, String m, int v) {
-        super(tag);
-        module = m;
+    public ErlLiteral(BeamFile bf, int v) {
+        super("literal");
         value = v;
+        beamfile = bf;
+        reference = true;
     }
     public String toString() {
-        return "literal(" + value + ")";
+        return getValue().toString();
     }
-    public int getValue() {
-        return value;
+    public ErlTerm getValue() {
+        return beamfile.getLiteral(value);
     }
 }
 
@@ -485,6 +476,7 @@ class ErlLabel extends ErlTerm {
     public ErlLabel(int v) {
         super("label");
         value = v;
+        reference = true;
     }
     public String toString() {
         return "label(" + value + ")";
@@ -549,7 +541,7 @@ class ExternalTerm {
             break;
         case 97: // small integer
             int smallint = br.readByte();
-            return new ErlInt("integer", smallint);
+            return new ErlInt(smallint);
         case 98: // integer
             long biginteger = br.read32BitUnsigned();
             System.out.println("INTEGER_EXT: " + biginteger);
@@ -561,7 +553,7 @@ class ExternalTerm {
         case 100: // ATOM_EXT
             int atom_length = br.read16BitUnsigned();
             byte[] atom_name = br.readBytes(atom_length);
-            return new ErlAtom("atom", new String(atom_name));
+            return new ErlAtom(new String(atom_name));
         case 104: // SMALL_TUPLE_EXT
             ErlTuple tuple = new ErlTuple();
             int small_tuple_arity = br.readByte();
@@ -575,7 +567,7 @@ class ExternalTerm {
             int length = br.read16BitUnsigned();
             return new ErlString(new String(br.readBytes(length)));
         case 108: // LIST_EXT
-            ErlList list = new ErlList("list");
+            ErlList list = new ErlList();
             long list_length = br.read32BitUnsigned();
             for (long i = 0; i < list_length; i++) {
                 list.add(read_term());
@@ -610,12 +602,12 @@ class ExternalTerm {
             break;
         }
         System.out.println("UNKNOWN ext_term " + tag);
-        return new GenericErlTerm("unknown", tag);
+        return new GenericErlTerm(tag);
     }
 }
 
 class InternalTerm {
-    public static ErlTerm read(ByteReader br, String module) throws IOException {
+    public static ErlTerm read(ByteReader br, BeamFile bf) throws IOException {
         String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
         System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
@@ -641,13 +633,13 @@ class InternalTerm {
                 System.out.print("[" + BeamDebug.dec_to_bin(cont1) + "] ");
                 value = ((b & 0xE0) << 3) + cont1;
                 switch (tag) {
-                case 0: return new ErlInt("literal", value);
-                case 1: return new ErlInt("integer", value);
-                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom("atom", value - 1);
+                case 0: return new ErlInt(value);
+                case 1: return new ErlInt(value);
+                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom(bf, value - 1);
                 case 3: return new Xregister(value);
                 case 4: return new Yregister(value);
                 case 5: return new ErlLabel(value);
-                case 6: return new ErlInt("character", value);
+                case 6: return new ErlInt(value); // TODO: character type?
                 }
             }
         } else { // bit 3 is 0, no continuation
@@ -659,10 +651,10 @@ class InternalTerm {
                     tagname += "list";
                     int list_size = value >> 4;
                     tagname += "(" + list_size + ")";
-                    ErlList list = new ErlList(tagname);
+                    ErlList list = new ErlList();
                     for (int i = 0; i < list_size; i++) {
                         System.out.print("list[" + (i+1) + "]: ");
-                        list.add(read(br, module)); // item
+                        list.add(read(br, bf)); // item
                     }
                     System.out.print("list end - ");
                     return list;
@@ -673,22 +665,22 @@ class InternalTerm {
                     tagname += "allocation list";
                     break;
                 case 4: // literal
-                    return new ErlLiteral("extended literal", module, value);
+                    return new ErlLiteral(bf, value);
                 }
             } else {
                 value = (b & 0xF0) >> 4;
                 switch (tag) {
-                case 0: return new ErlInt("literal", value);
-                case 1: return new ErlInt("integer", value);
-                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom("atom", value - 1);
+                case 0: return new ErlInt(value);
+                case 1: return new ErlInt(value);
+                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom(bf, value - 1);
                 case 3: return new Xregister(value);
                 case 4: return new Yregister(value);
                 case 5: return new ErlLabel(value);
-                case 6: return new ErlInt("character", value); // TODO: character type?
+                case 6: return new ErlInt(value); // TODO: character type?
                 }
             }
         }
         System.out.println(tagname + " " + value);
-        return new GenericErlTerm(tagname, value);
+        return new GenericErlTerm(value);
     }
 }

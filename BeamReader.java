@@ -102,7 +102,6 @@ public class BeamReader {
 	    throw new BeamFormatException();
 	while (available() != 0)
 	    readChunk();
-        beamfile.removeRefs();
 	return beamfile;
     }
 }
