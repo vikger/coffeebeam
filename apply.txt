@@ -1,3 +1,11 @@
+a
+newproc
+1
+ErlAtom
+np
+a
+list
+0
 example
 greeting
 0

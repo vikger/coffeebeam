@@ -61,10 +61,24 @@ public class ErlProcess {
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
             if (reg instanceof Xregister) {
-                x_reg.set(((Xregister) reg).getIndex(), value); ip++; return null;
+                x_reg.set(((Xregister) reg).getIndex(), value);
             } else if (reg instanceof Yregister) {
-                y_reg.set(((Yregister) reg).getIndex(), value); ip++; return null;
+                y_reg.set(((Yregister) reg).getIndex(), value);
             }
+            ip++;
+            return null;
+        case 69: // put_list
+            ErlTerm head = getValue(op.args.get(0));
+            ErlTerm tail = getValue(op.args.get(1));
+            ErlList list = new ErlList(head, tail);
+            ErlTerm listreg = op.args.get(2);
+            if (listreg instanceof Xregister) {
+                x_reg.set(((Xregister) listreg).getIndex(), list);
+            } else if (listreg instanceof Yregister) {
+                y_reg.set(((Yregister) listreg).getIndex(), list);
+            }
+            ip++;
+            return null;
         case 78:
             Import mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExtOnly(mfa);
@@ -81,6 +95,13 @@ public class ErlProcess {
         if (mod.equals("erlang")) {
             if (function.equals("get_module_info")) {
                 return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
+            } else if (function.equals("spawn")) { // TODO: extend with new process
+                String res = "spawn(";
+                for (int i = 0; i < arity; i++) {
+                    res += x_reg.get(i).toString() + " ";
+                }
+                res += ")";
+                return new ErlString(res);
             }
         } else {
             file = vm.getModule(mod).file;

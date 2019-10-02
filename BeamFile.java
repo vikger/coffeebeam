@@ -394,12 +394,20 @@ class ErlAtom extends ErlTerm {
 
 class ErlList extends ErlTerm {
     ArrayList<ErlTerm> list;
+    ErlTerm head;
     ErlTerm tail;
-    // TODO: tail for LIST_EXT
+    boolean single = false;
     public ErlList() {
         super("list");
+        single = true;
         list = new ArrayList<ErlTerm>();
         tail = new ErlNil();
+    }
+    public ErlList(ErlTerm hd, ErlTerm tl) {
+        super("list");
+        single = false;
+        head = hd;
+        tail = tl;
     }
     public void add(ErlTerm item) {
         list.add(item);
@@ -409,11 +417,15 @@ class ErlList extends ErlTerm {
     }
     public String toString() {
         String str = "[";
-        for (int i = 0; i < list.size(); i++) {
-            if (i == 0)
-                str += list.get(i);
-            else
-                str += ", " + list.get(i);
+        if (single) {
+            for (int i = 0; i < list.size(); i++) {
+                if (i == 0)
+                    str += list.get(i);
+                else
+                    str += ", " + list.get(i);
+            }
+        } else {
+            str += head.toString() + " | " + tail.toString();
         }
         str += "]";
         return str;
@@ -491,7 +503,7 @@ class ErlLabel extends ErlTerm {
 class ErlString extends ErlTerm {
     private String value;
     public ErlString(String v) { super("string"); value = v; }
-    public String toString() { return value; }
+    public String toString() { return "\"" + value + "\""; }
 }
 
 class Xregister extends ErlTerm {
@@ -670,7 +682,7 @@ class InternalTerm {
                     tagname += "allocation list";
                     break;
                 case 4: // literal
-                    return new ErlLiteral(bf, value);
+                    return new ErlLiteral(bf, value >> 4); // TODO: check spec / beam_asm
                 }
             } else {
                 value = (b & 0xF0) >> 4;
@@ -685,7 +697,7 @@ class InternalTerm {
                 }
             }
         }
-        System.out.println(tagname + " " + value);
+        System.out.println("Generic " + tagname + " " + value);
         return new GenericErlTerm(value);
     }
 }
