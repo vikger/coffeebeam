@@ -50,13 +50,28 @@ public class ErlProcess {
                 y_reg.set(((Yregister) reg).getIndex(), value); ip++; return null;
             }
         case 78:
-            int module = ((ErlInt) op.args.get(1)).getValue();
-            ip++;
-            return null;
+            Import mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+            return setCallExtOnly(mfa);
         case 153: ip++; return null; // skip line
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
         }
         ip++; return null;
+    }
+
+    public ErlTerm setCallExtOnly(Import mfa) {
+        String mod = file.getAtomName(mfa.getModule());
+        String function = file.getAtomName(mfa.getFunction());
+        int arity = mfa.getArity();
+        if (mod.equals("erlang")) {
+            if (function.equals("get_module_info")) {
+                return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
+            }
+        } else {
+            file = vm.getModule(mod).file;
+            int label = file.getLabel(function, arity);
+            ip = file.getLabelRef(label);
+        }
+        return null;
     }
 
     private ErlTerm getValue(ErlTerm source) {

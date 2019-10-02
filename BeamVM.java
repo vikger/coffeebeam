@@ -27,7 +27,7 @@ public class BeamVM {
         BeamVM vm = new BeamVM();
         vm.load(args[0]);
         ErlProcess p = new ErlProcess(vm);
-        p.apply("example", "greeting", NO_ARGS);
+        p.apply("example", "module_info", NO_ARGS);
     }
 }
 

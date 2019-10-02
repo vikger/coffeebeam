@@ -183,6 +183,8 @@ public class BeamFile {
 
     public ErlTerm getLiteral(int index) { return literals.get(index); }
 
+    public Import getImport(int index) { return imports.get(index); }
+
     public int getLabel(String function, int argc) {
         for (int i = 0; i < exports.size(); i++) {
             Export exp = exports.get(i);
