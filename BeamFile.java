@@ -480,6 +480,9 @@ class ErlLabel extends ErlTerm {
         value = v;
         reference = true;
     }
+    public int getValue() {
+        return value;
+    }
     public String toString() {
         return "label(" + value + ")";
     }

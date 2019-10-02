@@ -40,7 +40,23 @@ public class ErlProcess {
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
             // case 7 call_ext: save module, ip, x, y on stack
+        case 2: // func_info
+            String func_info = "Error: " + op.args.get(0) + ":" + op.args.get(1) + "(";
+            int argc = ((ErlInt) op.args.get(2)).getValue();
+            for (int i = 0; i < argc; i++) {
+                if (i > 0) func_info += ",";
+                func_info += x_reg.get(i).toString();
+            }
+            func_info += ")";
+            return new ErlString(func_info);
         case 19: return x_reg.get(0);
+        case 43: // is_eq_exact, TODO: apply for all types
+            if (getValue(op.args.get(1)).toString().equals(getValue(op.args.get(2)).toString())) {
+                ip++;
+            } else {
+                ip = file.getLabelRef(((ErlLabel)op.args.get(0)).getValue());
+            }
+            return null;
         case 64:
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
