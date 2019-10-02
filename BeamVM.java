@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 public class BeamVM {
@@ -23,11 +23,42 @@ public class BeamVM {
         return null;
     }
 
+    public void loadModules(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        String module;
+        while ((module = reader.readLine()) != null) {
+            load(module);
+        }
+        reader.close();
+    }
+
+    public void runApplies(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        String module;
+        String function;
+        ErlTerm[] args;
+        int arity;
+        while ((module = reader.readLine()) != null) {
+            function = reader.readLine();
+            arity = Integer.valueOf(reader.readLine());
+            args = new ErlTerm[arity];
+            for (int i = 0; i < arity; i++) {
+                String type = reader.readLine();
+                switch (type) {
+                case "ErlInt": args[i] = new ErlInt(Integer.valueOf(reader.readLine()));
+                case "ErlAtom": args[i] = new ErlAtom(reader.readLine());
+                }
+            }
+            ErlProcess p = new ErlProcess(this);
+            p.apply(module, function, args);
+        }
+        reader.close();
+    }
+
     public static void main(String[] args) throws Exception {
         BeamVM vm = new BeamVM();
-        vm.load(args[0]);
-        ErlProcess p = new ErlProcess(vm);
-        p.apply("example", "module_info", NO_ARGS);
+        vm.loadModules("load.txt");
+        vm.runApplies("apply.txt");
     }
 }
 

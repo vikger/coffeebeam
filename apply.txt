@@ -1,0 +1,11 @@
+example
+greeting
+0
+example
+module_info
+0
+a
+call
+1
+ErlInt
+10
