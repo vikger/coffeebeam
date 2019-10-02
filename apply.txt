@@ -9,3 +9,6 @@ call
 1
 ErlInt
 10
+a
+module_info
+0

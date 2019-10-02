@@ -44,10 +44,9 @@ public class BeamVM {
             args = new ErlTerm[arity];
             for (int i = 0; i < arity; i++) {
                 String type = reader.readLine();
-                switch (type) {
-                case "ErlInt": args[i] = new ErlInt(Integer.valueOf(reader.readLine()));
-                case "ErlAtom": args[i] = new ErlAtom(reader.readLine());
-                }
+                if (type.equals("ErlInt")) args[i] = new ErlInt(Integer.valueOf(reader.readLine()));
+                else if (type.equals("ErlAtom")) args[i] = new ErlAtom(reader.readLine());
+                else System.out.println("Unknown type: '" + type + "'");
             }
             ErlProcess p = new ErlProcess(this);
             p.apply(module, function, args);
