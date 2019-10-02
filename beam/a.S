@@ -2,6 +2,7 @@
 
 {exports, [{call,1},
            {list,0},
+           {listlength,1},
            {module_info,0},
            {module_info,1},
            {newproc,1},
@@ -9,7 +10,7 @@
 
 {attributes, []}.
 
-{labels, 13}.
+{labels, 16}.
 
 
 {function, call, 1, 2}.
@@ -55,21 +56,42 @@
     return.
 
 
-{function, module_info, 0, 10}.
+{function, listlength, 1, 10}.
   {label,9}.
+    {line,[{location,"a.erl",17}]}.
+    {func_info,{atom,a},{atom,listlength},1}.
+  {label,10}.
+    {test,is_nonempty_list,{f,11},[{x,0}]}.
+    {allocate,0,1}.
+    {get_tl,{x,0},{x,0}}.
+    {line,[{location,"a.erl",18}]}.
+    {call,1,{f,10}}.
+    {'%',{type_info,{x,0},number}}.
+    {line,[{location,"a.erl",18}]}.
+    {gc_bif,'+',{f,0},1,[{x,0},{integer,1}],{x,0}}.
+    {deallocate,0}.
+    return.
+  {label,11}.
+    {test,is_nil,{f,9},[{x,0}]}.
+    {move,{integer,0},{x,0}}.
+    return.
+
+
+{function, module_info, 0, 13}.
+  {label,12}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},0}.
-  {label,10}.
+  {label,13}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 12}.
-  {label,11}.
+{function, module_info, 1, 15}.
+  {label,14}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},1}.
-  {label,12}.
+  {label,15}.
     {move,{x,0},{x,1}}.
     {move,{atom,a},{x,0}}.
     {line,[]}.

@@ -54,8 +54,13 @@ public class ErlProcess {
             if (getValue(op.args.get(1)).toString().equals(getValue(op.args.get(2)).toString())) {
                 ip++;
             } else {
-                ip = file.getLabelRef(((ErlLabel)op.args.get(0)).getValue());
+                ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
             }
+            return null;
+        case 56: // is_nonempty_list
+            ErlTerm listarg = getValue(op.args.get(1));
+            if (listarg instanceof ErlList) ip++;
+            else ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
             return null;
         case 64:
             ErlTerm value = getValue(op.args.get(0));

@@ -42,15 +42,29 @@ public class BeamVM {
             arity = Integer.valueOf(reader.readLine());
             args = new ErlTerm[arity];
             for (int i = 0; i < arity; i++) {
-                String type = reader.readLine();
-                if (type.equals("ErlInt")) args[i] = new ErlInt(Integer.valueOf(reader.readLine()));
-                else if (type.equals("ErlAtom")) args[i] = new ErlAtom(reader.readLine());
-                else System.out.println("Unknown type: '" + type + "'");
+                args[i] = readTerm(reader);
             }
             ErlProcess p = new ErlProcess(this);
             p.apply(module, function, args);
         }
         reader.close();
+    }
+
+    private ErlTerm readTerm(BufferedReader reader) throws Exception {
+        String type = reader.readLine();
+        if (type.equals("ErlInt")) return new ErlInt(Integer.valueOf(reader.readLine()));
+        else if (type.equals("ErlAtom")) return new ErlAtom(reader.readLine());
+        else if (type.equals("ErlList")) {
+            int length = Integer.valueOf(reader.readLine());
+            ErlList list = new ErlList();
+            for (int i = 0; i < length; i++) {
+                list.add(readTerm(reader));
+            }
+            list.setTail(readTerm(reader));
+            return list;
+        } else if (type.equals("ErlNil")) return new ErlNil();
+        else System.out.println("Unknown type: '" + type + "'");
+        return null;
     }
 
     public static void main(String[] args) throws Exception {
