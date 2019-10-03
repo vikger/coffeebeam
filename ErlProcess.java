@@ -19,7 +19,7 @@ public class ErlProcess {
         int argc = args.length;
         int label = file.getLabel(function, argc);
         ip = file.getLabelRef(label);
-        System.out.println("apply " + module + ":" + function + "/" + argc + " ip: " + ip);
+        System.out.println("apply " + module + ":" + function + "/" + argc + " ip " + ip);
         for (int i = 0; i < argc; i++) {
             x_reg.set(i, args[i]);
         }
@@ -35,7 +35,6 @@ public class ErlProcess {
                 System.out.println("pop: " + ip + " size " + stack.size());
                 ip++;
             }
-            System.out.println("ip -> " + ip);
             ErlOp op = file.getOp(ip);
             result = execute(op);
         }
@@ -43,7 +42,7 @@ public class ErlProcess {
     }
 
     public ErlTerm execute(ErlOp op) {
-        System.out.println("execute op " + op.opcode + " " + OpCode.name(op.opcode));
+        System.out.println("ip(" + ip + ") " + OpCode.name(op.opcode) + "(" + op.opcode + ")");
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
             // case 7 call_ext: save module, ip, x, y on stack

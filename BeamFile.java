@@ -49,7 +49,7 @@ public class BeamFile {
         int opcode;
         while ((opcode = br.readByte()) != -1) {
             int arity = OpCode.arity(opcode);
-            System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
+            //System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
             ArrayList<ErlTerm> terms = new ArrayList<ErlTerm>();
             for (int j = 0; j < arity; j++) {
                 terms.add(InternalTerm.read(br, this));
@@ -157,10 +157,10 @@ public class BeamFile {
     private void printCodeTable() {
         for (int i = 0; i < codeTable.size(); i++) {
             ErlOp erlop = codeTable.get(i);
-            System.out.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
+            //System.out.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
             for (int j = 0; j < erlop.args.size(); j++) {
                 ErlTerm arg = erlop.args.get(j);
-                System.out.println("---- " + arg.toString());
+                //System.out.println("---- " + arg.toString());
             }
         }
     }
@@ -621,7 +621,7 @@ class InternalTerm {
     public static ErlTerm read(ByteReader br, BeamFile bf) throws IOException {
         String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
-        System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
+        //System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
         String tagname = null;
         int value = -1234;
@@ -641,7 +641,7 @@ class InternalTerm {
                 System.out.print("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte
                 int cont1 = br.readByte();
-                System.out.print("[" + BeamDebug.dec_to_bin(cont1) + "] ");
+                // System.out.print("[" + BeamDebug.dec_to_bin(cont1) + "] ");
                 value = ((b & 0xE0) << 3) + cont1;
                 switch (tag) {
                 case 0: return new ErlInt(value);
