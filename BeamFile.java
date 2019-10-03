@@ -25,7 +25,7 @@ public class BeamFile {
         exports = new ArrayList<Export>();
         localFunctions = new ArrayList<LocalFunction>();
         codeTable = new ArrayList<ErlOp>();
-        labelRefs = new ArrayList<Integer>(); labelRefs.add(0);
+        labelRefs = new ArrayList<Integer>(); labelRefs.add(-1); // for errors
     }
 
     public void readAtom(ByteReader br) throws IOException {
@@ -500,6 +500,12 @@ class ErlString extends ErlTerm {
     public String toString() { return "\"" + value + "\""; }
 }
 
+class ErlException extends ErlTerm {
+    private String value;
+    public ErlException(String v) { super("exception"); value = v; }
+    public String toString() { return "** exception: " + value; }
+}
+
 class Xregister extends ErlTerm {
     private int index;
     public Xregister(int i) {
@@ -656,7 +662,7 @@ class InternalTerm {
         } else { // bit 3 is 0, no continuation
             if (extended) {
                 value = br.readByte();
-                System.out.print("[" + BeamDebug.dec_to_bin(value) + "] ");
+                //System.out.print("[" + BeamDebug.dec_to_bin(value) + "] ");
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
                     tagname += "list";

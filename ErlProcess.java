@@ -19,10 +19,12 @@ public class ErlProcess {
         int argc = args.length;
         int label = file.getLabel(function, argc);
         ip = file.getLabelRef(label);
-        System.out.println("apply " + module + ":" + function + "/" + argc + " ip " + ip);
+        System.out.print("apply " + module + ":" + function + "/" + argc);
         for (int i = 0; i < argc; i++) {
             x_reg.set(i, args[i]);
+            System.out.print("\t" + args[i]);
         }
+        System.out.println();
         run();
     }
 
@@ -35,8 +37,12 @@ public class ErlProcess {
                 System.out.println("pop: " + ip + " size " + stack.size());
                 ip++;
             }
-            ErlOp op = file.getOp(ip);
-            result = execute(op);
+            if (ip == -1) {
+                result = new ErlException("badarg");
+            } else {
+                ErlOp op = file.getOp(ip);
+                result = execute(op);
+            }
         }
         System.out.println("result: " + result.toString());
     }
@@ -49,14 +55,14 @@ public class ErlProcess {
         case 1: ip++; return null; // skip label
             // case 7 call_ext: save module, ip, x, y on stack
         case 2: // func_info
-            String func_info = "Error: " + op.args.get(0) + ":" + op.args.get(1) + "(";
+            String func_info = op.args.get(0) + ":" + op.args.get(1) + "(";
             int argc = ((ErlInt) op.args.get(2)).getValue();
             for (int i = 0; i < argc; i++) {
                 if (i > 0) func_info += ",";
                 func_info += x_reg.get(i).toString();
             }
             func_info += ")";
-            return new ErlString(func_info);
+            return new ErlException("function_clause " + func_info);
         case 4: // call
             stack.push(ip); System.out.println("push: " + ip + " size " + stack.size());
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
@@ -108,7 +114,7 @@ public class ErlProcess {
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
-            if (bif2_result == null) return new ErlString("bif2 error");
+            if (bif2_result == null) return new ErlException("bif2 error");
             set_reg(op.args.get(5), bif2_result);
             ip++;
             return null;
@@ -135,7 +141,7 @@ public class ErlProcess {
                 }
             }
         }
-        return new ErlString("error " + arg1.toString() + " " + arg2.toString());
+        return new ErlException("gc_bif2 " + arg1.toString() + " " + arg2.toString());
     }
 
     private void set_reg(ErlTerm reg, ErlTerm value) {
