@@ -393,41 +393,45 @@ class ErlAtom extends ErlTerm {
 }
 
 class ErlList extends ErlTerm {
-    ArrayList<ErlTerm> list;
-    ErlTerm head;
-    ErlTerm tail;
-    boolean single = false;
+    ErlTerm head = null;
+    ErlTerm tail = null;
+    boolean nil = true;
     public ErlList() {
         super("list");
-        single = true;
-        list = new ArrayList<ErlTerm>();
-        tail = new ErlNil();
     }
     public ErlList(ErlTerm hd, ErlTerm tl) {
         super("list");
-        single = false;
+        nil = false;
         head = hd;
         tail = tl;
     }
     public void add(ErlTerm item) {
-        list.add(item);
+        if (isNil()) {
+            nil = false;
+            head = item;
+            tail = new ErlList();
+        } else {
+            if (tail instanceof ErlList) {
+                ((ErlList) tail).add(item);
+            }
+        }
     }
     public void setTail(ErlTerm t) {
-        tail = t;
-    }
-    public String toString() {
-        String str = "[";
-        if (single) {
-            for (int i = 0; i < list.size(); i++) {
-                if (i == 0)
-                    str += list.get(i);
-                else
-                    str += ", " + list.get(i);
+        if (tail instanceof ErlList) {
+            if (((ErlList) tail).isNil()) {
+                tail = t;
+            } else {
+                ((ErlList) tail).setTail(t);
             }
         } else {
-            str += head.toString() + " | " + tail.toString();
+            tail = t;
         }
-        str += "]";
+    }
+    public boolean isNil() {
+        return nil;
+    }
+    public String toString() {
+        String str = "[" + head.toString() + " | " + tail.toString() + "]";
         return str;
     }
 }
