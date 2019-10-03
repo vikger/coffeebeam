@@ -6,10 +6,12 @@ public class ErlProcess {
     private Register y_reg;
     private int ip;
     private BeamFile file;
+    private Stack stack;
     public ErlProcess(BeamVM bv) {
         vm = bv;
         x_reg = new Register();
         y_reg = new Register();
+        stack = new Stack();
     }
 
     public void apply(String module, String function, ErlTerm[] args) {
@@ -27,7 +29,12 @@ public class ErlProcess {
     public void run() {
         ErlTerm result = null;
 
-        while (result == null) {
+        while (result == null || !stack.isEmpty()) {
+            if (result != null) {
+                ip = stack.pop(); // TODO: check if only occurs on return
+                System.out.println("pop: " + ip + " size " + stack.size());
+                ip++;
+            }
             System.out.println("ip -> " + ip);
             ErlOp op = file.getOp(ip);
             result = execute(op);
@@ -49,6 +56,13 @@ public class ErlProcess {
             }
             func_info += ")";
             return new ErlString(func_info);
+        case 4: // call
+            stack.push(ip); System.out.println("push: " + ip + " size " + stack.size());
+            ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
+            ip++;
+            return null;
+        case 12: ip++; return null; // skip allocate
+        case 18: ip++; return null; // skip deallocate
         case 19: return x_reg.get(0);
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toString().equals(getValue(op.args.get(2)).toString())) {
@@ -57,40 +71,77 @@ public class ErlProcess {
                 ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
             }
             return null;
+        case 52: // is_nil
+            ErlTerm is_nil_list = getValue(op.args.get(1));
+            if (is_nil_list instanceof ErlList) {
+                if (((ErlList) is_nil_list).isNil()) {
+                    ip++;
+                    return null;
+                }
+            }
+            ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
+            return null;
         case 56: // is_nonempty_list
             ErlTerm listarg = getValue(op.args.get(1));
-            if (listarg instanceof ErlList) ip++;
+            if (listarg instanceof ErlList && !((ErlList) listarg).isNil())
+                ip++;
             else ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
             return null;
         case 64:
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
-            if (reg instanceof Xregister) {
-                x_reg.set(((Xregister) reg).getIndex(), value);
-            } else if (reg instanceof Yregister) {
-                y_reg.set(((Yregister) reg).getIndex(), value);
-            }
+            set_reg(op.args.get(1), value);
             ip++;
             return null;
         case 69: // put_list
             ErlTerm head = getValue(op.args.get(0));
             ErlTerm tail = getValue(op.args.get(1));
             ErlList list = new ErlList(head, tail);
-            ErlTerm listreg = op.args.get(2);
-            if (listreg instanceof Xregister) {
-                x_reg.set(((Xregister) listreg).getIndex(), list);
-            } else if (listreg instanceof Yregister) {
-                y_reg.set(((Yregister) listreg).getIndex(), list);
-            }
+            set_reg(op.args.get(2), list);
             ip++;
             return null;
         case 78:
             Import mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExtOnly(mfa);
+        case 125: // gc_bif2
+            Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
+            ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
+            if (bif2_result == null) return new ErlString("bif2 error");
+            set_reg(op.args.get(5), bif2_result);
+            ip++;
+            return null;
         case 153: ip++; return null; // skip line
+        case 163: // get_tl
+            ErlTerm get_tl_tail = ((ErlList) getValue(op.args.get(0))).tail;
+            set_reg(op.args.get(1), get_tl_tail);
+            ip++;
+            return null;
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
         }
         ip++; return null;
+    }
+
+    private ErlTerm gc_bif2(Import mfa, ErlTerm arg1, ErlTerm arg2) {
+        String mod = file.getAtomName(mfa.getModule());
+        String function = file.getAtomName(mfa.getFunction());
+        if (mod.equals("erlang")) {
+            if (function.equals("+")) {
+                if (arg1 instanceof ErlInt) {
+                    if (arg2 instanceof ErlInt) {
+                        return new ErlInt(((ErlInt) arg1).getValue() + ((ErlInt) arg2).getValue());
+                    }
+                }
+            }
+        }
+        return new ErlString("error " + arg1.toString() + " " + arg2.toString());
+    }
+
+    private void set_reg(ErlTerm reg, ErlTerm value) {
+        if (reg instanceof Xregister) {
+            x_reg.set(((Xregister) reg).getIndex(), value);
+        } else if (reg instanceof Yregister) {
+            y_reg.set(((Yregister) reg).getIndex(), value);
+        }
     }
 
     public ErlTerm setCallExtOnly(Import mfa) {
@@ -152,5 +203,31 @@ class Register {
         for (int i = 0; i < slots.size(); i++) {
             System.out.print(" " + slots.get(i));
         }
+    }
+}
+
+class Stack {
+    ArrayList<Integer> items;
+    public Stack() {
+        items = new ArrayList<Integer>();
+    }
+
+    public void push(int item) {
+        items.add(item);
+    }
+
+    public int pop() {
+        int index = items.size() - 1;
+        int item = items.get(index);
+        items.remove(index);
+        return item;
+    }
+
+    public boolean isEmpty() {
+        return items.size() == 0;
+    }
+
+    public int size() {
+        return items.size();
     }
 }
