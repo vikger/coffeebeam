@@ -42,7 +42,9 @@ public class ErlProcess {
     }
 
     public ErlTerm execute(ErlOp op) {
-        System.out.println("ip(" + ip + ") " + OpCode.name(op.opcode) + "(" + op.opcode + ")");
+        System.out.print("  ip(" + ip + ") " + OpCode.name(op.opcode) + "(" + op.opcode + ")");
+        for (int i = 0; i < OpCode.arity(op.opcode); i++) System.out.print("\t" + op.args.get(i).toString());
+        System.out.println();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
             // case 7 call_ext: save module, ip, x, y on stack
@@ -61,6 +63,7 @@ public class ErlProcess {
             ip++;
             return null;
         case 12: ip++; return null; // skip allocate
+        case 16: ip++; return null; // skip test_heap
         case 18: ip++; return null; // skip deallocate
         case 19: return x_reg.get(0);
         case 43: // is_eq_exact, TODO: apply for all types
