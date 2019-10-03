@@ -51,6 +51,8 @@ public class ErlProcess {
         System.out.print("  ip(" + ip + ") " + OpCode.name(op.opcode) + "(" + op.opcode + ")");
         for (int i = 0; i < OpCode.arity(op.opcode); i++) System.out.print("\t" + op.args.get(i).toString());
         System.out.println();
+        x_reg.dump();
+        y_reg.dump();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
             // case 7 call_ext: save module, ip, x, y on stack
@@ -66,12 +68,15 @@ public class ErlProcess {
         case 4: // call
             stack.push(ip); System.out.println("push: " + ip + " size " + stack.size());
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
-            ip++;
+            return null;
+        case 6: // call_only
+            ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
             return null;
         case 12: ip++; return null; // skip allocate
         case 16: ip++; return null; // skip test_heap
         case 18: ip++; return null; // skip deallocate
         case 19: return x_reg.get(0);
+        case 33: ip++; return null; // skip allocate_heap
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toString().equals(getValue(op.args.get(2)).toString())) {
                 ip++;
@@ -99,6 +104,12 @@ public class ErlProcess {
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
             set_reg(op.args.get(1), value);
+            ip++;
+            return null;
+        case 65: // get_list
+            ErlTerm get_list = getValue(op.args.get(0));
+            set_reg(op.args.get(1), ((ErlList) get_list).head);
+            set_reg(op.args.get(2), ((ErlList) get_list).tail);
             ip++;
             return null;
         case 69: // put_list
@@ -207,10 +218,11 @@ class Register {
     }
 
     public void dump() {
-        System.out.println("reg: " + slots.size() + " |");
+        System.out.print("    reg(" + slots.size() + "):");
         for (int i = 0; i < slots.size(); i++) {
-            System.out.print(" " + slots.get(i));
+            System.out.print("\t" + slots.get(i));
         }
+        System.out.println();
     }
 }
 

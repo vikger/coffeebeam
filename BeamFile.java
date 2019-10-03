@@ -117,8 +117,8 @@ public class BeamFile {
         printExports();
         printLocalFunctions();
         printCodeTable();
-        printLabelRefs();
-        printAttributes();
+        //printLabelRefs();
+        //printAttributes();
     }
 
     private void printAtoms() {
@@ -157,10 +157,10 @@ public class BeamFile {
     private void printCodeTable() {
         for (int i = 0; i < codeTable.size(); i++) {
             ErlOp erlop = codeTable.get(i);
-            //System.out.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
+            System.out.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
             for (int j = 0; j < erlop.args.size(); j++) {
                 ErlTerm arg = erlop.args.get(j);
-                //System.out.println("---- " + arg.toString());
+                System.out.println("---- " + arg.toString());
             }
         }
     }
@@ -432,7 +432,18 @@ class ErlList extends ErlTerm {
     }
     public String toString() {
         if (isNil()) return "[]";
-        else return "[" + head.toString() + " | " + tail.toString() + "]";
+        else return "[" + toStringValues();
+    }
+    public String toStringValues() {
+        if (tail instanceof ErlList) {
+            if (((ErlList)tail).isNil()) {
+                return head.toString() + "]";
+            } else {
+                return head.toString() + ", " + ((ErlList) tail).toStringValues();
+            }
+        } else {
+            return head.toString() + " | " + tail.toString() + "]";
+        }
     }
 }
 
@@ -670,10 +681,8 @@ class InternalTerm {
                     tagname += "(" + list_size + ")";
                     ErlList list = new ErlList();
                     for (int i = 0; i < list_size; i++) {
-                        System.out.print("list[" + (i+1) + "]: ");
                         list.add(read(br, bf)); // item
                     }
-                    System.out.print("list end - ");
                     return list;
                 case 2: // floating point register
                     tagname += "floating point register";
