@@ -290,11 +290,12 @@ class ErlOp {
 }
 
 abstract class ErlTerm {
-    private String tag;
+    String tag;
     boolean reference = false;
     private ErlTerm() {}
     public ErlTerm(String t) { tag = t; }
     public abstract String toString();
+    public abstract String toId();
     public String getTag() { return tag; }
     public boolean isReference() { return reference; }
 }
@@ -308,9 +309,8 @@ class GenericErlTerm extends ErlTerm {
 
     public boolean isReference() { return false; }
 
-    public String toString() {
-        return "term(" + getTag() + "): " + value;
-    }
+    public String toString() { return "term(" + getTag() + "): " + value; }
+    public String toId() { return tag + "(" + value + ")"; }
 }
 
 abstract class ErlNumber extends ErlTerm {
@@ -326,14 +326,11 @@ class ErlInt extends ErlNumber {
         super("integer");
         value = v;
     }
+    public String toString() { return "int(" + value + ")"; }
 
-    public String toString() {
-        return "integer(" + value + ")";
-    }
+    public String toId() { return tag + "(" + value + ")"; }
 
-    public int getValue() {
-        return value;
-    }
+    public int getValue() { return value; }
 }
 
 class ErlBigNum extends ErlNumber {
@@ -360,7 +357,11 @@ class ErlBigNum extends ErlNumber {
     }
 
     public String toString() {
-        return Long.toString(getValue());
+        return Long.toString(getValue()); // TODO: fix
+    }
+
+    public String toId() {
+        return tag + "(" + Long.toString(getValue()) + ")"; // TODO: fix
     }
 }
 
@@ -368,23 +369,22 @@ class ErlAtom extends ErlTerm {
     private int index;
     private String value;
     private BeamFile beamfile;
+
     public ErlAtom(String v) {
         super("atom");
         value = v;
     }
-
     public ErlAtom(BeamFile bf, int i) {
         super("atom");
         index = i;
         reference = true;
         beamfile = bf;
     }
-
     public String toString() {
         if (reference) return getValue();
         else return value;
     }
-
+    public String toId() { return tag + "(" + value + ")"; }
     public int getIndex() { return index; }
     public String getValue() {
         if (reference) return beamfile.getAtomName(index);
@@ -396,6 +396,7 @@ class ErlList extends ErlTerm {
     ErlTerm head = null;
     ErlTerm tail = null;
     boolean nil = true;
+
     public ErlList() {
         super("list");
     }
@@ -445,6 +446,10 @@ class ErlList extends ErlTerm {
             return head.toString() + " | " + tail.toString() + "]";
         }
     }
+    public String toId() {
+        if (isNil()) return "nil";
+        else return tag + "(" + head.toId() + "," + tail.toId() + ")";
+    }
 }
 
 class ErlTuple extends ErlTerm {
@@ -464,12 +469,23 @@ class ErlTuple extends ErlTerm {
         String str = "{";
         for (int i = 0; i < elements.size(); i++) {
             if (i == 0)
-                str += elements.get(i);
+                str += elements.get(i).toString();
             else
-                str += ", " + elements.get(i);
+                str += ", " + elements.get(i).toString();
         }
         str += "}";
         return str;
+    }
+    public String toId() {
+        String id = tag + "(";
+        for (int i = 0; i < elements.size(); i++) {
+            if (i == 0)
+                id += elements.get(i).toId();
+            else
+                id += "," + elements.get(i).toId();
+        }
+        id += ")";
+        return id;
     }
 }
 
@@ -482,12 +498,9 @@ class ErlLiteral extends ErlTerm {
         beamfile = bf;
         reference = true;
     }
-    public String toString() {
-        return getValue().toString();
-    }
-    public ErlTerm getValue() {
-        return beamfile.getLiteral(value);
-    }
+    public ErlTerm getValue() { return beamfile.getLiteral(value); }
+    public String toString() { return getValue().toString(); }
+    public String toId() { return tag + "(" + getValue().toId() + ")"; }
 }
 
 class ErlLabel extends ErlTerm {
@@ -497,52 +510,45 @@ class ErlLabel extends ErlTerm {
         value = v;
         reference = true;
     }
-    public int getValue() {
-        return value;
-    }
-    public String toString() {
-        return "label(" + value + ")";
-    }
+    public int getValue() { return value; }
+    public String toString() { return "label(" + value + ")"; }
+    public String toId() { return tag + "(" + value + ")"; }
 }
 
 class ErlString extends ErlTerm {
     private String value;
     public ErlString(String v) { super("string"); value = v; }
     public String toString() { return "\"" + value + "\""; }
+    public String toId() { return tag + "(" + value + ")"; }
 }
 
 class ErlException extends ErlTerm {
     private String value;
     public ErlException(String v) { super("exception"); value = v; }
     public String toString() { return "** exception: " + value; }
+    public String toId() { return tag + "(" + value + ")"; }
 }
 
 class Xregister extends ErlTerm {
     private int index;
     public Xregister(int i) {
-        super("X register");
+        super("Xregister");
         index = i;
     }
-    public String toString() {
-        return "X(" + index + ")";
-    }
-    public int getIndex() {
-        return index;
-    }
+    public String toString() { return "X(" + index + ")"; }
+    public String toId() { return tag + "(" + index + ")"; }
+    public int getIndex() { return index; }
 }
 
 class Yregister extends ErlTerm {
     private int index;
     public Yregister(int i) {
-        super("Y register");
+        super("Yregister");
         index = i;
     }
-    public String toString() {
-        return "Y(" + index + ")";
-    }
-    public int getIndex() {
-        return index;
-    }
+    public String toString() { return "Y(" + index + ")"; }
+    public String toId() { return tag + "(" + index + ")"; }
+    public int getIndex() { return index; }
 }
 
 class ExternalTerm {
