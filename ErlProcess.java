@@ -137,7 +137,7 @@ class Register {
 
     public void set(int index, ErlTerm value) {
         while (index > maxindex) {
-            slots.add(new ErlNil());
+            slots.add(new ErlList()); // can be any ErlTerm instance
             maxindex++;
         }
         slots.set(index, value);

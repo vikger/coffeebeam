@@ -62,7 +62,7 @@ public class BeamVM {
             }
             list.setTail(readTerm(reader));
             return list;
-        } else if (type.equals("ErlNil")) return new ErlNil();
+        } else if (type.equals("ErlNil")) return new ErlList();
         else System.out.println("Unknown type: '" + type + "'");
         return null;
     }

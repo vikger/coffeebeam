@@ -431,8 +431,8 @@ class ErlList extends ErlTerm {
         return nil;
     }
     public String toString() {
-        String str = "[" + head.toString() + " | " + tail.toString() + "]";
-        return str;
+        if (isNil()) return "[]";
+        else return "[" + head.toString() + " | " + tail.toString() + "]";
     }
 }
 
@@ -459,16 +459,6 @@ class ErlTuple extends ErlTerm {
         }
         str += "}";
         return str;
-    }
-}
-
-class ErlNil extends ErlTerm {
-    public ErlNil() {
-        super("NIL");
-    }
-
-    public String toString() {
-        return "[]";
     }
 }
 
@@ -583,7 +573,7 @@ class ExternalTerm {
             }
             return tuple;
         case 106: // NIL_EXT
-            return new ErlNil();
+            return new ErlList();
         case 107: // STRING_EXT
             int length = br.read16BitUnsigned();
             return new ErlString(new String(br.readBytes(length)));
@@ -656,7 +646,7 @@ class InternalTerm {
                 switch (tag) {
                 case 0: return new ErlInt(value);
                 case 1: return new ErlInt(value);
-                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom(bf, value - 1);
+                case 2: if (value == 0) return new ErlList(); else return new ErlAtom(bf, value - 1);
                 case 3: return new Xregister(value);
                 case 4: return new Yregister(value);
                 case 5: return new ErlLabel(value);
@@ -693,7 +683,7 @@ class InternalTerm {
                 switch (tag) {
                 case 0: return new ErlInt(value);
                 case 1: return new ErlInt(value);
-                case 2: if (value == 0) return new ErlNil(); else return new ErlAtom(bf, value - 1);
+                case 2: if (value == 0) return new ErlList(); else return new ErlAtom(bf, value - 1);
                 case 3: return new Xregister(value);
                 case 4: return new Yregister(value);
                 case 5: return new ErlLabel(value);
