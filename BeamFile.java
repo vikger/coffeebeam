@@ -518,6 +518,48 @@ class ErlTuple extends ErlTerm {
 
 }
 
+class ErlMap extends ErlTerm {
+    private ArrayList<ErlTerm> keys;
+    private ArrayList<ErlTerm> values;
+
+    public ErlMap() {
+        super("map");
+        keys = new ArrayList<ErlTerm>();
+        values = new ArrayList<ErlTerm>();
+    }
+    public int size() { return keys.size(); }
+    public void add(ErlTerm key, ErlTerm value) {
+        keys.add(key);
+        values.add(value);
+    }
+    public ErlTerm get(ErlTerm key) {
+        for (int i = 0; i < keys.size(); i++) {
+            if (keys.get(i).toId().equals(key.toId())) {
+                return values.get(i);
+            }
+        }
+        return null;
+    }
+    public String toString() {
+        String str = "#{";
+        for (int i = 0; i < keys.size(); i++) {
+            if (i == 0) str += keys.get(i).toString() + " => " + values.get(i).toString();
+            else str += ", " + keys.get(i).toString() + " => " + values.get(i).toString();
+        }
+        str += "}";
+        return str;
+    }
+    public String toId() {
+        String str = tag + "(";
+        for (int i = 0; i < keys.size(); i++) {
+            if (i == 0) str += "(" + keys.get(i).toString() + "," + values.get(i).toString() + ")";
+            else str += ",(" + keys.get(i).toString() + "," + values.get(i).toString() + ")";
+        }
+        str += ")";
+        return str;
+    }
+}
+
 class ErlLiteral extends ErlTerm {
     private BeamFile beamfile;
     private int value;
@@ -659,6 +701,13 @@ class ExternalTerm {
                 numl.addSegment(br.readByte());
             }
             return numl;
+        case 116: // MAP_EXT
+            long map_arity = br.read32BitUnsigned();
+            ErlMap map = new ErlMap();
+            for (int i = 0; i < map_arity; i++) {
+                map.add(read_term(), read_term());
+            }
+            return map;
         default:
             System.out.println("other " + tag);
             System.out.println(" " + br.readByte());

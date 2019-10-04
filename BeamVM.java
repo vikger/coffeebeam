@@ -67,7 +67,14 @@ public class BeamVM {
             list.setTail(readTerm(reader));
             return list;
         } else if (term[0].equals("ErlNil")) return new ErlList();
-        else System.out.println("Unknown type: '" + term[0] + "'");
+        else if (term[0].equals("ErlMap")) {
+            int maplength = Integer.valueOf(term[1]);
+            ErlMap map = new ErlMap();
+            for (int i = 0; i < maplength; i++) {
+                map.add(readTerm(reader), readTerm(reader));
+            }
+            return map;
+        } else System.out.println("Unknown type: '" + term[0] + "'");
         return null;
     }
 

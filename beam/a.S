@@ -3,6 +3,7 @@
 {exports, [{call,1},
            {list,0},
            {listlength,1},
+           {map,1},
            {module_info,0},
            {module_info,1},
            {newproc,1},
@@ -12,7 +13,7 @@
 
 {attributes, []}.
 
-{labels, 24}.
+{labels, 26}.
 
 
 {function, call, 1, 2}.
@@ -85,7 +86,7 @@
     {func_info,{atom,a},{atom,sending},0}.
   {label,13}.
     {allocate,0,0}.
-    {make_fun2,{f,21},0,0,0}.
+    {make_fun2,{f,23},0,0,0}.
     {line,[{location,"a.erl",23}]}.
     {call_ext,1,{extfunc,erlang,spawn,1}}.
     {move,{atom,message},{x,1}}.
@@ -111,37 +112,56 @@
     return.
 
 
-{function, module_info, 0, 17}.
+{function, map, 1, 17}.
   {label,16}.
+    {line,[{location,"a.erl",31}]}.
+    {func_info,{atom,a},{atom,map},1}.
+  {label,17}.
+    {put_map_assoc,{f,0},{literal,#{}},{x,0},1,{list,[{x,0},{x,0}]}}.
+    {put_map_assoc,{f,0},
+                   {x,0},
+                   {x,0},
+                   1,
+                   {list,[{atom,a},
+                          {integer,1},
+                          {atom,c},
+                          {integer,3},
+                          {atom,b},
+                          {integer,2}]}}.
+    return.
+
+
+{function, module_info, 0, 19}.
+  {label,18}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},0}.
-  {label,17}.
+  {label,19}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 19}.
-  {label,18}.
+{function, module_info, 1, 21}.
+  {label,20}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},1}.
-  {label,19}.
+  {label,21}.
     {move,{x,0},{x,1}}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-sending/0-fun-0-', 0, 21}.
-  {label,20}.
+{function, '-sending/0-fun-0-', 0, 23}.
+  {label,22}.
     {line,[{location,"a.erl",23}]}.
     {func_info,{atom,a},{atom,'-sending/0-fun-0-'},0}.
-  {label,21}.
+  {label,23}.
     {allocate,0,0}.
-  {label,22}.
-    {loop_rec,{f,23},{x,0}}.
+  {label,24}.
+    {loop_rec,{f,25},{x,0}}.
     remove_message.
     {deallocate,0}.
     return.
-  {label,23}.
-    {wait,{f,22}}.
+  {label,25}.
+    {wait,{f,24}}.

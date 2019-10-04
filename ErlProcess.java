@@ -161,6 +161,22 @@ public class ErlProcess {
             ip++;
             return null;
         case 153: ip++; return null; // skip line
+        case 154: // put_map_assoc
+            ErlTerm mapbase = getValue(op.args.get(1));
+            ErlMap map;
+            if (mapbase instanceof ErlLiteral) map = (ErlMap) ((ErlLiteral) mapbase).getValue();
+            else map = (ErlMap) mapbase;
+            ErlList maplist = (ErlList) op.args.get(4);
+            while (!maplist.isNil()) {
+                ErlTerm mapkey = getValue(maplist.head);
+                maplist = (ErlList) maplist.tail;
+                ErlTerm mapvalue = getValue(maplist.head);
+                map.add(mapkey, mapvalue);
+                maplist = (ErlList) maplist.tail;
+            }
+            set_reg(op.args.get(2), map);
+            ip++;
+            return null;
         case 163: // get_tl
             ErlTerm get_tl_tail = ((ErlList) getValue(op.args.get(0))).tail;
             set_reg(op.args.get(1), get_tl_tail);
