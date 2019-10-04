@@ -84,13 +84,11 @@ public class ErlProcess {
             ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, false);
-        case 12: // allocate
-            ip++; return null;
+        case 12: ip++; return null; // skip allocate
         case 13: ip++; return null; // skip allocate_heap
         case 16: ip++; return null; // skip test_heap
-        case 18: // deallocate
-            ip++; return null;
-        case 19:
+        case 18: ip++; return null; // skip deallocate
+        case 19: // return
             if (!reg_stack.isEmpty()) restore();
             System.out.println("return: " + x_reg.get(0));
             return x_reg.get(0);
@@ -133,7 +131,7 @@ public class ErlProcess {
                 ip++;
             else jump(op.args.get(0));
             return null;
-        case 64:
+        case 64: // move
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
             set_reg(op.args.get(1), value);
@@ -255,13 +253,13 @@ public class ErlProcess {
                 x_reg.set(0, newtuple);
                 return newtuple;
             }
+            ip++; // continue if no matches
         } else {
-            if (!last) save();
+            if (!last) save(); // TODO: store module, ip, regs
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);
             ip = file.getLabelRef(label);
         }
-        ip++;
         return null;
     }
 

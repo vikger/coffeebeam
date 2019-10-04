@@ -11,6 +11,8 @@
          dropwhile/2,
          duplicate/2,
          filter/2,
+         reverse/1,
+         reverse/2,
          zip/2
         ]).
 
@@ -83,6 +85,14 @@ filter(Pred, [H|T]) ->
     end;
 filter(_Pred, []) ->
     [].
+
+reverse(L) ->
+    reverse(L, []).
+
+reverse([H|T], R) ->
+    reverse(T, [H|R]);
+reverse([], R) ->
+    R.
 
 zip([H1|T1], [H2|T2]) ->
     [{H1, H2} | zip(T1, T2)];

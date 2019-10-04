@@ -57,15 +57,31 @@
 % lists duplicate 2
 % ErlInt 3
 % ErlAtom d
-lists zip 2
-ErlList 2
+% lists zip 2
+% ErlList 2
+% ErlAtom a
+% ErlAtom b
+% ErlNil
+% ErlList 2
+% ErlInt 1
+% ErlInt 2
+% ErlNil
+% a tuple 1
+% ErlList 0
+% ErlNil
+lists reverse 1
+ErlAtom a
+lists reverse 1
+ErlList 3
 ErlAtom a
 ErlAtom b
+ErlAtom c
 ErlNil
+lists reverse 2
 ErlList 2
 ErlInt 1
 ErlInt 2
 ErlNil
-a tuple 1
-ErlList 0
+ErlList 1
+ErlInt 0
 ErlNil
