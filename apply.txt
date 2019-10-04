@@ -1,54 +1,56 @@
-a listlength 1
-ErlList 3
-ErlInt 1
-ErlInt 2
-ErlInt 3
-ErlNil
-a listlength 1
-ErlNil
-a newproc 1
-ErlAtom np
-a list 0
-example greeting 0
-example module_info 0
-a call 1
-ErlInt 10
-a module_info 0
-a test 1
-ErlAtom a
-a test 1
-ErlAtom b
-a test 1
-ErlInt 0
-lists append 2
-ErlList 3
-ErlInt 1
-ErlInt 2
-ErlInt 3
-ErlNil
-ErlList 3
-ErlInt 4
-ErlInt 5
-ErlInt 6
-ErlNil
-lists append 1
-ErlList 3
-ErlList 2
-ErlInt 1
-ErlInt 2
-ErlNil
-ErlList 0
-ErlNil
-ErlList 1
-ErlInt 3
-ErlNil
-ErlNil
+%a listlength 1
+%ErlList 3
+%ErlInt 1
+%ErlInt 2
+%ErlInt 3
+%ErlNil
+%a listlength 1
+%ErlNil
+%a newproc 1
+%ErlAtom np
+%a list 0
+%example greeting 0
+%example module_info 0
+%a call 1
+%ErlInt 10
+%a module_info 0
+%a test 1
+%ErlAtom a
+%a test 1
+%ErlAtom b
+%a test 1
+%ErlInt 0
+%lists append 2
+%ErlList 3
+%ErlInt 1
+%ErlInt 2
+%ErlInt 3
+%ErlNil
+%ErlList 3
+%ErlInt 4
+%ErlInt 5
+%ErlInt 6
+%ErlNil
+%lists append 1
+%ErlList 3
+%ErlList 2
+%ErlInt 1
+%ErlInt 2
+%ErlNil
+%ErlList 0
+%ErlNil
+%ErlList 1
+%ErlInt 3
+%ErlNil
+%ErlNil
 lists concat 1
 ErlList 4
 ErlAtom a
 ErlInt 1
 ErlFloat 1.5
-ErlList 1
-ErlAtom listitem
+ErlList 3
+ErlInt 55
+ErlInt 56
+ErlInt 57
 ErlNil
 ErlNil

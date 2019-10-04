@@ -38,14 +38,16 @@ public class BeamVM {
         ErlTerm[] args;
         int arity;
         while ((line = reader.readLine()) != null) {
-            mfa = line.split(" ", 3);
-            arity = Integer.valueOf(mfa[2]);
-            args = new ErlTerm[arity];
-            for (int i = 0; i < arity; i++) {
-                args[i] = readTerm(reader);
+            if (!line.startsWith("%") && !line.equals("")) {
+                mfa = line.split(" ", 3);
+                arity = Integer.valueOf(mfa[2]);
+                args = new ErlTerm[arity];
+                for (int i = 0; i < arity; i++) {
+                    args[i] = readTerm(reader);
+                }
+                ErlProcess p = new ErlProcess(this);
+                p.apply(mfa[0], mfa[1], args);
             }
-            ErlProcess p = new ErlProcess(this);
-            p.apply(mfa[0], mfa[1], args);
         }
         reader.close();
     }

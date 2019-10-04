@@ -8,7 +8,7 @@ public class ErlProcess {
     private BeamFile file;
     private Stack<Integer> ip_stack;
     private Stack<Register> reg_stack;
-    private int alloc = 0;
+    private Import mfa;
 
     public ErlProcess(BeamVM bv) {
         vm = bv;
@@ -59,7 +59,6 @@ public class ErlProcess {
         //y_reg.dump();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
-            // case 7 call_ext: save module, ip, x, y on stack
         case 2: // func_info
             String func_info = op.args.get(0) + ":" + op.args.get(1) + "(";
             int argc = ((ErlInt) op.args.get(2)).getValue();
@@ -80,6 +79,11 @@ public class ErlProcess {
         case 6: // call_only
             jump(op.args.get(1));
             return null;
+        case 7: // call_ext
+            // TODO: save module, ip, regs
+            ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
+            mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+            return setCallExt(mfa);
         case 12: // allocate
             ip++; return null;
         case 13: ip++; return null; // skip allocate_heap
@@ -88,6 +92,7 @@ public class ErlProcess {
             ip++; return null;
         case 19:
             if (!reg_stack.isEmpty()) restore();
+            System.out.println("return: " + x_reg.get(0));
             return x_reg.get(0);
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
@@ -147,8 +152,8 @@ public class ErlProcess {
             set_reg(op.args.get(2), list);
             ip++;
             return null;
-        case 78:
-            Import mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+        case 78: // call_ext_only
+            mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExtOnly(mfa);
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
@@ -189,6 +194,53 @@ public class ErlProcess {
         } else if (reg instanceof Yregister) {
             y_reg.set(((Yregister) reg).getIndex(), value);
         }
+    }
+
+    public ErlTerm setCallExt(Import mfa) {
+        String mod = file.getAtomName(mfa.getModule());
+        String function = file.getAtomName(mfa.getFunction());
+        int arity = mfa.getArity();
+        if (mod.equals("erlang")) {
+            if (function.equals("get_module_info")) {
+                return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
+            } else if (function.equals("spawn")) { // TODO: extend with new process
+                String res = "spawn(";
+                for (int i = 0; i < arity; i++) {
+                    res += x_reg.get(i).toString() + " ";
+                }
+                res += ")";
+                x_reg.set(0, new ErlString(res));
+            } else if (function.equals("atom_to_list")) {
+                String atomstr = ((ErlAtom) x_reg.get(0)).getValue();
+                ErlList atomlist = string_to_list(atomstr);
+                x_reg.set(0, atomlist);
+                return atomlist;
+            } else if (function.equals("integer_to_list")) {
+                String intstr = Integer.toString(((ErlInt) x_reg.get(0)).getValue());
+                ErlList intlist = string_to_list(intstr);
+                x_reg.set(0, intlist);
+                return intlist;
+            } else if (function.equals("float_to_list")) {
+                String floatstr = Float.toString(((ErlFloat) x_reg.get(0)).getValue());
+                ErlList floatlist = string_to_list(floatstr);
+                x_reg.set(0, floatlist);
+                return floatlist;
+            }
+        } else {
+            save();
+            file = vm.getModule(mod).file;
+            int label = file.getLabel(function, arity);
+            ip = file.getLabelRef(label);
+        }
+        return null;
+    }
+
+    private ErlList string_to_list(String str) {
+        ErlList list = new ErlList();
+        for (char c : str.toCharArray()) {
+            list.add(new ErlInt((int) c));
+        }
+        return list;
     }
 
     public ErlTerm setCallExtOnly(Import mfa) {
