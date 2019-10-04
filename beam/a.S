@@ -13,7 +13,7 @@
 
 {attributes, []}.
 
-{labels, 26}.
+{labels, 28}.
 
 
 {function, call, 1, 2}.
@@ -86,7 +86,7 @@
     {func_info,{atom,a},{atom,sending},0}.
   {label,13}.
     {allocate,0,0}.
-    {make_fun2,{f,23},0,0,0}.
+    {make_fun2,{f,25},0,0,0}.
     {line,[{location,"a.erl",23}]}.
     {call_ext,1,{extfunc,erlang,spawn,1}}.
     {move,{atom,message},{x,1}}.
@@ -101,22 +101,53 @@
     {line,[{location,"a.erl",26}]}.
     {func_info,{atom,a},{atom,tuple},1}.
   {label,15}.
-    {allocate_heap,0,5,1}.
-    {put_tuple2,{x,1},{list,[{atom,a},{atom,b},{atom,c},{x,0}]}}.
+    {allocate_heap,3,5,1}.
+    {init,{y,0}}.
+    {move,{x,0},{y,2}}.
+    {put_tuple2,{y,1},{list,[{atom,a},{atom,b},{atom,c},{x,0}]}}.
+    {move,{y,1},{x,1}}.
     {move,{atom,x},{x,2}}.
     {move,{integer,1},{x,0}}.
     {line,[{location,"a.erl",28}]}.
     {call_ext,3,{extfunc,erlang,setelement,3}}.
-    {move,{atom,x},{x,0}}.
-    {deallocate,0}.
+    {move,{x,0},{y,0}}.
+    {move,{atom,b},{x,1}}.
+    {line,[{location,"a.erl",30}]}.
+    {call,2,{f,17}}.
+    {'%',{type_info,{x,0},
+                    {tuple,4,
+                           #{{integer,1} => {atom,x},
+                             {integer,2} => {atom,b},
+                             {integer,3} => {atom,b}}}}}.
+    {test_heap,5,1}.
+    {put_tuple2,{x,0},{list,[{y,2},{y,1},{y,0},{x,0}]}}.
+    {deallocate,3}.
     return.
 
 
-{function, map, 1, 17}.
+{function, tuple1, 2, 17}.
   {label,16}.
-    {line,[{location,"a.erl",31}]}.
-    {func_info,{atom,a},{atom,map},1}.
+    {line,[{location,"a.erl",33}]}.
+    {func_info,{atom,a},{atom,tuple1},2}.
   {label,17}.
+    {'%',{type_info,{x,0},
+                    {tuple,4,
+                           #{{integer,1} => {atom,x},
+                             {integer,2} => {atom,b},
+                             {integer,3} => {atom,c}}}}}.
+    {'%',{type_info,{x,1},{atom,b}}}.
+    {move,{x,0},{x,1}}.
+    {move,{atom,b},{x,2}}.
+    {move,{integer,3},{x,0}}.
+    {line,[{location,"a.erl",34}]}.
+    {call_ext_only,3,{extfunc,erlang,setelement,3}}.
+
+
+{function, map, 1, 19}.
+  {label,18}.
+    {line,[{location,"a.erl",36}]}.
+    {func_info,{atom,a},{atom,map},1}.
+  {label,19}.
     {put_map_assoc,{f,0},{literal,#{}},{x,0},1,{list,[{x,0},{x,0}]}}.
     {put_map_assoc,{f,0},
                    {x,0},
@@ -131,37 +162,37 @@
     return.
 
 
-{function, module_info, 0, 19}.
-  {label,18}.
+{function, module_info, 0, 21}.
+  {label,20}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},0}.
-  {label,19}.
+  {label,21}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 21}.
-  {label,20}.
+{function, module_info, 1, 23}.
+  {label,22}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},1}.
-  {label,21}.
+  {label,23}.
     {move,{x,0},{x,1}}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-sending/0-fun-0-', 0, 23}.
-  {label,22}.
+{function, '-sending/0-fun-0-', 0, 25}.
+  {label,24}.
     {line,[{location,"a.erl",23}]}.
     {func_info,{atom,a},{atom,'-sending/0-fun-0-'},0}.
-  {label,23}.
+  {label,25}.
     {allocate,0,0}.
-  {label,24}.
-    {loop_rec,{f,25},{x,0}}.
+  {label,26}.
+    {loop_rec,{f,27},{x,0}}.
     remove_message.
     {deallocate,0}.
     return.
-  {label,25}.
-    {wait,{f,24}}.
+  {label,27}.
+    {wait,{f,26}}.

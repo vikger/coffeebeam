@@ -82,10 +82,6 @@
 % ErlInt 2
 % ErlNil
 
-% a tuple 1
-% ErlList 0
-% ErlNil
-
 % lists reverse 1
 % ErlAtom a
 
@@ -107,3 +103,7 @@
 
 a map 1
 ErlAtom mapitem
+
+a tuple 1
+ErlList 0
+ErlNil
