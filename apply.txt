@@ -43,3 +43,12 @@ ErlList 1
 ErlInt 3
 ErlNil
 ErlNil
+lists concat 1
+ErlList 4
+ErlAtom a
+ErlInt 1
+ErlFloat 1.5
+ErlList 1
+ErlAtom listitem
+ErlNil
+ErlNil

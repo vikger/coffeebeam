@@ -54,6 +54,7 @@ public class BeamVM {
         String line = reader.readLine();
         String[] term = line.split(" ", 2);
         if (term[0].equals("ErlInt")) return new ErlInt(Integer.valueOf(term[1]));
+        else if (term[0].equals("ErlFloat")) return new ErlFloat(Float.valueOf(term[1]));
         else if (term[0].equals("ErlAtom")) return new ErlAtom(term[1]);
         else if (term[0].equals("ErlList")) {
             int length = Integer.valueOf(term[1]);

@@ -2,19 +2,24 @@
 
 -export([
          all/2,
+         any/2,
          append/1,
-         append/2
+         append/2,
+         concat/1,
+         delete/2,
+         droplast/1,
+         dropwhile/2
         ]).
 
-all(_Pred, []) ->
-    true;
 all(Pred, [H|T]) ->
-    case Pred(H) of
-        true ->
-            all(Pred, T);
-        false ->
-            false
-    end.
+    Pred(H) andalso all(Pred, T);
+all(_Pred, []) ->
+    true.
+
+any(Pred, [H|T]) ->
+    Pred(H) orelse any(Pred, T);
+any(_Pred, []) ->
+    false.
 
 append([[H|T] | LL]) ->
     [H | append([T | LL])];
@@ -27,3 +32,36 @@ append([H|T], L) ->
     [H | append(T, L)];
 append([], L) ->
     L.
+
+concat([H|T]) when is_atom(H) ->
+    [atom_to_list(H) | concat(T)];
+concat([H|T]) when is_integer(H) ->
+    [integer_to_list(H) | concat(T)];
+concat([H|T]) when is_float(H) ->
+    [float_to_list(H) | concat(T)];
+concat([H|T]) when is_list(H) ->
+    append(H, concat(T));
+concat([]) ->
+    [].
+
+delete(H, [H|T]) ->
+    T;
+delete(H1, [H|T]) ->
+    [H | delete(H1, T)];
+delete(_, []) ->
+    [].
+
+droplast([_]) ->
+    [];
+droplast([H|T]) ->
+    [H | droplast(T)].
+
+dropwhile(Pred, [H|T] = L) ->
+    case Pred(H) of
+        true ->
+            dropwhile(Pred, T);
+        _ ->
+            L
+    end;
+dropwhile(_Pred, []) ->
+    [].

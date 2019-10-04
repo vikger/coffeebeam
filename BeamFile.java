@@ -333,6 +333,18 @@ class ErlInt extends ErlNumber {
     public int getValue() { return value; }
 }
 
+class ErlFloat extends ErlNumber {
+    float value;
+
+    public ErlFloat(float v) {
+        super("float");
+        value = v;
+    }
+    public String toString() { return "f(" + value + ")"; }
+    public String toId() { return tag + "(" + value + ")"; }
+    public float getValue() { return value; }
+}
+
 class ErlBigNum extends ErlNumber {
     boolean positive = false;
     ArrayList<Integer> segments;

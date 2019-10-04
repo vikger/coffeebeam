@@ -52,11 +52,11 @@ public class ErlProcess {
     }
 
     public ErlTerm execute(ErlOp op) {
-        System.out.print("  ip(" + ip + ") " + OpCode.name(op.opcode) + "(" + op.opcode + ")");
+        System.out.print("  ip(" + ip + ")\t" + OpCode.name(op.opcode) + "(" + op.opcode + ")");
         for (int i = 0; i < OpCode.arity(op.opcode); i++) System.out.print("\t" + op.args.get(i).toString());
         System.out.println();
-        x_reg.dump();
-        y_reg.dump();
+        //x_reg.dump();
+        //y_reg.dump();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
             // case 7 call_ext: save module, ip, x, y on stack
@@ -72,10 +72,13 @@ public class ErlProcess {
         case 4: // call
             ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
             save();
-            ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
+            jump(op.args.get(1));
+            return null;
+        case 5: // call_last
+            jump(op.args.get(1));
             return null;
         case 6: // call_only
-            ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
+            jump(op.args.get(1));
             return null;
         case 12: // allocate
             ip++; return null;
@@ -90,8 +93,20 @@ public class ErlProcess {
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
                 ip++;
             } else {
-                ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
+                jump(op.args.get(0));
             }
+            return null;
+        case 45: // is_integer
+            if (getValue(op.args.get(1)) instanceof ErlInt) ip++;
+            else jump(op.args.get(0));
+            return null;
+        case 46: // is_float
+            if (getValue(op.args.get(1)) instanceof ErlFloat) ip++;
+            else jump(op.args.get(0));
+            return null;
+        case 48: // is_atom
+            if (getValue(op.args.get(1)) instanceof ErlAtom) ip++;
+            else jump(op.args.get(0));
             return null;
         case 52: // is_nil
             ErlTerm is_nil_list = getValue(op.args.get(1));
@@ -101,13 +116,17 @@ public class ErlProcess {
                     return null;
                 }
             }
-            ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
+            jump(op.args.get(0));
+            return null;
+        case 55: // is_list
+            if (getValue(op.args.get(1)) instanceof ErlList) ip++;
+            else jump(op.args.get(0));
             return null;
         case 56: // is_nonempty_list
             ErlTerm listarg = getValue(op.args.get(1));
             if (listarg instanceof ErlList && !((ErlList) listarg).isNil())
                 ip++;
-            else ip = file.getLabelRef(((ErlLabel) op.args.get(0)).getValue());
+            else jump(op.args.get(0));
             return null;
         case 64:
             ErlTerm value = getValue(op.args.get(0));
@@ -211,6 +230,10 @@ public class ErlProcess {
 
     private void restore() {
         y_reg = reg_stack.pop();
+    }
+
+    private void jump(ErlTerm label) {
+        ip = file.getLabelRef(((ErlLabel) label).getValue());
     }
 }
 
