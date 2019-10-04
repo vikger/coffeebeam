@@ -168,6 +168,16 @@ public class ErlProcess {
             set_reg(op.args.get(1), get_tl_tail);
             ip++;
             return null;
+        case 164: // put_tuple2
+            ErlList elements = (ErlList) op.args.get(1);
+            ErlTuple tuple = new ErlTuple();
+            while (!elements.isNil()) {
+                tuple.add(getValue(elements.head));
+                elements = (ErlList) elements.tail;
+            }
+            set_reg(op.args.get(0), tuple);
+            ip++;
+            return null;
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
         }
         ip++; return null;
@@ -181,6 +191,12 @@ public class ErlProcess {
                 if (arg1 instanceof ErlInt) {
                     if (arg2 instanceof ErlInt) {
                         return new ErlInt(((ErlInt) arg1).getValue() + ((ErlInt) arg2).getValue());
+                    }
+                }
+            } else if (function.equals("-")) {
+                if (arg1 instanceof ErlInt) {
+                    if (arg2 instanceof ErlInt) {
+                        return new ErlInt(((ErlInt) arg1).getValue() - ((ErlInt) arg2).getValue());
                     }
                 }
             }

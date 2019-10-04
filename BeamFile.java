@@ -461,6 +461,11 @@ class ErlList extends ErlTerm {
         if (isNil()) return "nil";
         else return tag + "(" + head.toId() + "," + tail.toId() + ")";
     }
+    public int size() {
+        if (isNil()) return 0;
+        else if (tail instanceof ErlList) return 1 + ((ErlList) tail).size();
+        else return -1;
+    }
 }
 
 class ErlTuple extends ErlTerm {

@@ -10,7 +10,8 @@
          droplast/1,
          dropwhile/2,
          duplicate/2,
-         filter/2
+         filter/2,
+         zip/2
         ]).
 
 all(Pred, [H|T]) ->
@@ -81,4 +82,9 @@ filter(Pred, [H|T]) ->
             filter(Pred, T)
     end;
 filter(_Pred, []) ->
+    [].
+
+zip([H1|T1], [H2|T2]) ->
+    [{H1, H2} | zip(T1, T2)];
+zip([], []) ->
     [].

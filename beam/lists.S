@@ -11,16 +11,17 @@
            {duplicate,2},
            {filter,2},
            {module_info,0},
-           {module_info,1}]}.
+           {module_info,1},
+           {zip,2}]}.
 
 {attributes, []}.
 
-{labels, 48}.
+{labels, 51}.
 
 
 {function, all, 2, 2}.
   {label,1}.
-    {line,[{location,"lists.erl",16}]}.
+    {line,[{location,"lists.erl",17}]}.
     {func_info,{atom,lists},{atom,all},2}.
   {label,2}.
     {test,is_nonempty_list,{f,5},[{x,1}]}.
@@ -28,7 +29,7 @@
     {move,{x,0},{y,1}}.
     {get_list,{x,1},{x,0},{y,0}}.
     {move,{y,1},{x,1}}.
-    {line,[{location,"lists.erl",17}]}.
+    {line,[{location,"lists.erl",18}]}.
     {call_fun,1}.
     {select_val,{x,0},{f,6},{list,[{atom,true},{f,4},{atom,false},{f,3}]}}.
   {label,3}.
@@ -45,13 +46,13 @@
   {label,6}.
     {test_heap,3,1}.
     {put_tuple2,{x,0},{list,[{atom,badarg},{x,0}]}}.
-    {line,[{location,"lists.erl",17}]}.
+    {line,[{location,"lists.erl",18}]}.
     {call_ext,1,{extfunc,erlang,error,1}}.
 
 
 {function, any, 2, 8}.
   {label,7}.
-    {line,[{location,"lists.erl",21}]}.
+    {line,[{location,"lists.erl",22}]}.
     {func_info,{atom,lists},{atom,any},2}.
   {label,8}.
     {test,is_nonempty_list,{f,11},[{x,1}]}.
@@ -59,7 +60,7 @@
     {move,{x,0},{y,1}}.
     {get_list,{x,1},{x,0},{y,0}}.
     {move,{y,1},{x,1}}.
-    {line,[{location,"lists.erl",22}]}.
+    {line,[{location,"lists.erl",23}]}.
     {call_fun,1}.
     {select_val,{x,0},{f,12},{list,[{atom,false},{f,10},{atom,true},{f,9}]}}.
   {label,9}.
@@ -76,13 +77,13 @@
   {label,12}.
     {test_heap,3,1}.
     {put_tuple2,{x,0},{list,[{atom,badarg},{x,0}]}}.
-    {line,[{location,"lists.erl",22}]}.
+    {line,[{location,"lists.erl",23}]}.
     {call_ext,1,{extfunc,erlang,error,1}}.
 
 
 {function, append, 1, 14}.
   {label,13}.
-    {line,[{location,"lists.erl",26}]}.
+    {line,[{location,"lists.erl",27}]}.
     {func_info,{atom,lists},{atom,append},1}.
   {label,14}.
     {test,is_nonempty_list,{f,16},[{x,0}]}.
@@ -91,7 +92,7 @@
     {allocate_heap,1,2,3}.
     {get_list,{x,1},{y,0},{x,0}}.
     {put_list,{x,0},{x,2},{x,0}}.
-    {line,[{location,"lists.erl",27}]}.
+    {line,[{location,"lists.erl",28}]}.
     {call,1,{f,14}}.
     {'%',{type_info,{x,0},list}}.
     {test_heap,2,1}.
@@ -109,13 +110,13 @@
 
 {function, append, 2, 18}.
   {label,17}.
-    {line,[{location,"lists.erl",33}]}.
+    {line,[{location,"lists.erl",34}]}.
     {func_info,{atom,lists},{atom,append},2}.
   {label,18}.
     {test,is_nonempty_list,{f,19},[{x,0}]}.
     {allocate,1,2}.
     {get_list,{x,0},{y,0},{x,0}}.
-    {line,[{location,"lists.erl",34}]}.
+    {line,[{location,"lists.erl",35}]}.
     {call,2,{f,18}}.
     {test_heap,2,1}.
     {put_list,{y,0},{x,0},{x,0}}.
@@ -129,7 +130,7 @@
 
 {function, concat, 1, 21}.
   {label,20}.
-    {line,[{location,"lists.erl",38}]}.
+    {line,[{location,"lists.erl",39}]}.
     {func_info,{atom,lists},{atom,concat},1}.
   {label,21}.
     {test,is_nonempty_list,{f,25},[{x,0}]}.
@@ -138,12 +139,12 @@
     {allocate,1,3}.
     {move,{x,2},{y,0}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"lists.erl",39}]}.
+    {line,[{location,"lists.erl",40}]}.
     {call_ext,1,{extfunc,erlang,atom_to_list,1}}.
     {move,{y,0},{x,1}}.
     {move,{x,0},{y,0}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"lists.erl",39}]}.
+    {line,[{location,"lists.erl",40}]}.
     {call,1,{f,21}}.
     {move,{x,0},{x,1}}.
     {move,{y,0},{x,0}}.
@@ -153,12 +154,12 @@
     {allocate,1,3}.
     {move,{x,2},{y,0}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"lists.erl",41}]}.
+    {line,[{location,"lists.erl",42}]}.
     {call_ext,1,{extfunc,erlang,integer_to_list,1}}.
     {move,{y,0},{x,1}}.
     {move,{x,0},{y,0}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"lists.erl",41}]}.
+    {line,[{location,"lists.erl",42}]}.
     {call,1,{f,21}}.
     {move,{x,0},{x,1}}.
     {move,{y,0},{x,0}}.
@@ -168,12 +169,12 @@
     {allocate,1,3}.
     {move,{x,2},{y,0}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"lists.erl",43}]}.
+    {line,[{location,"lists.erl",44}]}.
     {call_ext,1,{extfunc,erlang,float_to_list,1}}.
     {move,{y,0},{x,1}}.
     {move,{x,0},{y,0}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"lists.erl",43}]}.
+    {line,[{location,"lists.erl",44}]}.
     {call,1,{f,21}}.
     {move,{x,0},{x,1}}.
     {move,{y,0},{x,0}}.
@@ -183,7 +184,7 @@
     {allocate,1,3}.
     {move,{x,1},{y,0}}.
     {move,{x,2},{x,0}}.
-    {line,[{location,"lists.erl",45}]}.
+    {line,[{location,"lists.erl",46}]}.
     {call,1,{f,21}}.
     {move,{x,0},{x,1}}.
     {move,{y,0},{x,0}}.
@@ -195,7 +196,7 @@
 
 {function, delete, 2, 27}.
   {label,26}.
-    {line,[{location,"lists.erl",49}]}.
+    {line,[{location,"lists.erl",50}]}.
     {func_info,{atom,lists},{atom,delete},2}.
   {label,27}.
     {test,is_nonempty_list,{f,29},[{x,1}]}.
@@ -206,7 +207,7 @@
   {label,28}.
     {allocate,1,3}.
     {move,{x,2},{y,0}}.
-    {line,[{location,"lists.erl",52}]}.
+    {line,[{location,"lists.erl",53}]}.
     {call,2,{f,27}}.
     {test_heap,2,1}.
     {put_list,{y,0},{x,0},{x,0}}.
@@ -220,7 +221,7 @@
 
 {function, droplast, 1, 31}.
   {label,30}.
-    {line,[{location,"lists.erl",56}]}.
+    {line,[{location,"lists.erl",57}]}.
     {func_info,{atom,lists},{atom,droplast},1}.
   {label,31}.
     {test,is_nonempty_list,{f,30},[{x,0}]}.
@@ -230,7 +231,7 @@
   {label,32}.
     {allocate,1,2}.
     {move,{x,1},{y,0}}.
-    {line,[{location,"lists.erl",59}]}.
+    {line,[{location,"lists.erl",60}]}.
     {call,1,{f,31}}.
     {'%',{type_info,{x,0},list}}.
     {test_heap,2,1}.
@@ -241,7 +242,7 @@
 
 {function, dropwhile, 2, 34}.
   {label,33}.
-    {line,[{location,"lists.erl",61}]}.
+    {line,[{location,"lists.erl",62}]}.
     {func_info,{atom,lists},{atom,dropwhile},2}.
   {label,34}.
     {test,is_nonempty_list,{f,36},[{x,1}]}.
@@ -250,7 +251,7 @@
     {move,{x,0},{y,2}}.
     {get_list,{x,1},{x,0},{y,0}}.
     {move,{y,2},{x,1}}.
-    {line,[{location,"lists.erl",62}]}.
+    {line,[{location,"lists.erl",63}]}.
     {call_fun,1}.
     {test,is_eq_exact,{f,35},[{x,0},{atom,true}]}.
     {move,{y,0},{x,1}}.
@@ -268,18 +269,18 @@
 
 {function, duplicate, 2, 38}.
   {label,37}.
-    {line,[{location,"lists.erl",71}]}.
+    {line,[{location,"lists.erl",72}]}.
     {func_info,{atom,lists},{atom,duplicate},2}.
   {label,38}.
     {test,is_eq_exact,{f,39},[{x,0},{integer,0}]}.
     {move,nil,{x,0}}.
     return.
   {label,39}.
-    {line,[{location,"lists.erl",74}]}.
+    {line,[{location,"lists.erl",75}]}.
     {gc_bif,'-',{f,0},2,[{x,0},{integer,1}],{x,0}}.
     {allocate,1,2}.
     {move,{x,1},{y,0}}.
-    {line,[{location,"lists.erl",74}]}.
+    {line,[{location,"lists.erl",75}]}.
     {call,2,{f,38}}.
     {'%',{type_info,{x,0},list}}.
     {test_heap,2,1}.
@@ -290,7 +291,7 @@
 
 {function, filter, 2, 41}.
   {label,40}.
-    {line,[{location,"lists.erl",76}]}.
+    {line,[{location,"lists.erl",77}]}.
     {func_info,{atom,lists},{atom,filter},2}.
   {label,41}.
     {test,is_nonempty_list,{f,43},[{x,1}]}.
@@ -299,14 +300,14 @@
     {get_list,{x,1},{y,1},{y,0}}.
     {move,{y,2},{x,1}}.
     {move,{y,1},{x,0}}.
-    {line,[{location,"lists.erl",77}]}.
+    {line,[{location,"lists.erl",78}]}.
     {call_fun,1}.
     {test,is_eq_exact,{f,42},[{x,0},{atom,true}]}.
     {move,{y,0},{x,1}}.
     {move,{y,2},{x,0}}.
     {kill,{y,2}}.
     {trim,1,2}.
-    {line,[{location,"lists.erl",79}]}.
+    {line,[{location,"lists.erl",80}]}.
     {call,2,{f,41}}.
     {'%',{type_info,{x,0},list}}.
     {test_heap,2,1}.
@@ -323,21 +324,48 @@
     return.
 
 
-{function, module_info, 0, 45}.
+{function, zip, 2, 45}.
   {label,44}.
+    {line,[{location,"lists.erl",87}]}.
+    {func_info,{atom,lists},{atom,zip},2}.
+  {label,45}.
+    {test,is_nonempty_list,{f,46},[{x,0}]}.
+    {get_list,{x,0},{x,2},{x,3}}.
+    {test,is_nonempty_list,{f,44},[{x,1}]}.
+    {allocate,2,4}.
+    {move,{x,2},{y,1}}.
+    {get_list,{x,1},{y,0},{x,1}}.
+    {move,{x,3},{x,0}}.
+    {line,[{location,"lists.erl",88}]}.
+    {call,2,{f,45}}.
+    {'%',{type_info,{x,0},list}}.
+    {test_heap,5,1}.
+    {put_tuple2,{x,1},{list,[{y,1},{y,0}]}}.
+    {put_list,{x,1},{x,0},{x,0}}.
+    {deallocate,2}.
+    return.
+  {label,46}.
+    {test,is_nil,{f,44},[{x,0}]}.
+    {test,is_nil,{f,44},[{x,1}]}.
+    {move,nil,{x,0}}.
+    return.
+
+
+{function, module_info, 0, 48}.
+  {label,47}.
     {line,[]}.
     {func_info,{atom,lists},{atom,module_info},0}.
-  {label,45}.
+  {label,48}.
     {move,{atom,lists},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 47}.
-  {label,46}.
+{function, module_info, 1, 50}.
+  {label,49}.
     {line,[]}.
     {func_info,{atom,lists},{atom,module_info},1}.
-  {label,47}.
+  {label,50}.
     {move,{x,0},{x,1}}.
     {move,{atom,lists},{x,0}}.
     {line,[]}.
