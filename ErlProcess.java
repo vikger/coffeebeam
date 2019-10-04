@@ -6,12 +6,14 @@ public class ErlProcess {
     private Register y_reg;
     private int ip;
     private BeamFile file;
-    private Stack stack;
+    private Stack<Integer> ip_stack;
+    private Stack<ErlTerm> reg_stack;
     public ErlProcess(BeamVM bv) {
         vm = bv;
         x_reg = new Register();
         y_reg = new Register();
-        stack = new Stack();
+        ip_stack = new Stack<Integer>();
+        reg_stack = new Stack<ErlTerm>();
     }
 
     public void apply(String module, String function, ErlTerm[] args) {
@@ -31,10 +33,10 @@ public class ErlProcess {
     public void run() {
         ErlTerm result = null;
 
-        while (result == null || !stack.isEmpty()) {
+        while (result == null || !ip_stack.isEmpty()) {
             if (result != null) {
-                ip = stack.pop(); // TODO: check if only occurs on return
-                System.out.println("pop: " + ip + " size " + stack.size());
+                ip = ip_stack.pop(); // TODO: check if only occurs on return
+                System.out.println("pop: " + ip + " size " + ip_stack.size());
                 ip++;
             }
             if (ip == -1) {
@@ -66,16 +68,26 @@ public class ErlProcess {
             func_info += ")";
             return new ErlException("function_clause " + func_info);
         case 4: // call
-            stack.push(ip); System.out.println("push: " + ip + " size " + stack.size());
+            ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
             return null;
         case 6: // call_only
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
             return null;
-        case 12: ip++; return null; // skip allocate
+        case 12: // allocate
+            /*int alloc_size = ((ErlInt) op.args.get(0)).getValue();
+            for (int i = 0; i < alloc_size; i++) {
+                reg_stack.push(x_reg.get(i));
+                }*/
+            ip++; return null;
         case 13: ip++; return null; // skip allocate_heap
         case 16: ip++; return null; // skip test_heap
-        case 18: ip++; return null; // skip deallocate
+        case 18: // deallocate
+            /*int dealloc_size = ((ErlInt) op.args.get(1)).getValue();
+            for (int i = 0; i < dealloc_size; i++) {
+                x_reg.set(i, reg_stack.pop());
+                }*/
+            ip++; return null;
         case 19: return x_reg.get(0);
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
@@ -226,19 +238,19 @@ class Register {
     }
 }
 
-class Stack {
-    ArrayList<Integer> items;
+class Stack<T> {
+    ArrayList<T> items;
     public Stack() {
-        items = new ArrayList<Integer>();
+        items = new ArrayList<T>();
     }
 
-    public void push(int item) {
+    public void push(T item) {
         items.add(item);
     }
 
-    public int pop() {
+    public T pop() {
         int index = items.size() - 1;
-        int item = items.get(index);
+        T item = items.get(index);
         items.remove(index);
         return item;
     }

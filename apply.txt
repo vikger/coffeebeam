@@ -21,28 +21,9 @@ ErlAtom b
 a test 1
 ErlInt 0
 lists append 2
-ErlList 1
-ErlInt 1
-ErlNil
-ErlList 1
-ErlInt 2
-ErlNil
-lists append 1
 ErlList 2
-ErlList 2
-ErlInt 1
-ErlInt 2
-ErlNil
-ErlList 1
-ErlInt 3
-ErlNil
-ErlNil
-lists append 1
-ErlList 2
-ErlList 2
-ErlInt 1
-ErlInt 2
+ErlInt 123
+ErlInt 456
 ErlNil
 ErlList 0
-ErlNil
 ErlNil
