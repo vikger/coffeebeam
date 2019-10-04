@@ -73,10 +73,10 @@ public class ErlProcess {
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
             return null;
         case 12: ip++; return null; // skip allocate
+        case 13: ip++; return null; // skip allocate_heap
         case 16: ip++; return null; // skip test_heap
         case 18: ip++; return null; // skip deallocate
         case 19: return x_reg.get(0);
-        case 33: ip++; return null; // skip allocate_heap
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
                 ip++;
