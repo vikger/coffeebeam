@@ -83,7 +83,7 @@ public class ErlProcess {
             // TODO: save module, ip, regs
             ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
-            return setCallExt(mfa);
+            return setCallExt(mfa, false);
         case 12: // allocate
             ip++; return null;
         case 13: ip++; return null; // skip allocate_heap
@@ -154,7 +154,7 @@ public class ErlProcess {
             return null;
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
-            return setCallExtOnly(mfa);
+            return setCallExt(mfa, true);
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
@@ -212,7 +212,7 @@ public class ErlProcess {
         }
     }
 
-    public ErlTerm setCallExt(Import mfa) {
+    public ErlTerm setCallExt(Import mfa, boolean last) {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         int arity = mfa.getArity();
@@ -225,7 +225,8 @@ public class ErlProcess {
                     res += x_reg.get(i).toString() + " ";
                 }
                 res += ")";
-                x_reg.set(0, new ErlString(res));
+                if (!last) x_reg.set(0, new ErlString(res));
+                else return new ErlString(res);
             } else if (function.equals("atom_to_list")) {
                 String atomstr = ((ErlAtom) x_reg.get(0)).getValue();
                 ErlList atomlist = string_to_list(atomstr);
@@ -241,13 +242,26 @@ public class ErlProcess {
                 ErlList floatlist = string_to_list(floatstr);
                 x_reg.set(0, floatlist);
                 return floatlist;
+            } else if (function.equals("setelement")) {
+                int setindex = ((ErlInt) x_reg.get(0)).getValue() - 1; // tuple indexing starts with 1
+                ErlTuple oldtuple = (ErlTuple) x_reg.get(1);
+                ErlTuple newtuple = new ErlTuple();
+                for (int i = 0; i < oldtuple.size(); i++) {
+                    if (i == setindex)
+                        newtuple.add(x_reg.get(2));
+                    else
+                        newtuple.add(oldtuple.getElement(i));
+                }
+                x_reg.set(0, newtuple);
+                return newtuple;
             }
         } else {
-            save();
+            if (!last) save();
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);
             ip = file.getLabelRef(label);
         }
+        ip++;
         return null;
     }
 
@@ -257,29 +271,6 @@ public class ErlProcess {
             list.add(new ErlInt((int) c));
         }
         return list;
-    }
-
-    public ErlTerm setCallExtOnly(Import mfa) {
-        String mod = file.getAtomName(mfa.getModule());
-        String function = file.getAtomName(mfa.getFunction());
-        int arity = mfa.getArity();
-        if (mod.equals("erlang")) {
-            if (function.equals("get_module_info")) {
-                return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
-            } else if (function.equals("spawn")) { // TODO: extend with new process
-                String res = "spawn(";
-                for (int i = 0; i < arity; i++) {
-                    res += x_reg.get(i).toString() + " ";
-                }
-                res += ")";
-                return new ErlString(res);
-            }
-        } else {
-            file = vm.getModule(mod).file;
-            int label = file.getLabel(function, arity);
-            ip = file.getLabelRef(label);
-        }
-        return null;
     }
 
     private ErlTerm getValue(ErlTerm source) {

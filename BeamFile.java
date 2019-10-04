@@ -470,6 +470,7 @@ class ErlList extends ErlTerm {
 
 class ErlTuple extends ErlTerm {
     ArrayList<ErlTerm> elements;
+    int maxindex = -1;
 
     public ErlTuple() {
         super("tuple");
@@ -480,6 +481,7 @@ class ErlTuple extends ErlTerm {
     }
     public void add(ErlTerm element) {
         elements.add(element);
+        maxindex++;
     }
     public String toString() {
         String str = "{";
@@ -503,6 +505,17 @@ class ErlTuple extends ErlTerm {
         id += ")";
         return id;
     }
+
+    public int size() { return elements.size(); }
+    public ErlTerm getElement(int index) { return elements.get(index); }
+    public void setElement(int index, ErlTerm value) {
+        while (index > maxindex) {
+            elements.add(new ErlList()); // can be any ErlTerm instance
+            maxindex++;
+        }
+        elements.set(index, value);
+    }
+
 }
 
 class ErlLiteral extends ErlTerm {

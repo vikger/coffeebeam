@@ -66,3 +66,6 @@ ErlList 2
 ErlInt 1
 ErlInt 2
 ErlNil
+a tuple 1
+ErlList 0
+ErlNil

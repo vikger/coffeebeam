@@ -7,11 +7,12 @@
            {module_info,1},
            {newproc,1},
            {sending,0},
-           {test,1}]}.
+           {test,1},
+           {tuple,1}]}.
 
 {attributes, []}.
 
-{labels, 22}.
+{labels, 24}.
 
 
 {function, call, 1, 2}.
@@ -84,7 +85,7 @@
     {func_info,{atom,a},{atom,sending},0}.
   {label,13}.
     {allocate,0,0}.
-    {make_fun2,{f,19},0,0,0}.
+    {make_fun2,{f,21},0,0,0}.
     {line,[{location,"a.erl",23}]}.
     {call_ext,1,{extfunc,erlang,spawn,1}}.
     {move,{atom,message},{x,1}}.
@@ -94,37 +95,53 @@
     return.
 
 
-{function, module_info, 0, 15}.
+{function, tuple, 1, 15}.
   {label,14}.
+    {line,[{location,"a.erl",26}]}.
+    {func_info,{atom,a},{atom,tuple},1}.
+  {label,15}.
+    {allocate_heap,0,5,1}.
+    {put_tuple2,{x,1},{list,[{atom,a},{atom,b},{atom,c},{x,0}]}}.
+    {move,{atom,x},{x,2}}.
+    {move,{integer,1},{x,0}}.
+    {line,[{location,"a.erl",28}]}.
+    {call_ext,3,{extfunc,erlang,setelement,3}}.
+    {move,{atom,x},{x,0}}.
+    {deallocate,0}.
+    return.
+
+
+{function, module_info, 0, 17}.
+  {label,16}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},0}.
-  {label,15}.
+  {label,17}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 17}.
-  {label,16}.
+{function, module_info, 1, 19}.
+  {label,18}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},1}.
-  {label,17}.
+  {label,19}.
     {move,{x,0},{x,1}}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-sending/0-fun-0-', 0, 19}.
-  {label,18}.
+{function, '-sending/0-fun-0-', 0, 21}.
+  {label,20}.
     {line,[{location,"a.erl",23}]}.
     {func_info,{atom,a},{atom,'-sending/0-fun-0-'},0}.
-  {label,19}.
+  {label,21}.
     {allocate,0,0}.
-  {label,20}.
-    {loop_rec,{f,21},{x,0}}.
+  {label,22}.
+    {loop_rec,{f,23},{x,0}}.
     remove_message.
     {deallocate,0}.
     return.
-  {label,21}.
-    {wait,{f,20}}.
+  {label,23}.
+    {wait,{f,22}}.
