@@ -33,37 +33,38 @@ public class BeamVM {
 
     public void runApplies(String filename) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
-        String module;
-        String function;
+        String line;
+        String[] mfa;
         ErlTerm[] args;
         int arity;
-        while ((module = reader.readLine()) != null) {
-            function = reader.readLine();
-            arity = Integer.valueOf(reader.readLine());
+        while ((line = reader.readLine()) != null) {
+            mfa = line.split(" ", 3);
+            arity = Integer.valueOf(mfa[2]);
             args = new ErlTerm[arity];
             for (int i = 0; i < arity; i++) {
                 args[i] = readTerm(reader);
             }
             ErlProcess p = new ErlProcess(this);
-            p.apply(module, function, args);
+            p.apply(mfa[0], mfa[1], args);
         }
         reader.close();
     }
 
     private ErlTerm readTerm(BufferedReader reader) throws Exception {
-        String type = reader.readLine();
-        if (type.equals("ErlInt")) return new ErlInt(Integer.valueOf(reader.readLine()));
-        else if (type.equals("ErlAtom")) return new ErlAtom(reader.readLine());
-        else if (type.equals("ErlList")) {
-            int length = Integer.valueOf(reader.readLine());
+        String line = reader.readLine();
+        String[] term = line.split(" ", 2);
+        if (term[0].equals("ErlInt")) return new ErlInt(Integer.valueOf(term[1]));
+        else if (term[0].equals("ErlAtom")) return new ErlAtom(term[1]);
+        else if (term[0].equals("ErlList")) {
+            int length = Integer.valueOf(term[1]);
             ErlList list = new ErlList();
             for (int i = 0; i < length; i++) {
                 list.add(readTerm(reader));
             }
             list.setTail(readTerm(reader));
             return list;
-        } else if (type.equals("ErlNil")) return new ErlList();
-        else System.out.println("Unknown type: '" + type + "'");
+        } else if (term[0].equals("ErlNil")) return new ErlList();
+        else System.out.println("Unknown type: '" + term[0] + "'");
         return null;
     }
 

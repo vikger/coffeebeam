@@ -326,7 +326,7 @@ class ErlInt extends ErlNumber {
         super("integer");
         value = v;
     }
-    public String toString() { return "int(" + value + ")"; }
+    public String toString() { return "i(" + value + ")"; }
 
     public String toId() { return tag + "(" + value + ")"; }
 
