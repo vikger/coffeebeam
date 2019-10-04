@@ -7,13 +7,15 @@ public class ErlProcess {
     private int ip;
     private BeamFile file;
     private Stack<Integer> ip_stack;
-    private Stack<ErlTerm> reg_stack;
+    private Stack<Register> reg_stack;
+    private int alloc = 0;
+
     public ErlProcess(BeamVM bv) {
         vm = bv;
         x_reg = new Register();
         y_reg = new Register();
         ip_stack = new Stack<Integer>();
-        reg_stack = new Stack<ErlTerm>();
+        reg_stack = new Stack<Register>();
     }
 
     public void apply(String module, String function, ErlTerm[] args) {
@@ -69,26 +71,21 @@ public class ErlProcess {
             return new ErlException("function_clause " + func_info);
         case 4: // call
             ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
+            save();
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
             return null;
         case 6: // call_only
             ip = file.getLabelRef(((ErlLabel) op.args.get(1)).getValue());
             return null;
         case 12: // allocate
-            /*int alloc_size = ((ErlInt) op.args.get(0)).getValue();
-            for (int i = 0; i < alloc_size; i++) {
-                reg_stack.push(x_reg.get(i));
-                }*/
             ip++; return null;
         case 13: ip++; return null; // skip allocate_heap
         case 16: ip++; return null; // skip test_heap
         case 18: // deallocate
-            /*int dealloc_size = ((ErlInt) op.args.get(1)).getValue();
-            for (int i = 0; i < dealloc_size; i++) {
-                x_reg.set(i, reg_stack.pop());
-                }*/
             ip++; return null;
-        case 19: return x_reg.get(0);
+        case 19:
+            if (!reg_stack.isEmpty()) restore();
+            return x_reg.get(0);
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
                 ip++;
@@ -207,6 +204,14 @@ public class ErlProcess {
             return source;
         }
     }
+
+    private void save() {
+        reg_stack.push(y_reg.clone());
+    }
+
+    private void restore() {
+        y_reg = reg_stack.pop();
+    }
 }
 
 class Register {
@@ -215,6 +220,14 @@ class Register {
 
     public Register() {
         slots = new ArrayList<ErlTerm>();
+    }
+
+    public Register clone() {
+        Register reg = new Register();
+        for (int i = 0; i < size(); i++) {
+            reg.set(i, get(i));
+        }
+        return reg;
     }
 
     public void set(int index, ErlTerm value) {
@@ -235,6 +248,10 @@ class Register {
             System.out.print("\t" + slots.get(i));
         }
         System.out.println();
+    }
+
+    public int size() {
+        return slots.size();
     }
 }
 
