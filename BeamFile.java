@@ -381,10 +381,9 @@ class ErlAtom extends ErlTerm {
         beamfile = bf;
     }
     public String toString() {
-        if (reference) return getValue();
-        else return value;
+        return getValue();
     }
-    public String toId() { return tag + "(" + value + ")"; }
+    public String toId() { return tag + "(" + getValue() + ")"; }
     public int getIndex() { return index; }
     public String getValue() {
         if (reference) return beamfile.getAtomName(index);
