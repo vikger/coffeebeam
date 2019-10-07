@@ -175,7 +175,8 @@ public class ErlProcess {
             set_reg(op.args.get(5), bif2_result);
             ip++;
             return null;
-        case 136: // trim ???
+        case 136: // trim
+            y_reg.trim(((ErlInt) op.args.get(0)).getValue());
             ip++;
             return null;
         case 153: ip++; return null; // skip line
@@ -384,6 +385,13 @@ class Register {
 
     public int size() {
         return slots.size();
+    }
+
+    public void trim(int n) {
+        for (int i = 0; i < n; i++) {
+            slots.remove(0);
+            maxindex--;
+        }
     }
 }
 
