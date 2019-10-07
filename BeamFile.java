@@ -11,7 +11,7 @@ public class BeamFile {
     private ArrayList<ErlTerm> literals;
     private ArrayList<Import> imports;
     private ArrayList<Export> exports;
-    private ArrayList<LocalFunction> localFunctions;
+    private ArrayList<ErlFun> localFunctions;
     private ArrayList<ErlOp> codeTable;
     private ArrayList<Integer> labelRefs;
     private ErlTerm attributes;
@@ -23,7 +23,7 @@ public class BeamFile {
         literals = new ArrayList<ErlTerm>();
         imports = new ArrayList<Import>();
         exports = new ArrayList<Export>();
-        localFunctions = new ArrayList<LocalFunction>();
+        localFunctions = new ArrayList<ErlFun>();
         codeTable = new ArrayList<ErlOp>();
         labelRefs = new ArrayList<Integer>(); labelRefs.add(-1); // for errors
     }
@@ -102,7 +102,7 @@ public class BeamFile {
             int function = (int) br.read32BitUnsigned();
             int arity = (int) br.read32BitUnsigned();
             int label = (int) br.read32BitUnsigned();
-            localFunctions.add(new LocalFunction(function - 1, arity, label));
+            localFunctions.add(new ErlFun(this, function - 1, arity, label));
         }
     }
 
@@ -149,8 +149,8 @@ public class BeamFile {
 
     private void printLocalFunctions() {
         for (int i = 0; i < localFunctions.size(); i++) {
-            LocalFunction loc = localFunctions.get(i);
-            System.out.println("LocalFunction(" + i + "): [atom " + loc.getFunction() + "] / " + loc.getArity() + " - label " + loc.getLabel());
+            ErlFun loc = localFunctions.get(i);
+            System.out.println("LocalFunction(" + i + "): " + loc.toString());
         }
     }
 
@@ -200,6 +200,10 @@ public class BeamFile {
 
     public ErlOp getOp(int index) {
         return codeTable.get(index);
+    }
+
+    public ErlFun getLocalFunction(int index) {
+        return localFunctions.get(index);
     }
 }
 
@@ -267,17 +271,22 @@ class Export {
     public int getLabel() { return label; }
 }
 
-class LocalFunction {
-    int function, arity, label;
-    public LocalFunction(int f, int a, int l) {
-        function = f;
+class ErlFun extends ErlTerm {
+    ErlAtom name;
+    int arity, label;
+    private BeamFile beamfile;
+    public ErlFun(BeamFile bf, int f, int a, int l) {
+        super("fun");
+        name = new ErlAtom(bf, f);
         arity = a;
         label = l;
     }
 
-    public int getFunction() { return function; }
+    public ErlAtom getName() { return name; }
     public int getArity() { return arity; }
     public int getLabel() { return label; }
+    public String toString() { return name.toString() + " / " + arity + " -> label(" + label + ")"; }
+    public String toId() { return tag + "(" + name + "," + arity + "," + label + ")"; }
 }
 
 class ErlOp {
