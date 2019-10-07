@@ -110,16 +110,28 @@
 
 % a sending 0
 
-add add 2
-ErlInt 1
-ErlInt 2
+% add add 2
+% ErlInt 1
+% ErlInt 2
 
-a call 1
-ErlInt 1
+% a call 1
+% ErlInt 1
 
-a funs 1
-ErlList 3
-ErlInt 1
-ErlInt 2
-ErlInt 3
+% a funs 1
+% ErlList 3
+% ErlInt 1
+% ErlInt 2
+% ErlInt 3
+% ErlNil
+
+a all 1
+ErlList 2
+ErlAtom a
+ErlAtom a
+ErlNil
+
+a all 1
+ErlList 2
+ErlAtom a
+ErlAtom b
 ErlNil

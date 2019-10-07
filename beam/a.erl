@@ -1,6 +1,6 @@
 -module(a).
 
--export([call/1, test/1, newproc/1, list/0, listlength/1, sending/0, tuple/1, map/1, funs/1]).
+-export([call/1, test/1, newproc/1, list/0, listlength/1, sending/0, tuple/1, map/1, funs/1, all/1]).
 
 call(_) ->
     test(b:call()).
@@ -39,3 +39,8 @@ map(X) ->
 funs(L) ->
     F = fun(X) -> X + 1 end,
     lists:map(F, L).
+
+all(L) ->
+    lists:all(fun
+                  (a) -> true;
+                  (_) -> false end, L).
