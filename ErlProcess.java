@@ -39,7 +39,7 @@ public class ErlProcess {
 
         while (result == null || !ip_stack.isEmpty()) {
             if (result != null) {
-                ip = ip_stack.pop(); // TODO: check if only occurs on return
+                restore_ip(); // TODO: check if only occurs on return
                 System.out.println("pop: " + ip + " size " + ip_stack.size());
             }
             if (ip == -1) {
@@ -70,7 +70,7 @@ public class ErlProcess {
             func_info += ")";
             return new ErlException("function_clause " + func_info);
         case 4: // call
-            ip_stack.push(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
+            save_ip(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
             save();
             jump(op.args.get(1));
             return null;
@@ -82,7 +82,7 @@ public class ErlProcess {
             return null;
         case 7: // call_ext
             // TODO: save module, ip, regs
-            ip_stack.push(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
+            save_ip(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, false);
         case 8: // call_ext_last
@@ -158,7 +158,7 @@ public class ErlProcess {
             int fun_arity = ((ErlInt) op.args.get(0)).getValue();
             ErlFun fun = (ErlFun) x_reg.get(fun_arity);
             save();
-            ip_stack.push(ip + 1);
+            save_ip(ip + 1);
             file = fun.getModule();
             jump(fun.getLabel());
             return null;
@@ -329,6 +329,16 @@ public class ErlProcess {
 
     private void restore() {
         y_reg = reg_stack.pop();
+        file = module_stack.pop();
+    }
+
+    private void save_ip(int cp) {
+        ip_stack.push(cp);
+        module_stack.push(file);
+    }
+
+    private void restore_ip() {
+        ip = ip_stack.pop();
         file = module_stack.pop();
     }
 
