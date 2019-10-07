@@ -8,6 +8,7 @@ public class ErlProcess {
     private BeamFile file;
     private Stack<Integer> ip_stack;
     private Stack<Register> reg_stack;
+    private Stack<BeamFile> module_stack;
     private Import mfa;
 
     public ErlProcess(BeamVM bv) {
@@ -16,6 +17,7 @@ public class ErlProcess {
         y_reg = new Register();
         ip_stack = new Stack<Integer>();
         reg_stack = new Stack<Register>();
+        module_stack = new Stack<BeamFile>();
     }
 
     public void apply(String module, String function, ErlTerm[] args) {
@@ -39,7 +41,6 @@ public class ErlProcess {
             if (result != null) {
                 ip = ip_stack.pop(); // TODO: check if only occurs on return
                 System.out.println("pop: " + ip + " size " + ip_stack.size());
-                ip++;
             }
             if (ip == -1) {
                 result = new ErlException("badarg");
@@ -69,7 +70,7 @@ public class ErlProcess {
             func_info += ")";
             return new ErlException("function_clause " + func_info);
         case 4: // call
-            ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
+            ip_stack.push(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
             save();
             jump(op.args.get(1));
             return null;
@@ -81,9 +82,12 @@ public class ErlProcess {
             return null;
         case 7: // call_ext
             // TODO: save module, ip, regs
-            ip_stack.push(ip); System.out.println("push: " + ip + " size " + ip_stack.size());
+            ip_stack.push(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, false);
+        case 8: // call_ext_last
+            mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+            return setCallExt(mfa, true);
         case 12: ip++; return null; // skip allocate
         case 13: ip++; return null; // skip allocate_heap
         case 16: ip++; return null; // skip test_heap
@@ -150,6 +154,14 @@ public class ErlProcess {
             set_reg(op.args.get(2), list);
             ip++;
             return null;
+        case 75: // call_fun
+            int fun_arity = ((ErlInt) op.args.get(0)).getValue();
+            ErlFun fun = (ErlFun) x_reg.get(fun_arity);
+            save();
+            ip_stack.push(ip + 1);
+            file = fun.getModule();
+            jump(fun.getLabel());
+            return null;
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, true);
@@ -162,6 +174,9 @@ public class ErlProcess {
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
             if (bif2_result == null) return new ErlException("bif2 error");
             set_reg(op.args.get(5), bif2_result);
+            ip++;
+            return null;
+        case 136: // trim ???
             ip++;
             return null;
         case 153: ip++; return null; // skip line
@@ -309,10 +324,12 @@ public class ErlProcess {
 
     private void save() {
         reg_stack.push(y_reg.clone());
+        module_stack.push(file);
     }
 
     private void restore() {
         y_reg = reg_stack.pop();
+        file = module_stack.pop();
     }
 
     private void jump(ErlTerm label) {

@@ -101,13 +101,16 @@
 % ErlInt 0
 % ErlNil
 
-% a map 1
-% ErlAtom mapitem
+a map 1
+ErlAtom mapitem
 
-% a tuple 1
-% ErlList 0
-% ErlNil
+a tuple 1
+ErlList 0
+ErlNil
 
 % a sending 0
 
-a funs 0
+a funs 1
+ErlList 1
+ErlInt 1
+ErlNil

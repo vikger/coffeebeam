@@ -1,7 +1,7 @@
 {module, a}.  %% version = 0
 
 {exports, [{call,1},
-           {funs,0},
+           {funs,1},
            {list,0},
            {listlength,1},
            {map,1},
@@ -163,15 +163,17 @@
     return.
 
 
-{function, funs, 0, 21}.
+{function, funs, 1, 21}.
   {label,20}.
     {line,[{location,"a.erl",39}]}.
-    {func_info,{atom,a},{atom,funs},0}.
+    {func_info,{atom,a},{atom,funs},1}.
   {label,21}.
+    {allocate,1,1}.
+    {move,{x,0},{y,0}}.
     {make_fun2,{f,27},0,0,0}.
-    {move,{literal,[1,2,3]},{x,1}}.
+    {move,{y,0},{x,1}}.
     {line,[{location,"a.erl",41}]}.
-    {call_ext_only,2,{extfunc,lists,map,2}}.
+    {call_ext_last,2,{extfunc,lists,map,2},1}.
 
 
 {function, module_info, 0, 23}.
@@ -195,10 +197,10 @@
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-funs/0-fun-0-', 1, 27}.
+{function, '-funs/1-fun-0-', 1, 27}.
   {label,26}.
     {line,[{location,"a.erl",40}]}.
-    {func_info,{atom,a},{atom,'-funs/0-fun-0-'},1}.
+    {func_info,{atom,a},{atom,'-funs/1-fun-0-'},1}.
   {label,27}.
     {line,[{location,"a.erl",40}]}.
     {gc_bif,'+',{f,0},1,[{x,0},{integer,1}],{x,0}}.

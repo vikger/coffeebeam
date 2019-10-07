@@ -273,19 +273,21 @@ class Export {
 
 class ErlFun extends ErlTerm {
     ErlAtom name;
-    int arity, label;
+    int arity;
+    ErlLabel label;
     private BeamFile beamfile;
     public ErlFun(BeamFile bf, int f, int a, int l) {
         super("fun");
         name = new ErlAtom(bf, f);
         arity = a;
-        label = l;
+        label = new ErlLabel(l);
+        beamfile = bf;
     }
 
     public ErlAtom getName() { return name; }
     public int getArity() { return arity; }
-    public int getLabel() { return label; }
-    public String toString() { return name.toString() + " / " + arity + " -> label(" + label + ")"; }
+    public ErlLabel getLabel() { return label; }
+    public String toString() { return name.toString() + " / " + arity + " -> label(" + label.getValue() + ")"; }
     public String toId() { return tag + "(" + name + "," + arity + "," + label + ")"; }
     public BeamFile getModule() { return beamfile; }
 }
