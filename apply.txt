@@ -108,8 +108,6 @@
 % ErlList 0
 % ErlNil
 
-% a sending 0
-
 % add add 2
 % ErlInt 1
 % ErlInt 2
@@ -124,20 +122,22 @@
 % ErlInt 3
 % ErlNil
 
-a all 1
-ErlList 2
-ErlAtom a
-ErlAtom a
-ErlNil
+% a all 1
+% ErlList 2
+% ErlAtom a
+% ErlAtom a
+% ErlNil
 
-a all 1
-ErlList 2
-ErlAtom a
-ErlAtom b
-ErlNil
+% a all 1
+% ErlList 2
+% ErlAtom a
+% ErlAtom b
+% ErlNil
 
-a any 1
-ErlList 2
-ErlAtom b
-ErlAtom a
-ErlNil
+% a any 1
+% ErlList 2
+% ErlAtom b
+% ErlAtom a
+% ErlNil
+
+a sending 0
