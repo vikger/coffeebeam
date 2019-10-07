@@ -108,4 +108,7 @@
 % ErlList 0
 % ErlNil
 
-a sending 0
+% a sending 0
+
+a funs 1
+ErlInt 1

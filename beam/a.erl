@@ -1,6 +1,6 @@
 -module(a).
 
--export([call/1, test/1, newproc/1, list/0, listlength/1, sending/0, tuple/1, map/1]).
+-export([call/1, test/1, newproc/1, list/0, listlength/1, sending/0, tuple/1, map/1, funs/1]).
 
 call(_) ->
     b:call().
@@ -35,3 +35,7 @@ tuple1(T, E) ->
 
 map(X) ->
     #{X => X, a => 1, b => 2, c => 3}.
+
+funs(N) ->
+    F = fun(X) -> X + 1 end,
+    F(N).

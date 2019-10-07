@@ -153,6 +153,10 @@ public class ErlProcess {
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, true);
+        case 103: // make_fun2
+            x_reg.set(0, file.getLocalFunction(((ErlInt) op.args.get(0)).getValue()));
+            ip++;
+            return null;
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
