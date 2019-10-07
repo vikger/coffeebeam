@@ -134,6 +134,21 @@ public class ErlProcess {
                 ip++;
             else jump(op.args.get(0));
             return null;
+        case 59: // select_val
+            ErlTerm select_match = getValue(op.args.get(0));
+            ErlList dest = (ErlList) op.args.get(2);
+            while (!dest.isNil()) {
+                ErlTerm dest_match = dest.head;
+                ErlList dest_tail = (ErlList) dest.tail;
+                ErlLabel dest_value = (ErlLabel) dest_tail.head;
+                if (dest_match.toId().equals(select_match.toId())) {
+                    jump(dest_value);
+                    return null;
+                }
+                dest = (ErlList) dest_tail.tail;
+            }
+            jump(op.args.get(1));
+            return null;
         case 64: // move
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
