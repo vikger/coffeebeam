@@ -40,7 +40,6 @@ public class ErlProcess {
         while (result == null || !ip_stack.isEmpty()) {
             if (result != null) {
                 restore_ip(); // TODO: check if only occurs on return
-                System.out.println("pop: " + ip + " size " + ip_stack.size());
             }
             if (ip == -1) {
                 result = new ErlException("badarg");
@@ -70,7 +69,7 @@ public class ErlProcess {
             func_info += ")";
             return new ErlException("function_clause " + func_info);
         case 4: // call
-            save_ip(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
+            save_ip(ip + 1);
             save();
             jump(op.args.get(1));
             return null;
@@ -82,7 +81,7 @@ public class ErlProcess {
             return null;
         case 7: // call_ext
             // TODO: save module, ip, regs
-            save_ip(ip + 1); System.out.println("push: " + ip + " size " + ip_stack.size());
+            save_ip(ip + 1);
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, false);
         case 8: // call_ext_last
@@ -333,13 +332,13 @@ public class ErlProcess {
     }
 
     private void save_ip(int cp) {
-        ip_stack.push(cp);
+        ip_stack.push(cp); System.out.println("push: " + file.getModuleName() + " " + cp + " size " + ip_stack.size());
         module_stack.push(file);
     }
 
     private void restore_ip() {
         ip = ip_stack.pop();
-        file = module_stack.pop();
+        file = module_stack.pop(); System.out.println("pop: " + file.getModuleName() + " " + ip + " size " + ip_stack.size());
     }
 
     private void jump(ErlTerm label) {
