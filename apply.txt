@@ -134,10 +134,10 @@
 % ErlAtom b
 % ErlNil
 
-% a any 1
-% ErlList 2
-% ErlAtom b
-% ErlAtom a
-% ErlNil
+a any 1
+ErlList 2
+ErlAtom b
+ErlAtom a
+ErlNil
 
 a sending 0

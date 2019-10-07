@@ -3,8 +3,11 @@ import java.util.ArrayList;
 
 public class BeamVM {
     private ArrayList<BeamModule> modules;
+    private Scheduler scheduler;
+
     public BeamVM() {
         modules = new ArrayList<BeamModule>();
+	scheduler = new Scheduler(this);
     }
 
     public void load(String filename) throws IOException, BeamFormatException {
@@ -45,11 +48,12 @@ public class BeamVM {
                 for (int i = 0; i < arity; i++) {
                     args[i] = readTerm(reader);
                 }
-                ErlProcess p = new ErlProcess(this);
-                p.apply(mfa[0], mfa[1], args);
+                ErlProcess p = scheduler.newProcess();
+                p.prepare(mfa[0], mfa[1], args);
             }
         }
         reader.close();
+	scheduler.start();
     }
 
     private ErlTerm readTerm(BufferedReader reader) throws Exception {
@@ -78,6 +82,8 @@ public class BeamVM {
         return null;
     }
 
+    public Scheduler getScheduler() { return scheduler; }
+
     public static void main(String[] args) throws Exception {
         BeamVM vm = new BeamVM();
         vm.loadModules("load.txt");
@@ -92,5 +98,35 @@ class BeamModule {
     public BeamModule(String n, BeamFile f) {
         name = n;
         file = f;
+    }
+}
+
+class Scheduler {
+    private BeamVM vm;
+    private long nextPid = 1;
+    private ArrayList<ErlProcess> processes;
+
+    public Scheduler(BeamVM bv) {
+	vm = bv;
+	processes = new ArrayList<ErlProcess>();
+    }
+    public ErlProcess newProcess() {
+	ErlProcess p = new ErlProcess(vm, new ErlPid(nextPid++));
+	processes.add(p);
+	return p;
+    }
+    public ErlProcess getProcess(ErlPid pid) {
+	for (int i = 0; i < processes.size(); i++) {
+	    if (processes.get(i).getPid().getValue() == pid.getValue())
+		return processes.get(i);
+	}
+	return null;
+    }
+    public void start() {
+	while (processes.size() > 0) {
+	    ErlTerm result = processes.get(0).run();
+	    System.out.println("result: " + result.toString());
+	    processes.remove(0);
+	}
     }
 }

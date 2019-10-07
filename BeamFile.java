@@ -813,3 +813,15 @@ class InternalTerm {
         return new GenericErlTerm(value);
     }
 }
+
+class ErlPid extends ErlTerm {
+    private long pid;
+
+    public ErlPid(long p) {
+	super("pid");
+	pid = p;
+    }
+    public String toString() { return "PID<" + pid + ">"; }
+    public String toId() { return tag + "(" + pid + ")"; }
+    public long getValue() { return pid; }
+}

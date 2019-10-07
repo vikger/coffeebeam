@@ -10,9 +10,13 @@ public class ErlProcess {
     private Stack<Register> reg_stack;
     private Stack<BeamFile> module_stack;
     private Import mfa;
+    private ErlPid pid;
+    public static enum State {RUNNING, RUNNABLE, WAITING}
+    private State state = State.RUNNABLE;
 
-    public ErlProcess(BeamVM bv) {
+    public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
+	pid = p;
         x_reg = new Register();
         y_reg = new Register();
         ip_stack = new Stack<Integer>();
@@ -20,7 +24,7 @@ public class ErlProcess {
         module_stack = new Stack<BeamFile>();
     }
 
-    public void apply(String module, String function, ErlTerm[] args) {
+    public void prepare(String module, String function, ErlTerm[] args) {
         file = vm.getModule(module).file;
         int argc = args.length;
         int label = file.getLabel(function, argc);
@@ -31,10 +35,19 @@ public class ErlProcess {
             System.out.print("\t" + args[i]);
         }
         System.out.println();
-        run();
     }
 
-    public void run() {
+    public void prepare(BeamFile f, ErlFun fun, ErlTerm[] args) {
+	file = f;
+	int arity = fun.getArity();
+	for (int i = 0; i < arity; i++) {
+	    x_reg.set(i, args[i]);
+	}
+	jump(fun.getLabel());
+    }
+
+    public ErlTerm run() {
+	state = State.RUNNING;
         ErlTerm result = null;
 
         while (result == null || !ip_stack.isEmpty()) {
@@ -48,7 +61,7 @@ public class ErlProcess {
                 result = execute(op);
             }
         }
-        System.out.println("result: " + result.toString());
+	return result;
     }
 
     public ErlTerm execute(ErlOp op) {
@@ -268,14 +281,16 @@ public class ErlProcess {
         if (mod.equals("erlang")) {
             if (function.equals("get_module_info")) {
                 return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
-            } else if (function.equals("spawn")) { // TODO: extend with new process
-                String res = "spawn(";
-                for (int i = 0; i < arity; i++) {
-                    res += x_reg.get(i).toString() + " ";
-                }
-                res += ")";
-                if (!last) x_reg.set(0, new ErlString(res));
-                else return new ErlString(res);
+            } else if (function.equals("spawn")) {
+		ErlProcess p = vm.getScheduler().newProcess();
+		// TODO: check argument input (start / end)
+		int spawnarity = ((ErlFun) x_reg.get(0)).getArity();
+		ErlTerm[] spawnargs = new ErlTerm[spawnarity];
+		for (int i = 0; i < spawnarity; i++)
+		    spawnargs[i] = x_reg.get(i);
+		p.prepare(file, ((ErlFun) x_reg.get(spawnarity)), spawnargs);
+		x_reg.set(0, p.getPid());
+		return p.getPid();
             } else if (function.equals("atom_to_list")) {
                 String atomstr = ((ErlAtom) x_reg.get(0)).getValue();
                 ErlList atomlist = string_to_list(atomstr);
@@ -360,6 +375,10 @@ public class ErlProcess {
     private void jump(ErlTerm label) {
         ip = file.getLabelRef(((ErlLabel) label).getValue());
     }
+
+    public ErlPid getPid() { return pid; }
+    public void setState(State s) { state = s; }
+    public State getState() { return state; }
 }
 
 class Register {
