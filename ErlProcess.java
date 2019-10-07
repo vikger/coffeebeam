@@ -55,8 +55,8 @@ public class ErlProcess {
         System.out.print("  ip(" + ip + ")\t" + OpCode.name(op.opcode) + "(" + op.opcode + ")");
         for (int i = 0; i < OpCode.arity(op.opcode); i++) System.out.print("\t" + op.args.get(i).toString());
         System.out.println();
-        //x_reg.dump();
-        //y_reg.dump();
+        x_reg.dump();
+        y_reg.dump();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
         case 2: // func_info
@@ -234,6 +234,7 @@ public class ErlProcess {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         int arity = mfa.getArity();
+        System.out.println("CALL_EXT: " + mod + " " + function + " " + arity);
         if (mod.equals("erlang")) {
             if (function.equals("get_module_info")) {
                 return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
@@ -292,13 +293,18 @@ public class ErlProcess {
     }
 
     private ErlTerm getValue(ErlTerm source) {
+        ErlTerm value;
         if (source instanceof Xregister) {
-            return x_reg.get(((Xregister) source).getIndex());
+            value = x_reg.get(((Xregister) source).getIndex());
         } else if (source instanceof Yregister) {
-            return y_reg.get(((Yregister) source).getIndex());
+            value =  y_reg.get(((Yregister) source).getIndex());
         } else {
-            return source;
+            value =  source;
         }
+        if (value instanceof ErlLiteral) {
+            value = ((ErlLiteral) value).getValue();
+        }
+        return value;
     }
 
     private void save() {

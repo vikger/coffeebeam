@@ -11,6 +11,7 @@
          dropwhile/2,
          duplicate/2,
          filter/2,
+         map/2,
          reverse/1,
          reverse/2,
          zip/2
@@ -84,6 +85,11 @@ filter(Pred, [H|T]) ->
             filter(Pred, T)
     end;
 filter(_Pred, []) ->
+    [].
+
+map(F, [H|T]) ->
+    [F(H) | map(F, T)];
+map(_, []) ->
     [].
 
 reverse(L) ->

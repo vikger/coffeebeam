@@ -117,7 +117,7 @@ public class BeamFile {
         printExports();
         printLocalFunctions();
         printCodeTable();
-        //printLabelRefs();
+        printLabelRefs();
         //printAttributes();
     }
 
@@ -287,6 +287,7 @@ class ErlFun extends ErlTerm {
     public int getLabel() { return label; }
     public String toString() { return name.toString() + " / " + arity + " -> label(" + label + ")"; }
     public String toId() { return tag + "(" + name + "," + arity + "," + label + ")"; }
+    public BeamFile getModule() { return beamfile; }
 }
 
 class ErlOp {
@@ -600,6 +601,13 @@ class ErlString extends ErlTerm {
     public ErlString(String v) { super("string"); value = v; }
     public String toString() { return "\"" + value + "\""; }
     public String toId() { return tag + "(" + value + ")"; }
+    public ErlList toList() {
+        ErlList list = new ErlList();
+        for (char c : value.toCharArray()) {
+            list.add(new ErlInt((int) c));
+        }
+        return list;
+    }
 }
 
 class ErlException extends ErlTerm {
@@ -679,7 +687,7 @@ class ExternalTerm {
             return new ErlList();
         case 107: // STRING_EXT
             int length = br.read16BitUnsigned();
-            return new ErlString(new String(br.readBytes(length)));
+            return (new ErlString(new String(br.readBytes(length)))).toList();
         case 108: // LIST_EXT
             ErlList list = new ErlList();
             long list_length = br.read32BitUnsigned();

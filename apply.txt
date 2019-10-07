@@ -110,5 +110,4 @@
 
 % a sending 0
 
-a funs 1
-ErlInt 1
+a funs 0
