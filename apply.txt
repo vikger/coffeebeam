@@ -140,4 +140,6 @@
 % ErlAtom a
 % ErlNil
 
-a sending 0
+% a sending 0
+
+a sendrecv 0

@@ -117,6 +117,13 @@ public class ErlProcess {
         case 8: // call_ext_last
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, true);
+        case 9: // bif0
+            Import bif0_mfa = file.getImport(((ErlInt) op.args.get(0)).getValue());
+            ErlTerm bif0_result = bif0(bif0_mfa);
+            if (bif0_result == null) return new ErlException("bif0 error");
+            set_reg(op.args.get(1), bif0_result);
+            ip++;
+            return null;
         case 12: ip++; return null; // skip allocate
         case 13: ip++; return null; // skip allocate_heap
         case 16: ip++; return null; // skip test_heap
@@ -190,6 +197,14 @@ public class ErlProcess {
                 ip++;
             else jump(op.args.get(0));
             return null;
+        case 57: // is_tuple
+            if (getValue(op.args.get(1)) instanceof ErlTuple) ip++;
+            else jump(op.args.get(0));
+            return null;
+        case 58: // test_arity
+            if (((ErlTuple) getValue(op.args.get(1))).size() == ((ErlInt) getValue(op.args.get(2))).getValue()) ip++;
+            else jump(op.args.get(0));
+            return null;
         case 59: // select_val
             ErlTerm select_match = getValue(op.args.get(0));
             ErlList dest = (ErlList) op.args.get(2);
@@ -215,6 +230,10 @@ public class ErlProcess {
             ErlTerm get_list = getValue(op.args.get(0));
             set_reg(op.args.get(1), ((ErlList) get_list).head);
             set_reg(op.args.get(2), ((ErlList) get_list).tail);
+            ip++;
+            return null;
+        case 66: // get_tuple_element
+            set_reg(op.args.get(2), ((ErlTuple) getValue(op.args.get(0))).get(((ErlInt) op.args.get(1)).getValue()));
             ip++;
             return null;
         case 69: // put_list
@@ -306,6 +325,17 @@ public class ErlProcess {
             }
         }
         return new ErlException("gc_bif2 " + arg1.toString() + " " + arg2.toString());
+    }
+
+    private ErlTerm bif0(Import mfa) {
+        String mod = file.getAtomName(mfa.getModule());
+        String function = file.getAtomName(mfa.getFunction());
+        if (mod.equals("erlang")) {
+            if (function.equals("self")) {
+                return getPid();
+            }
+        }
+        return new ErlException("bif0");
     }
 
     private void set_reg(ErlTerm reg, ErlTerm value) {

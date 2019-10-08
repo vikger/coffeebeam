@@ -1,6 +1,6 @@
 -module(a).
 
--export([call/1, test/1, newproc/1, list/0, sending/0, tuple/1, map/1, funs/1, all/1, any/1]).
+-export([call/1, test/1, newproc/1, list/0, sending/0, tuple/1, map/1, funs/1, all/1, any/1, sendrecv/0]).
 
 call(_) ->
     test(b:call()).
@@ -17,6 +17,14 @@ list() ->
 sending() ->
     Pid = spawn(fun() -> receive X -> X end end),
     Pid ! message.
+
+sendrecv() ->
+    Pid = spawn(fun() -> receive {Pid, message1} -> Pid ! message2 end end),
+    Pid ! {self(), message1},
+    receive
+        X ->
+            X
+    end.
 
 tuple(T0) ->
     T1 = {a,b,c, T0},

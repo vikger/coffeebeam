@@ -527,7 +527,6 @@ class ErlTuple extends ErlTerm {
         }
         elements.set(index, value);
     }
-
 }
 
 class ErlMap extends ErlTerm {
