@@ -4,7 +4,17 @@ public class Test {
         new TestCase("a", "test", new ErlTerm[]{new ErlAtom("b")}, new ErlException("function_clause a:test(b)")),
         new TestCase("a", "list", new ErlTerm[]{}, new ErlList(new ErlAtom("a"), new ErlList(new ErlInt(1), new ErlList()))),
         new TestCase("lists", "append", new ErlTerm[]{new ErlList()}, new ErlList()),
-        new TestCase("lists", "append", new ErlTerm[]{new ErlList(new ErlList(new ErlInt(1), new ErlList(new ErlInt(2), new ErlList())), new ErlList(new ErlInt(3), new ErlList()))}, new ErlList(new ErlInt(1), new ErlList(new ErlInt(2), new ErlList(new ErlInt(3), new ErlList()))))
+        new TestCase("lists", "append", new ErlTerm[]{new ErlList(new ErlList(new ErlInt(1),
+                                                                              new ErlList(new ErlInt(2),
+                                                                                          new ErlList())),
+                                                                  new ErlList(new ErlList(new ErlInt(3),
+                                                                                          new ErlList()),
+                                                                              new ErlList()))},
+            new ErlList(new ErlInt(1),
+                        new ErlList(new ErlInt(2),
+                                    new ErlList(new ErlInt(3), new ErlList())))),
+        new TestCase("lists", "append", new ErlTerm[]{new ErlList(new ErlList(new ErlAtom("a"), new ErlList()),
+                                                                  new ErlAtom("b"))}, new ErlException("function_clause lists:append(b)"))
     };
 
     public Test() throws Exception {
