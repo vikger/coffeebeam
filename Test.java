@@ -14,7 +14,8 @@ public class Test {
                         new ErlList(new ErlInt(2),
                                     new ErlList(new ErlInt(3), new ErlList())))),
         new TestCase("lists", "append", new ErlTerm[]{new ErlList(new ErlList(new ErlAtom("a"), new ErlList()),
-                                                                  new ErlAtom("b"))}, new ErlException("function_clause lists:append(b)"))
+                                                                  new ErlAtom("b"))}, new ErlException("function_clause lists:append(b)")),
+        new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message"))
     };
 
     public Test() throws Exception {

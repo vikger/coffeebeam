@@ -56,10 +56,18 @@ public class BeamVM {
 	scheduler.start();
     }
 
+    public void send(ErlPid pid, ErlTerm message) {
+        scheduler.send(pid, message);
+    }
+
     public ErlTerm test(String module, String function, ErlTerm[] args) {
         ErlProcess p = scheduler.newProcess();
         p.prepare(module, function, args);
-        return p.run();
+        ErlTerm result;
+        do {
+            result = p.run();
+        } while (result == null);
+        return result;
     }
 
     private ErlTerm readTerm(BufferedReader reader) throws Exception {
@@ -130,9 +138,20 @@ class Scheduler {
     }
     public void start() {
 	while (processes.size() > 0) {
-	    ErlTerm result = processes.get(0).run();
-	    System.out.println("result: " + result.toString());
-	    processes.remove(0);
+            ErlProcess p = processes.get(0);
+            ErlTerm result = p.run();
+            if (result == null) {
+                System.out.println("VM: reschedule " + p.getPid());
+                processes.remove(0);
+                processes.add(p);
+            } else {
+                System.out.println("result: " + result.toString());
+                processes.remove(0);
+            }
 	}
+    }
+    public void send(ErlPid pid, ErlTerm message) {
+        ErlProcess p = getProcess(pid);
+        p.put_message(message);
     }
 }

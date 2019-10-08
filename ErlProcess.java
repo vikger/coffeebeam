@@ -13,6 +13,10 @@ public class ErlProcess {
     private ErlPid pid;
     public static enum State {RUNNING, RUNNABLE, WAITING}
     private State state = State.RUNNABLE;
+    private final long reduction_max = 1000;
+    private long reduction;
+    private ErlTerm result = null;
+    private MessageQueue mq;
 
     public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
@@ -22,6 +26,8 @@ public class ErlProcess {
         ip_stack = new Stack<Integer>();
         reg_stack = new Stack<Register>();
         module_stack = new Stack<BeamFile>();
+        reduction = reduction_max;
+        mq = new MessageQueue();
     }
 
     public void prepare(String module, String function, ErlTerm[] args) {
@@ -48,20 +54,31 @@ public class ErlProcess {
 
     public ErlTerm run() {
 	state = State.RUNNING;
-        ErlTerm result = null;
 
-        while (result == null || (!ip_stack.isEmpty() && !(result instanceof ErlException))) {
-            if (result != null) {
-                restore_ip(); // TODO: check if only occurs on return
-            }
-            if (ip == -1) {
-                result = new ErlException("badarg");
+        while (reduction > 0 && state == State.RUNNING) {
+            reduction--;
+            if (result == null) {
+                if (ip == -1) {
+                    return new ErlException("badarg");
+                }
             } else {
-                ErlOp op = file.getOp(ip);
-                result = execute(op);
+                if (result instanceof ErlException) {
+                    return result;
+                } else if (!ip_stack.isEmpty()) {
+                    restore_ip(); // TODO: check if only occurs on return
+                } else {
+                    return result;
+                }
             }
+            ErlOp op = file.getOp(ip);
+            result = execute(op);
         }
-	return result;
+        if (state == State.RUNNING) {
+            state = State.RUNNABLE;
+            reduction = reduction_max;
+            return null;
+        }
+	return null;
     }
 
     public ErlTerm execute(ErlOp op) {
@@ -108,6 +125,32 @@ public class ErlProcess {
             if (!reg_stack.isEmpty()) restore();
             System.out.println("return: " + x_reg.get(0));
             return x_reg.get(0);
+        case 20: // send
+            ErlTerm message = getValue(x_reg.get(1));
+            vm.send((ErlPid) x_reg.get(0), message);
+            x_reg.set(0, message);
+            ip++;
+            return null;
+        case 21: // remove_message
+            mq.remove();
+            ip++;
+            return null;
+        case 23: // loop_rec
+            if (mq.size() > 0) {
+                x_reg.set(0, mq.get());
+                ip++;
+            } else {
+                jump((ErlLabel) op.args.get(0));
+            }
+            return null;
+        case 25: // wait
+            if (mq.size() == 0) {
+                state = State.WAITING;
+                jump((ErlLabel) op.args.get(0));
+            } else {
+                ip++;
+            }
+            return null;
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
                 ip++;
@@ -321,7 +364,7 @@ public class ErlProcess {
             }
             ip++; // continue if no matches
         } else {
-            if (!last) save(); // TODO: store module, ip, regs
+            if (!last) { save(); save_ip(ip + 1); }
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);
             ip = file.getLabelRef(label);
@@ -377,6 +420,13 @@ public class ErlProcess {
     public ErlPid getPid() { return pid; }
     public void setState(State s) { state = s; }
     public State getState() { return state; }
+
+    public void put_message(ErlTerm message) {
+        mq.put(message);
+        if (state == State.WAITING) {
+            state = state.RUNNABLE;
+        }
+    }
 }
 
 class Register {
@@ -450,5 +500,31 @@ class Stack<T> {
 
     public int size() {
         return items.size();
+    }
+}
+
+class MessageQueue {
+    ArrayList<ErlTerm> messages;
+    int current;
+
+    public MessageQueue() {
+        messages = new ArrayList<ErlTerm>();
+    }
+
+    public void put(ErlTerm message) {
+        messages.add(message);
+    }
+
+    public ErlTerm get() {
+        current = 0; // TODO: rotating check
+        return messages.get(0);
+    }
+
+    public void remove() {
+        messages.remove(current);
+    }
+
+    public int size() {
+        return messages.size();
     }
 }
