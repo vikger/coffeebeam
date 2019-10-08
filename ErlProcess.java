@@ -50,7 +50,7 @@ public class ErlProcess {
 	state = State.RUNNING;
         ErlTerm result = null;
 
-        while (result == null || !ip_stack.isEmpty()) {
+        while (result == null || (!ip_stack.isEmpty() && !(result instanceof ErlException))) {
             if (result != null) {
                 restore_ip(); // TODO: check if only occurs on return
             }
@@ -353,13 +353,11 @@ public class ErlProcess {
     }
 
     private void save() {
-        reg_stack.push(y_reg.clone());
-        module_stack.push(file);
+        reg_stack.push(y_reg.clone()); System.out.println("save: y_reg(" + y_reg.size() + ")");
     }
 
     private void restore() {
-        y_reg = reg_stack.pop();
-        file = module_stack.pop();
+        y_reg = reg_stack.pop(); System.out.println("restore: y_reg(" + y_reg.size() + ")");
     }
 
     private void save_ip(int cp) {
