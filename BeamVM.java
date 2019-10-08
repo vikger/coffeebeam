@@ -56,6 +56,12 @@ public class BeamVM {
 	scheduler.start();
     }
 
+    public ErlTerm test(String module, String function, ErlTerm[] args) {
+        ErlProcess p = scheduler.newProcess();
+        p.prepare(module, function, args);
+        return p.run();
+    }
+
     private ErlTerm readTerm(BufferedReader reader) throws Exception {
         String line = reader.readLine();
         String[] term = line.split(" ", 2);

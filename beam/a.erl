@@ -1,6 +1,6 @@
 -module(a).
 
--export([call/1, test/1, newproc/1, list/0, listlength/1, sending/0, tuple/1, map/1, funs/1, all/1, any/1]).
+-export([call/1, test/1, newproc/1, list/0, sending/0, tuple/1, map/1, funs/1, all/1, any/1]).
 
 call(_) ->
     test(b:call()).
@@ -12,12 +12,7 @@ newproc(X) ->
     spawn(io, format, ["~p", [X]]).
 
 list() ->
-    [a, 1, "s"].
-
-listlength([_ | T]) ->
-    1 + listlength(T);
-listlength([]) ->
-    0.
+    [a, 1].
 
 sending() ->
     Pid = spawn(fun() -> receive X -> X end end),
