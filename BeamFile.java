@@ -371,6 +371,10 @@ class ErlBigNum extends ErlNumber {
         segments.add(seg);
     }
 
+    public void addSegmentFirst(int seg) {
+        segments.add(0, seg);
+    }
+
     public long getValue() {
         long value = 0;
         for (int i = 0; i < segments.size(); i++) {
@@ -794,12 +798,21 @@ class InternalTerm {
 
         // read value
         if ((b & 0x08) != 0) { // bit 3 is 1, continuation
-            if ((b & 0x10) != 0) { // 2..8 continuation bytes
+            if ((b & 0x10) != 0) { // 2+ continuation bytes
                 int following_bytes = (b & 0xE0) >> 5;
-                if (following_bytes == 0x07) {
+                if (following_bytes == 0x07) { // 9+ continuation bytes
                     following_bytes = (br.readByte() >> 4) + 9; // tag_u, at least 9 bytes
+                } else { // 2..8 continuation bytes
+                    following_bytes += 2;
                 }
-                for (int i = 0; i < following_bytes + 2; i++)
+                switch (tag) {
+                case 1: // big integer
+                    ErlBigNum bigint = new ErlBigNum(0);
+                    for (int i = 0; i < following_bytes; i++)
+                        bigint.addSegmentFirst(br.readByte());
+                    return bigint;
+                }
+                for (int i = 0; i < following_bytes; i++)
                     System.out.print("skipped [" + BeamDebug.dec_to_bin(br.readByte()) + "] ");
                 System.out.print("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte

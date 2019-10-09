@@ -144,4 +144,6 @@
 
 % a sendrecv 0
 
-a bignum 0
+a bignum1 0
+a bignum2 0
+a bignum3 0
