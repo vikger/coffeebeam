@@ -118,7 +118,7 @@ public class BeamFile {
         printLocalFunctions();
         printCodeTable();
         printLabelRefs();
-        //printAttributes();
+        printAttributes();
     }
 
     private void printAtoms() {
@@ -380,12 +380,53 @@ class ErlBigNum extends ErlNumber {
         return value;
     }
 
+    public ErlBigNum clone() {
+        ErlBigNum res = new ErlBigNum(positive ? 0 : 1);
+        for (int i = 0; i < segments.size(); i++)
+            res.addSegment(segments.get(i));
+        return res;
+    }
+
     public String toString() {
-        return Long.toString(getValue()); // TODO: fix
+        String str = "";
+        boolean trim = true;
+        ErlBigNum temp = clone();
+        do {
+            str = temp.mod10() + str;
+            temp = temp.div10();
+        } while (temp.segments.size() > 0);
+        if (!positive) str = "-" + str;
+        return str;
     }
 
     public String toId() {
         return tag + "(" + Long.toString(getValue()) + ")"; // TODO: fix
+    }
+
+    public ErlBigNum div10() {
+        int rem = 0;
+        boolean trim = true;
+        ErlBigNum result = new ErlBigNum(0);
+        for (int i = segments.size() - 1; i >= 0; i--) {
+            int n = segments.get(i);
+            int newseg = (n + rem) / 10;
+            if (!(trim && newseg == 0)) {
+                trim = false;
+                result.segments.add(0, newseg);
+            }
+            rem = ((n + rem) % 10) << 8;
+        }
+        return result;
+    }
+
+    public int mod10() {
+        int mul = 1;
+        int result = 0;
+        for (int i = 0; i < segments.size(); i++) {
+            result = (result + segments.get(i) * mul) % 10;
+            mul = (mul * 256) % 10;
+        }
+        return result;
     }
 }
 
@@ -740,7 +781,7 @@ class InternalTerm {
     public static ErlTerm read(ByteReader br, BeamFile bf) throws IOException {
         String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
-        //System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
+        System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
         String tagname = null;
         int value = -1234;
@@ -755,8 +796,11 @@ class InternalTerm {
         if ((b & 0x08) != 0) { // bit 3 is 1, continuation
             if ((b & 0x10) != 0) { // 2..8 continuation bytes
                 int following_bytes = (b & 0xE0) >> 5;
-                for (int i = 0; 9 < following_bytes; i++)
-                    br.readByte();
+                if (following_bytes == 0x07) {
+                    following_bytes = (br.readByte() >> 4) + 9; // tag_u, at least 9 bytes
+                }
+                for (int i = 0; i < following_bytes + 2; i++)
+                    System.out.print("skipped [" + BeamDebug.dec_to_bin(br.readByte()) + "] ");
                 System.out.print("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte
                 int cont1 = br.readByte();
@@ -808,7 +852,7 @@ class InternalTerm {
                 }
             }
         }
-        System.out.println("Generic " + tagname + " " + value);
+        System.out.println("Generic " + tagname + " " + BeamDebug.dec_to_bin(value));
         return new GenericErlTerm(value);
     }
 }

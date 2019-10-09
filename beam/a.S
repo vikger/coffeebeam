@@ -2,6 +2,7 @@
 
 {exports, [{all,1},
            {any,1},
+           {bignum,0},
            {call,1},
            {funs,1},
            {list,0},
@@ -16,7 +17,7 @@
 
 {attributes, []}.
 
-{labels, 48}.
+{labels, 50}.
 
 
 {function, call, 1, 2}.
@@ -70,7 +71,7 @@
     {func_info,{atom,a},{atom,sending},0}.
   {label,10}.
     {allocate,0,0}.
-    {make_fun2,{f,45},0,0,0}.
+    {make_fun2,{f,47},0,0,0}.
     {line,[{location,"a.erl",18}]}.
     {call_ext,1,{extfunc,erlang,spawn,1}}.
     {move,{atom,message},{x,1}}.
@@ -86,7 +87,7 @@
     {func_info,{atom,a},{atom,sendrecv},0}.
   {label,12}.
     {allocate,0,0}.
-    {make_fun2,{f,40},0,0,0}.
+    {make_fun2,{f,42},0,0,0}.
     {line,[{location,"a.erl",22}]}.
     {call_ext,1,{extfunc,erlang,spawn,1}}.
     {test_heap,3,1}.
@@ -176,7 +177,7 @@
   {label,22}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {make_fun2,{f,38},0,0,0}.
+    {make_fun2,{f,40},0,0,0}.
     {move,{y,0},{x,1}}.
     {line,[{location,"a.erl",44}]}.
     {call_ext_last,2,{extfunc,lists,map,2},1}.
@@ -189,7 +190,7 @@
   {label,24}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {make_fun2,{f,35},0,0,0}.
+    {make_fun2,{f,37},0,0,0}.
     {move,{y,0},{x,1}}.
     {line,[{location,"a.erl",47}]}.
     {call_ext_last,2,{extfunc,lists,all,2},1}.
@@ -202,81 +203,90 @@
   {label,26}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {make_fun2,{f,32},0,0,0}.
+    {make_fun2,{f,34},0,0,0}.
     {move,{y,0},{x,1}}.
     {line,[{location,"a.erl",52}]}.
     {call_ext_last,2,{extfunc,lists,any,2},1}.
 
 
-{function, module_info, 0, 28}.
+{function, bignum, 0, 28}.
   {label,27}.
+    {line,[{location,"a.erl",57}]}.
+    {func_info,{atom,a},{atom,bignum},0}.
+  {label,28}.
+    {move,{integer,12345678910111213141516},{x,0}}.
+    return.
+
+
+{function, module_info, 0, 30}.
+  {label,29}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},0}.
-  {label,28}.
+  {label,30}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 30}.
-  {label,29}.
+{function, module_info, 1, 32}.
+  {label,31}.
     {line,[]}.
     {func_info,{atom,a},{atom,module_info},1}.
-  {label,30}.
+  {label,32}.
     {move,{x,0},{x,1}}.
     {move,{atom,a},{x,0}}.
     {line,[]}.
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-any/1-fun-0-', 1, 32}.
-  {label,31}.
+{function, '-any/1-fun-0-', 1, 34}.
+  {label,33}.
     {line,[{location,"a.erl",52}]}.
     {func_info,{atom,a},{atom,'-any/1-fun-0-'},1}.
-  {label,32}.
-    {test,is_eq_exact,{f,33},[{x,0},{atom,a}]}.
+  {label,34}.
+    {test,is_eq_exact,{f,35},[{x,0},{atom,a}]}.
     {move,{atom,true},{x,0}}.
     return.
-  {label,33}.
+  {label,35}.
     {move,{atom,false},{x,0}}.
     return.
 
 
-{function, '-all/1-fun-0-', 1, 35}.
-  {label,34}.
+{function, '-all/1-fun-0-', 1, 37}.
+  {label,36}.
     {line,[{location,"a.erl",47}]}.
     {func_info,{atom,a},{atom,'-all/1-fun-0-'},1}.
-  {label,35}.
-    {test,is_eq_exact,{f,36},[{x,0},{atom,a}]}.
+  {label,37}.
+    {test,is_eq_exact,{f,38},[{x,0},{atom,a}]}.
     {move,{atom,true},{x,0}}.
     return.
-  {label,36}.
+  {label,38}.
     {move,{atom,false},{x,0}}.
     return.
 
 
-{function, '-funs/1-fun-0-', 1, 38}.
-  {label,37}.
+{function, '-funs/1-fun-0-', 1, 40}.
+  {label,39}.
     {line,[{location,"a.erl",43}]}.
     {func_info,{atom,a},{atom,'-funs/1-fun-0-'},1}.
-  {label,38}.
+  {label,40}.
     {line,[{location,"a.erl",43}]}.
     {gc_bif,'+',{f,0},1,[{x,0},{integer,1}],{x,0}}.
     return.
 
 
-{function, '-sendrecv/0-fun-0-', 0, 40}.
-  {label,39}.
+{function, '-sendrecv/0-fun-0-', 0, 42}.
+  {label,41}.
     {line,[{location,"a.erl",22}]}.
     {func_info,{atom,a},{atom,'-sendrecv/0-fun-0-'},0}.
-  {label,40}.
+  {label,42}.
     {allocate,0,0}.
-  {label,41}.
-    {loop_rec,{f,43},{x,0}}.
-    {test,is_tuple,{f,42},[{x,0}]}.
-    {test,test_arity,{f,42},[{x,0},2]}.
+  {label,43}.
+    {loop_rec,{f,45},{x,0}}.
+    {test,is_tuple,{f,44},[{x,0}]}.
+    {test,test_arity,{f,44},[{x,0},2]}.
     {get_tuple_element,{x,0},1,{x,1}}.
-    {test,is_eq_exact,{f,42},[{x,1},{atom,message1}]}.
+    {test,is_eq_exact,{f,44},[{x,1},{atom,message1}]}.
     remove_message.
     {get_tuple_element,{x,0},0,{x,0}}.
     {move,{atom,message2},{x,1}}.
@@ -284,22 +294,22 @@
     send.
     {deallocate,0}.
     return.
-  {label,42}.
-    {loop_rec_end,{f,41}}.
-  {label,43}.
-    {wait,{f,41}}.
-
-
-{function, '-sending/0-fun-0-', 0, 45}.
   {label,44}.
+    {loop_rec_end,{f,43}}.
+  {label,45}.
+    {wait,{f,43}}.
+
+
+{function, '-sending/0-fun-0-', 0, 47}.
+  {label,46}.
     {line,[{location,"a.erl",18}]}.
     {func_info,{atom,a},{atom,'-sending/0-fun-0-'},0}.
-  {label,45}.
+  {label,47}.
     {allocate,0,0}.
-  {label,46}.
-    {loop_rec,{f,47},{x,0}}.
+  {label,48}.
+    {loop_rec,{f,49},{x,0}}.
     remove_message.
     {deallocate,0}.
     return.
-  {label,47}.
-    {wait,{f,46}}.
+  {label,49}.
+    {wait,{f,48}}.

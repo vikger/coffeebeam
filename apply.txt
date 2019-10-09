@@ -142,4 +142,6 @@
 
 % a sending 0
 
-a sendrecv 0
+% a sendrecv 0
+
+a bignum 0
