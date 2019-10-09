@@ -62,14 +62,14 @@ public class BeamFile {
 
     public void readLiterals(ByteReader br) throws IOException {
         int uncompressedSize = (int) br.read32BitUnsigned();
-        System.out.println(uncompressedSize);
+        //System.out.println(uncompressedSize);
 
         InflaterInputStream iis = new InflaterInputStream(br.getStream());
         byte[] uncompressed = new byte[uncompressedSize];
         iis.read(uncompressed);
         br = new ByteReader(new ByteArrayInputStream(uncompressed));
         int count = (int) br.read32BitUnsigned();
-        System.out.println("Count: " + count);
+        //System.out.println("Count: " + count);
         for (int i = 0; i < count; i++) {
             int size = (int) br.read32BitUnsigned();
             literals.add(ExternalTerm.read(br));
@@ -785,7 +785,7 @@ class InternalTerm {
     public static ErlTerm read(ByteReader br, BeamFile bf) throws IOException {
         String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
-        System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
+        //System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
         String tagname = null;
         int value = -1234;

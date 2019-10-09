@@ -59,9 +59,7 @@ public class BeamReader {
 
     public void readChunk() throws IOException {
 	String chunkname = read4ByteString();
-	System.out.println(chunkname);
 	int chunklength = (int) read32BitUnsigned();
-	System.out.println(Integer.toString(chunklength));
         ByteReader br = new ByteReader(new ByteArrayInputStream(readBytes(chunklength)));
 	switch (chunkname) {
 	case "Atom":
@@ -73,6 +71,7 @@ public class BeamReader {
         case "LocT": beamfile.readLocalFunctions(br); break;
         case "Attr": beamfile.readAttributes(br); break;
 	default:
+            System.out.println("Skipped chunk " + chunkname + "(" + chunklength + ")");
 	    break;
 	}
 	readPadding(chunklength);
