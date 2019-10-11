@@ -4,11 +4,12 @@
            {module_info,0},
            {module_info,1},
            {old_catch,1},
-           {recv_catch,1}]}.
+           {recv_catch,1},
+           {try_catch,0}]}.
 
 {attributes, []}.
 
-{labels, 16}.
+{labels, 19}.
 
 
 {function, call, 0, 2}.
@@ -70,21 +71,41 @@
     return.
 
 
-{function, module_info, 0, 13}.
+{function, try_catch, 0, 13}.
   {label,12}.
+    {line,[{location,"b.erl",24}]}.
+    {func_info,{atom,b},{atom,try_catch},0}.
+  {label,13}.
+    {allocate,1,0}.
+    {'try',{y,0},{f,14}}.
+    {line,[{location,"b.erl",26}]}.
+    {call_ext,0,{extfunc,erlang,unknown_function,0}}.
+    {try_end,{y,0}}.
+    {deallocate,1}.
+    return.
+  {label,14}.
+    {try_case,{y,0}}.
+    {test_heap,3,2}.
+    {put_tuple2,{x,0},{list,[{x,0},{x,1}]}}.
+    {deallocate,1}.
+    return.
+
+
+{function, module_info, 0, 16}.
+  {label,15}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,13}.
+  {label,16}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 15}.
-  {label,14}.
+{function, module_info, 1, 18}.
+  {label,17}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,15}.
+  {label,18}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.

@@ -1,6 +1,6 @@
 -module(b).
 
--export([call/0, recv_catch/1, old_catch/1]).
+-export([call/0, recv_catch/1, old_catch/1, try_catch/0]).
 
 call() ->
     ok.
@@ -20,3 +20,11 @@ recv_catch(Msg) ->
 
 old_catch(X) ->
         catch (3 - X).
+
+try_catch() ->
+    try
+        erlang:unknown_function()
+    catch
+        Type:E ->
+            {Type, E}
+    end.

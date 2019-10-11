@@ -6,7 +6,8 @@ public class Test {
         new TestCase("lists", "append", new ErlTerm[]{new ErlList()}, ErlTerm.parse("[]")),
         new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[1, 2], [3]]")}, ErlTerm.parse("[1, 2, 3]")),
         new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[a] | b]")}, new ErlException(ErlTerm.parse("{function_clause, {lists, append, [b]}}"))),
-        new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message"))
+        new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message")),
+        new TestCase("b", "try_catch", new ErlTerm[]{}, ErlTerm.parse("{error, undef}"))
     };
 
     public Test() throws Exception {
