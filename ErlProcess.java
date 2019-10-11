@@ -68,12 +68,12 @@ public class ErlProcess {
                         jump(tryLabel);
                         tryLabel = null;
                     } else
-                        return new ErlException("badarg");
+                        return new ErlException(new ErlAtom("badarg"));
                 }
             } else {
                 if (result instanceof ErlException) {
                     if (tryLabel != null) {
-                        set_reg(tryRegister, result);
+                        set_reg(tryRegister, ((ErlException) result).getValue());
                         jump(tryLabel);
                         tryLabel = null;
                     } else
@@ -104,14 +104,19 @@ public class ErlProcess {
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
         case 2: // func_info
-            String func_info = op.args.get(0) + ":" + op.args.get(1) + "(";
+            ErlTuple func = new ErlTuple();
+            func.add(op.args.get(0));
+            func.add(op.args.get(1));
+            ErlList arglist = new ErlList();
             int argc = ((ErlInt) op.args.get(2)).getValue();
             for (int i = 0; i < argc; i++) {
-                if (i > 0) func_info += ",";
-                func_info += x_reg.get(i).toString();
+                arglist.add(x_reg.get(i));
             }
-            func_info += ")";
-            return new ErlException("function_clause " + func_info);
+            func.add(arglist);
+            ErlTuple func_info = new ErlTuple();
+            func_info.add(new ErlAtom("function_clause"));
+            func_info.add(func);
+            return new ErlException(func_info);
         case 4: // call
             save_ip(ip + 1);
             save();
@@ -134,7 +139,8 @@ public class ErlProcess {
         case 9: // bif0
             Import bif0_mfa = file.getImport(((ErlInt) op.args.get(0)).getValue());
             ErlTerm bif0_result = bif0(bif0_mfa);
-            if (bif0_result == null) return new ErlException("bif0 error");
+            if (bif0_result instanceof ErlException)
+                return bif0_result;
             set_reg(op.args.get(1), bif0_result);
             ip++;
             return null;
@@ -380,7 +386,7 @@ public class ErlProcess {
                 }
             }
         }
-        return new ErlException("gc_bif2 " + arg1.toString() + " " + arg2.toString());
+        return new ErlException(new ErlAtom("badarg"));
     }
 
     private ErlTerm bif0(Import mfa) {
@@ -391,7 +397,7 @@ public class ErlProcess {
                 return getPid();
             }
         }
-        return new ErlException("bif0");
+        return new ErlException(new ErlAtom("badarg"));
     }
 
     private void set_reg(ErlTerm reg, ErlTerm value) {
@@ -449,7 +455,8 @@ public class ErlProcess {
                 x_reg.set(0, newtuple);
                 return newtuple;
             }
-            ip++; // continue if no matches
+            x_reg.set(0, new ErlAtom("error"));
+            return new ErlException(new ErlAtom("undef"));
         } else {
             if (!last) { save(); save_ip(ip + 1); }
             file = vm.getModule(mod).file;

@@ -11,7 +11,7 @@ recv_catch(Msg) ->
             Msg
     after 1000 ->
             try
-                Msg * 2
+                erlang:unknown_function(Msg)
             catch
                 Type:E ->
                     {Type, E}

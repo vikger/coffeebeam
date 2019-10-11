@@ -40,8 +40,10 @@
     {wait_timeout,{f,5},{integer,1000}}.
     timeout.
     {'try',{y,1},{f,8}}.
+    {move,{y,0},{x,0}}.
+    {kill,{y,0}}.
     {line,[{location,"b.erl",14}]}.
-    {gc_bif,'*',{f,0},0,[{y,0},{integer,2}],{x,0}}.
+    {call_ext,1,{extfunc,erlang,unknown_function,1}}.
     {try_end,{y,1}}.
     {deallocate,2}.
     return.

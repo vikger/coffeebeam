@@ -657,10 +657,11 @@ class ErlString extends ErlTerm {
 }
 
 class ErlException extends ErlTerm {
-    private String value;
-    public ErlException(String v) { super("exception"); value = v; }
-    public String toString() { return "** exception: " + value; }
-    public String toId() { return tag + "(" + value + ")"; }
+    private ErlTerm value;
+    public ErlException(ErlTerm v) { super("exception"); value = v; }
+    public String toString() { return "** exception: " + value.toString(); }
+    public String toId() { return tag + "(" + value.toId() + ")"; }
+    public ErlTerm getValue() { return value; }
 }
 
 
