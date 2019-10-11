@@ -17,6 +17,9 @@ public class ErlProcess {
     private long reduction;
     private ErlTerm result = null;
     private MessageQueue mq;
+    private boolean timeout = false;
+    private ErlLabel tryLabel = null;
+    private ErlRegister tryRegister = null;
 
     public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
@@ -59,11 +62,22 @@ public class ErlProcess {
             reduction--;
             if (result == null) {
                 if (ip == -1) {
-                    return new ErlException("badarg");
+                    if (tryLabel != null) {
+                        set_reg(tryRegister, new ErlAtom("badarg"));
+                        x_reg.set(0, new ErlAtom("error")); // TODO: needed?
+                        jump(tryLabel);
+                        tryLabel = null;
+                    } else
+                        return new ErlException("badarg");
                 }
             } else {
                 if (result instanceof ErlException) {
-                    return result;
+                    if (tryLabel != null) {
+                        set_reg(tryRegister, result);
+                        jump(tryLabel);
+                        tryLabel = null;
+                    } else
+                        return result;
                 } else if (!ip_stack.isEmpty()) {
                     restore_ip(); // TODO: check if only occurs on return
                 } else {
@@ -126,6 +140,12 @@ public class ErlProcess {
             return null;
         case 12: ip++; return null; // skip allocate
         case 13: ip++; return null; // skip allocate_heap
+        case 14: // allocate_zero
+            int zeros = ((ErlInt) op.args.get(0)).getValue();
+            for (int i = 0; i < zeros; i++)
+                y_reg.set(i, null);
+            ip++;
+            return null;
         case 16: ip++; return null; // skip test_heap
         case 18: ip++; return null; // skip deallocate
         case 19: // return
@@ -142,9 +162,12 @@ public class ErlProcess {
             mq.remove();
             ip++;
             return null;
+        case 22: // timeout
+            ip++;
+            return null;
         case 23: // loop_rec
             if (mq.size() > 0) {
-                x_reg.set(0, mq.get());
+                x_reg.set(0, mq.getNext());
                 ip++;
             } else {
                 jump((ErlLabel) op.args.get(0));
@@ -157,6 +180,16 @@ public class ErlProcess {
             } else {
                 ip++;
             }
+            return null;
+        case 26: // wait_timeout
+            if (timeout) {
+                timeout = false;
+                ip++;
+                return null;
+            }
+            state = State.WAITING;
+            vm.setTimeout(pid, ((ErlInt) op.args.get(1)).getValue());
+            jump((ErlLabel) op.args.get(0));
             return null;
         case 43: // is_eq_exact, TODO: apply for all types
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
@@ -258,10 +291,29 @@ public class ErlProcess {
             x_reg.set(0, file.getLocalFunction(((ErlInt) op.args.get(0)).getValue()));
             ip++;
             return null;
+        case 104: // try
+            tryRegister = (ErlRegister) op.args.get(0);
+            tryLabel = (ErlLabel) op.args.get(1);
+            ip++;
+            return null;
+        case 105: // try_end
+            tryLabel = null;
+            tryRegister = null;
+            ip++;
+            return null;
+        case 106: // try_case
+            x_reg.set(1, getValue(tryRegister));
+            tryLabel = null;
+            tryRegister = null;
+            ip++;
+            return null;
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
-            if (bif2_result == null) return new ErlException("bif2 error");
+            if (bif2_result instanceof ErlException) {
+                jump((ErlLabel) op.args.get(0));
+                return null;
+            }
             set_reg(op.args.get(5), bif2_result);
             ip++;
             return null;
@@ -306,6 +358,10 @@ public class ErlProcess {
         ip++; return null;
     }
 
+    public void timeout() {
+        timeout = true;
+    }
+
     private ErlTerm gc_bif2(Import mfa, ErlTerm arg1, ErlTerm arg2) {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
@@ -339,10 +395,11 @@ public class ErlProcess {
     }
 
     private void set_reg(ErlTerm reg, ErlTerm value) {
-        if (reg instanceof Xregister) {
-            x_reg.set(((Xregister) reg).getIndex(), value);
-        } else if (reg instanceof Yregister) {
-            y_reg.set(((Yregister) reg).getIndex(), value);
+        ErlRegister register = (ErlRegister) reg;
+        if (register.getType().equals("X")) {
+            x_reg.set(register.getIndex(), value);
+        } else if (register.getType().equals("Y")) {
+            y_reg.set(register.getIndex(), value);
         }
     }
 
@@ -411,13 +468,16 @@ public class ErlProcess {
     }
 
     private ErlTerm getValue(ErlTerm source) {
-        ErlTerm value;
-        if (source instanceof Xregister) {
-            value = x_reg.get(((Xregister) source).getIndex());
-        } else if (source instanceof Yregister) {
-            value =  y_reg.get(((Yregister) source).getIndex());
+        ErlTerm value = null;
+        if (source instanceof ErlRegister) {
+            ErlRegister reg = (ErlRegister) source;
+            if (reg.getType().equals("X")) {
+                value = x_reg.get(reg.getIndex());
+            } else if (reg.getType().equals("Y")) {
+                value = y_reg.get(reg.getIndex());
+            }
         } else {
-            value =  source;
+            value = source;
         }
         if (value instanceof ErlLiteral) {
             value = ((ErlLiteral) value).getValue();
@@ -545,13 +605,18 @@ class MessageQueue {
         messages.add(message);
     }
 
-    public ErlTerm get() {
-        current = 0; // TODO: rotating check
-        return messages.get(0);
+    public ErlTerm getNext() {
+        ErlTerm message = messages.get(current++);
+        if (current >= size()) current = 0;
+        return message;
     }
 
     public void remove() {
         messages.remove(current);
+    }
+
+    public void reset() {
+        current = 0;
     }
 
     public int size() {

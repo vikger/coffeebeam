@@ -60,6 +60,10 @@ public class BeamVM {
         scheduler.send(pid, message);
     }
 
+    public void setTimeout(ErlPid pid, int timeout) {
+        scheduler.setTimeout(pid, timeout);
+    }
+
     public ErlTerm test(String module, String function, ErlTerm[] args) {
         ErlProcess p = scheduler.newProcess();
         p.prepare(module, function, args);
@@ -119,10 +123,12 @@ class Scheduler {
     private BeamVM vm;
     private long nextPid = 1;
     private ArrayList<ErlProcess> processes;
+    private ArrayList<Timeout> timeouts;
 
     public Scheduler(BeamVM bv) {
 	vm = bv;
 	processes = new ArrayList<ErlProcess>();
+        timeouts = new ArrayList<Timeout>();
     }
     public ErlProcess newProcess() {
 	ErlProcess p = new ErlProcess(vm, new ErlPid(nextPid++));
@@ -136,22 +142,64 @@ class Scheduler {
 	}
 	return null;
     }
+    public void removeProcess(ErlProcess p) {
+        for (int i = 0; i < processes.size(); i++) {
+            if (p == processes.get(i)) {
+                processes.remove(i);
+                return;
+            }
+        }
+    }
+
     public void start() {
 	while (processes.size() > 0) {
-            ErlProcess p = processes.get(0);
-            ErlTerm result = p.run();
-            if (result == null) {
-                System.out.println("VM: reschedule " + p.getPid());
-                processes.remove(0);
-                processes.add(p);
+            ErlProcess p = checkTimeout();
+            if (p != null) {
+                p.timeout();
+                p.setState(ErlProcess.State.RUNNABLE);
+            }
+            else p = processes.get(0);
+            if (p.getState() == ErlProcess.State.RUNNABLE) {
+                ErlTerm result = p.run();
+                if (result == null) {
+                    System.out.println("VM: reschedule " + p.getPid());
+                    processes.remove(0);
+                    processes.add(p);
+                } else {
+                    System.out.println("result: " + result.toString());
+                    processes.remove(0);
+                }
             } else {
-                System.out.println("result: " + result.toString());
-                processes.remove(0);
+                removeProcess(p);
+                processes.add(p);
             }
 	}
     }
     public void send(ErlPid pid, ErlTerm message) {
         ErlProcess p = getProcess(pid);
         p.put_message(message);
+    }
+
+    public void setTimeout(ErlPid pid, int timeout) {
+        timeouts.add(new Timeout(pid, timeout));
+    }
+
+    private ErlProcess checkTimeout() {
+        long currentTime = System.currentTimeMillis();
+        for (int i = 0; i < timeouts.size(); i++) {
+            if (timeouts.get(i).timeout < currentTime)
+                return getProcess(timeouts.get(i).pid);
+        }
+        return null;
+    }
+}
+
+class Timeout {
+    ErlPid pid;
+    long timeout;
+
+    public Timeout(ErlPid p, int t) {
+        pid = p;
+        timeout = System.currentTimeMillis() + t;
     }
 }

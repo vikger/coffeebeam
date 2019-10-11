@@ -663,26 +663,19 @@ class ErlException extends ErlTerm {
     public String toId() { return tag + "(" + value + ")"; }
 }
 
-class Xregister extends ErlTerm {
-    private int index;
-    public Xregister(int i) {
-        super("Xregister");
-        index = i;
-    }
-    public String toString() { return "X(" + index + ")"; }
-    public String toId() { return tag + "(" + index + ")"; }
-    public int getIndex() { return index; }
-}
 
-class Yregister extends ErlTerm {
+class ErlRegister extends ErlTerm {
     private int index;
-    public Yregister(int i) {
-        super("Yregister");
+    private String type;
+    public ErlRegister(String t, int i) {
+        super(t + "register");
+        type = t;
         index = i;
     }
-    public String toString() { return "Y(" + index + ")"; }
+    public String toString() { return type + "(" + index + ")"; }
     public String toId() { return tag + "(" + index + ")"; }
     public int getIndex() { return index; }
+    public String getType() { return type; }
 }
 
 class ExternalTerm {
@@ -823,8 +816,8 @@ class InternalTerm {
                 case 0: return new ErlInt(value);
                 case 1: return new ErlInt(value);
                 case 2: if (value == 0) return new ErlList(); else return new ErlAtom(bf, value - 1);
-                case 3: return new Xregister(value);
-                case 4: return new Yregister(value);
+                case 3: return new ErlRegister("X", value);
+                case 4: return new ErlRegister("Y", value);
                 case 5: return new ErlLabel(value);
                 case 6: return new ErlInt(value); // TODO: character type?
                 }
@@ -858,8 +851,8 @@ class InternalTerm {
                 case 0: return new ErlInt(value);
                 case 1: return new ErlInt(value);
                 case 2: if (value == 0) return new ErlList(); else return new ErlAtom(bf, value - 1);
-                case 3: return new Xregister(value);
-                case 4: return new Yregister(value);
+                case 3: return new ErlRegister("X", value);
+                case 4: return new ErlRegister("Y", value);
                 case 5: return new ErlLabel(value);
                 case 6: return new ErlInt(value); // TODO: character type?
                 }
