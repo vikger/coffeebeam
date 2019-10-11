@@ -150,5 +150,7 @@
 
 % b recv_catch 1
 % ErlInt 1
-b old_catch 1
-ErlInt 1
+% b old_catch 1
+% ErlInt 1
+
+b throw 0

@@ -460,6 +460,9 @@ public class ErlProcess {
                 }
                 x_reg.set(0, newtuple);
                 return newtuple;
+            } else if (function.equals("throw")) {
+                if (!last) { ip_stack.pop(); module_stack.pop(); }
+                return new ErlException(x_reg.get(0));
             }
             x_reg.set(0, new ErlAtom("error"));
             if (!last) { ip_stack.pop(); module_stack.pop(); }

@@ -1,6 +1,6 @@
 -module(b).
 
--export([call/0, recv_catch/1, old_catch/1, try_catch/0]).
+-export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0]).
 
 call() ->
     ok.
@@ -28,3 +28,6 @@ try_catch() ->
         Type:E ->
             {Type, E}
     end.
+
+throw() ->
+    throw(strange).
