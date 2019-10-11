@@ -260,6 +260,16 @@ public class ErlProcess {
             }
             jump(op.args.get(1));
             return null;
+        case 62: // catch
+            try_catch_stack.push(new TryCatch("catch", (ErlLabel) op.args.get(1), (ErlRegister) op.args.get(0)));
+            set_reg((ErlRegister) op.args.get(0), null);
+            ip++;
+            return null;
+        case 63: // catch_end
+            if (getValue(op.args.get(0)) != null)
+                x_reg.set(0, getValue(op.args.get(0)));
+            ip++;
+            return null;
         case 64: // move
             ErlTerm value = getValue(op.args.get(0));
             ErlTerm reg = op.args.get(1);
@@ -314,8 +324,7 @@ public class ErlProcess {
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
             if (bif2_result instanceof ErlException) {
-                jump((ErlLabel) op.args.get(0));
-                return null;
+                return bif2_result;
             }
             set_reg(op.args.get(5), bif2_result);
             ip++;
