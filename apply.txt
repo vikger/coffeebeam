@@ -148,7 +148,7 @@
 % a bignum2 0
 % a bignum3 0
 
-b recv_catch 1
-ErlInt 1
+% b recv_catch 1
+% ErlInt 1
 b old_catch 1
 ErlInt 1

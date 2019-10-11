@@ -9,6 +9,7 @@ public class ErlProcess {
     private Stack<Integer> ip_stack;
     private Stack<Register> reg_stack;
     private Stack<BeamFile> module_stack;
+    private Stack<TryCatch> try_catch_stack;
     private Import mfa;
     private ErlPid pid;
     public static enum State {RUNNING, RUNNABLE, WAITING}
@@ -18,8 +19,6 @@ public class ErlProcess {
     private ErlTerm result = null;
     private MessageQueue mq;
     private boolean timeout = false;
-    private ErlLabel tryLabel = null;
-    private ErlRegister tryRegister = null;
 
     public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
@@ -31,6 +30,7 @@ public class ErlProcess {
         module_stack = new Stack<BeamFile>();
         reduction = reduction_max;
         mq = new MessageQueue();
+        try_catch_stack = new Stack<TryCatch>();
     }
 
     public void prepare(String module, String function, ErlTerm[] args) {
@@ -62,20 +62,21 @@ public class ErlProcess {
             reduction--;
             if (result == null) {
                 if (ip == -1) {
-                    if (tryLabel != null) {
-                        set_reg(tryRegister, new ErlAtom("badarg"));
-                        x_reg.set(0, new ErlAtom("error")); // TODO: needed?
-                        jump(tryLabel);
-                        tryLabel = null;
+                    if (!try_catch_stack.isEmpty()) {
+                        TryCatch tc = try_catch_stack.pop();
+                        set_reg(tc.register, new ErlAtom("badarg"));
+                        if (tc.type.equals("try"))
+                            x_reg.set(0, new ErlAtom("error")); // TODO: needed?
+                        jump(tc.label);
                     } else
                         return new ErlException(new ErlAtom("badarg"));
                 }
             } else {
                 if (result instanceof ErlException) {
-                    if (tryLabel != null) {
-                        set_reg(tryRegister, ((ErlException) result).getValue());
-                        jump(tryLabel);
-                        tryLabel = null;
+                    if (!try_catch_stack.isEmpty()) {
+                        TryCatch tc = try_catch_stack.pop();
+                        set_reg(tc.register, ((ErlException) result).getValue());
+                        jump(tc.label);
                     } else
                         return result;
                 } else if (!ip_stack.isEmpty()) {
@@ -298,19 +299,15 @@ public class ErlProcess {
             ip++;
             return null;
         case 104: // try
-            tryRegister = (ErlRegister) op.args.get(0);
-            tryLabel = (ErlLabel) op.args.get(1);
+            try_catch_stack.push(new TryCatch("try", (ErlLabel) op.args.get(1), (ErlRegister) op.args.get(0)));
             ip++;
             return null;
         case 105: // try_end
-            tryLabel = null;
-            tryRegister = null;
+            try_catch_stack.pop();
             ip++;
             return null;
         case 106: // try_case
-            x_reg.set(1, getValue(tryRegister));
-            tryLabel = null;
-            tryRegister = null;
+            x_reg.set(1, getValue(op.args.get(0)));
             ip++;
             return null;
         case 125: // gc_bif2
@@ -456,6 +453,7 @@ public class ErlProcess {
                 return newtuple;
             }
             x_reg.set(0, new ErlAtom("error"));
+            if (!last) { ip_stack.pop(); module_stack.pop(); }
             return new ErlException(new ErlAtom("undef"));
         } else {
             if (!last) { save(); save_ip(ip + 1); }
@@ -591,6 +589,10 @@ class Stack<T> {
         return item;
     }
 
+    public T get() {
+        return items.get(items.size() - 1);
+    }
+
     public boolean isEmpty() {
         return items.size() == 0;
     }
@@ -628,5 +630,16 @@ class MessageQueue {
 
     public int size() {
         return messages.size();
+    }
+}
+
+class TryCatch {
+    String type;
+    ErlLabel label;
+    ErlRegister register;
+    public TryCatch(String t, ErlLabel l, ErlRegister r) {
+        type = t;
+        label = l;
+        register = r;
     }
 }
