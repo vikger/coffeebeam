@@ -310,6 +310,104 @@ abstract class ErlTerm {
     public abstract String toId();
     public String getTag() { return tag; }
     public boolean isReference() { return reference; }
+    public static ErlTerm parse(String s) {
+        ParseResult pr = parse_term(s);
+        return pr.term;
+    }
+    public static ParseResult parse_term(String s) {
+        s = skipWs(s);
+        if (s.charAt(0) >= 'a' && s.charAt(0) <= 'z')
+            return parseAtom(s);
+        else if (isDigit(s.charAt(0)))
+            return parseNumber(s);
+        else if (s.charAt(0) == '[')
+            return parseList(s);
+        else if (s.charAt(0) == '{')
+            return parseTuple(s);
+        return new ParseResult(null, s);
+    }
+    private static String skipWs(String s) {
+        while (s.charAt(0) == ' ' || s.charAt(0) == '\t')
+            s = s.substring(1);
+        return s;
+    }
+    private static ParseResult parseAtom(String s) {
+        String name = String.valueOf(s.charAt(0));
+        s = s.substring(1);
+        while (!s.isEmpty() && isAtomSubChar(s.charAt(0))) {
+            name += s.charAt(0);
+            s = s.substring(1);
+        }
+        return new ParseResult(new ErlAtom(name), s);
+    }
+    private static ParseResult parseNumber(String s) {
+        int intvalue = s.charAt(0) - '0';
+        s = s.substring(1);
+        while (!s.isEmpty() && isDigit(s.charAt(0))) {
+            intvalue = 10 * intvalue + s.charAt(0) - '0';
+            s = s.substring(1);
+        } // TODO: parse float
+        return new ParseResult(new ErlInt(intvalue), s);
+    }
+    private static ParseResult parseList(String s) {
+        s = s.substring(1);
+        s = skipWs(s);
+        ErlList list = new ErlList();
+        s = parseFromHead(s, list);
+        return new ParseResult(list, s);
+    }
+    private static String parseFromHead(String s, ErlList list) {
+        while (s.charAt(0) != ']') {
+            ParseResult prhead = parse_term(s);
+            list.add(prhead.term);
+            s = prhead.remaining;
+            s = skipWs(s);
+            if (s.charAt(0) == ',') {
+                s = s.substring(1);
+                s = skipWs(s);
+            } else if (s.charAt(0) == '|') {
+                s = s.substring(1);
+                ParseResult prtail = parse_term(s);
+                list.setTail(prtail.term);
+                s = prtail.remaining;
+                s = skipWs(s);
+            }
+        }
+        s = s.substring(1);
+        return s;
+    }
+    private static ParseResult parseTuple(String s) {
+        s = s.substring(1);
+        s = skipWs(s);
+        ErlTuple tuple = new ErlTuple();
+        while (s.charAt(0) != '}') {
+            ParseResult pritem = parse_term(s);
+            tuple.add(pritem.term);
+            s = pritem.remaining;
+            s = skipWs(s);
+            if (s.charAt(0) == ',') {
+                s = s.substring(1);
+                s = skipWs(s);
+            }
+        }
+        s = s.substring(1);
+        return new ParseResult(tuple, s);
+    }
+    private static boolean isAtomSubChar(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
+    }
+    private static boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+}
+
+class ParseResult {
+    ErlTerm term;
+    String remaining;
+    public ParseResult(ErlTerm t, String r) {
+        term = t;
+        remaining = r;
+    }
 }
 
 class GenericErlTerm extends ErlTerm {
@@ -338,7 +436,7 @@ class ErlInt extends ErlNumber {
         super("integer");
         value = v;
     }
-    public String toString() { return "i(" + value + ")"; }
+    public String toString() { return Integer.toString(value); }
 
     public String toId() { return tag + "(" + value + ")"; }
 

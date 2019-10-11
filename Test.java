@@ -1,20 +1,11 @@
 public class Test {
     private TestCase[] tests = {
-        new TestCase("a", "test", new ErlTerm[]{new ErlAtom("a")}, new ErlAtom("ok")),
-        new TestCase("a", "test", new ErlTerm[]{new ErlAtom("b")}, new ErlException(new ErlAtom("function_clause"))),
-        new TestCase("a", "list", new ErlTerm[]{}, new ErlList(new ErlAtom("a"), new ErlList(new ErlInt(1), new ErlList()))),
-        new TestCase("lists", "append", new ErlTerm[]{new ErlList()}, new ErlList()),
-        new TestCase("lists", "append", new ErlTerm[]{new ErlList(new ErlList(new ErlInt(1),
-                                                                              new ErlList(new ErlInt(2),
-                                                                                          new ErlList())),
-                                                                  new ErlList(new ErlList(new ErlInt(3),
-                                                                                          new ErlList()),
-                                                                              new ErlList()))},
-            new ErlList(new ErlInt(1),
-                        new ErlList(new ErlInt(2),
-                                    new ErlList(new ErlInt(3), new ErlList())))),
-        new TestCase("lists", "append", new ErlTerm[]{new ErlList(new ErlList(new ErlAtom("a"), new ErlList()),
-                                                                  new ErlAtom("b"))}, new ErlException(new ErlAtom("function_clause"))),
+        new TestCase("a", "test", new ErlTerm[]{new ErlAtom("a")}, ErlTerm.parse("ok")),
+        new TestCase("a", "test", new ErlTerm[]{new ErlAtom("b")}, new ErlException(ErlTerm.parse("{function_clause, {a, test, [b]}}"))),
+        new TestCase("a", "list", new ErlTerm[]{}, ErlTerm.parse("[a, 1]")),
+        new TestCase("lists", "append", new ErlTerm[]{new ErlList()}, ErlTerm.parse("[]")),
+        new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[1, 2], [3]]")}, ErlTerm.parse("[1, 2, 3]")),
+        new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[a] | b]")}, new ErlException(ErlTerm.parse("{function_clause, {lists, append, [b]}}"))),
         new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message"))
     };
 
