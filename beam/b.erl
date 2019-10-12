@@ -1,6 +1,6 @@
 -module(b).
 
--export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0]).
+-export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1]).
 
 call() ->
     ok.
@@ -31,3 +31,9 @@ try_catch() ->
 
 throw() ->
     throw(strange).
+
+bin(X) ->
+    <<X,100,101,102>>.
+
+bin1(X) ->
+    <<48,49,50,51,X>>.

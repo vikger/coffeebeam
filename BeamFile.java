@@ -15,6 +15,7 @@ public class BeamFile {
     private ArrayList<ErlOp> codeTable;
     private ArrayList<Integer> labelRefs;
     private ErlTerm attributes;
+    private ErlBinary strTable;
 
     private BeamFile() {}
     public BeamFile(String fn) {
@@ -110,6 +111,13 @@ public class BeamFile {
         attributes = ExternalTerm.read(br);
     }
 
+    public void readStr(ByteReader br) throws IOException {
+	strTable = new ErlBinary();
+	int newbyte;
+	while ((newbyte = br.readByte()) != -1)
+	    strTable.add(newbyte);
+    }
+
     public void dump() {
         printAtoms();
         printLiterals();
@@ -119,6 +127,7 @@ public class BeamFile {
         printCodeTable();
         printLabelRefs();
         printAttributes();
+	printStrTable();
     }
 
     private void printAtoms() {
@@ -175,6 +184,10 @@ public class BeamFile {
         System.out.println("Attributes: " + attributes.toString());
     }
 
+    public void printStrTable() {
+	System.out.println("StrTable: " + strTable.toString());
+    }
+
     public String getModuleName() {
         return atoms.get(0);
     }
@@ -204,6 +217,10 @@ public class BeamFile {
 
     public ErlFun getLocalFunction(int index) {
         return localFunctions.get(index);
+    }
+
+    public int getStrByte(int index) {
+	return strTable.get(index);
     }
 }
 
@@ -324,6 +341,11 @@ abstract class ErlTerm {
             return parseList(s);
         else if (s.charAt(0) == '{')
             return parseTuple(s);
+	else if (s.charAt(0) == '<') {
+	    if (s.charAt(1) == '<')
+		return parseBinary(s);
+	    // else parse pid, port, ...
+	}
         return new ParseResult(null, s);
     }
     private static String skipWs(String s) {
@@ -392,6 +414,24 @@ abstract class ErlTerm {
         }
         s = s.substring(1);
         return new ParseResult(tuple, s);
+    }
+    private static ParseResult parseBinary(String s) {
+	s = s.substring(2);
+	s = skipWs(s);
+	ErlBinary bin = new ErlBinary();
+	while (s.charAt(0) != '>') {
+	    int binbyte = 0;
+	    while (isDigit(s.charAt(0))) {
+		binbyte = 10 * binbyte + s.charAt(0) - '0';
+		s = s.substring(1);
+	    }
+	    bin.add(binbyte);
+	    s = skipWs(s);
+	    if (s.charAt(0) == ',')
+		s = s.substring(1);
+	}
+	s = s.substring(2);
+	return new ParseResult(bin, s);
     }
     private static boolean isAtomSubChar(char c) {
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
@@ -714,6 +754,45 @@ class ErlMap extends ErlTerm {
     }
 }
 
+class ErlBinary extends ErlTerm {
+    ArrayList<Integer> bytes;
+
+    public ErlBinary() {
+	super("binary");
+	bytes = new ArrayList<Integer>();
+    }
+
+    public void add(int segment) {
+	bytes.add(segment);
+    }
+
+    public int get(int index) {
+	return bytes.get(index);
+    }
+
+    public ErlBinary get(int index, int length) {
+	ErlBinary result = new ErlBinary();
+	for (int i = index; i < index + length; i++)
+	    result.add(bytes.get(i));
+	return result;
+    }
+
+    public String toString() {
+	String str = "<<";
+	for (int i = 0; i < bytes.size(); i++) {
+	    if (i == 0)
+		str += bytes.get(i);
+	    else
+		str += "," + bytes.get(i);
+	}
+	return str + ">>";
+    }
+
+    public String toId() {
+	return toString();
+    }
+}
+
 class ErlLiteral extends ErlTerm {
     private BeamFile beamfile;
     private int value;
@@ -836,10 +915,11 @@ class ExternalTerm {
             return list;
         case 109: // BINARY_EXT
             long binary_length = br.read32BitUnsigned();
-            System.out.println("BINARY_EXT(" + binary_length + "): ");
+	    ErlBinary bin = new ErlBinary();
             for (long j = 0; j < binary_length; j++) {
-                System.out.println(br.readByte() + " ");
+		bin.add(br.readByte());
             }
+	    return bin;
         case 110: // SMALL_BIG_EXT
             int sb_length = br.readByte();
             int sign = br.readByte();

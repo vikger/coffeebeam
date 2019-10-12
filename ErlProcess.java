@@ -19,6 +19,7 @@ public class ErlProcess {
     private ErlTerm result = null;
     private MessageQueue mq;
     private boolean timeout = false;
+    private ErlBinary binary = null;
 
     public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
@@ -304,6 +305,22 @@ public class ErlProcess {
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, true);
+	case 89: // bs_put_integer
+	    ErlTerm bs_put_value = getValue(op.args.get(4));
+	    if (bs_put_value instanceof ErlInt) {
+		binary.add(((ErlInt) bs_put_value).getValue());
+		ip++;
+	    } else {
+		jump(op.args.get(0)); // error
+	    }
+	    return null;
+	case 92: // bs_put_string
+	    int bs_put_index = ((ErlInt) op.args.get(1)).getValue();
+	    int bs_put_length = ((ErlInt) op.args.get(0)).getValue();
+	    for (int i = bs_put_index; i < bs_put_index + bs_put_length; i++)
+		binary.add(file.getStrByte(i));
+	    ip++;
+	    return null;
         case 103: // make_fun2
             x_reg.set(0, file.getLocalFunction(((ErlInt) op.args.get(0)).getValue()));
             ip++;
@@ -320,6 +337,11 @@ public class ErlProcess {
             x_reg.set(1, getValue(op.args.get(0)));
             ip++;
             return null;
+	case 109: // bs_init2
+	    binary = new ErlBinary();
+	    set_reg((ErlRegister) op.args.get(5), binary); // target register
+	    ip++;
+	    return null;
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));

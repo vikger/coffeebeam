@@ -70,6 +70,7 @@ public class BeamReader {
         case "ExpT": beamfile.readExports(br); break;
         case "LocT": beamfile.readLocalFunctions(br); break;
         case "Attr": beamfile.readAttributes(br); break;
+	case "StrT": beamfile.readStr(br); break;
 	default:
             System.out.println("Skipped chunk " + chunkname + "(" + chunklength + ")");
 	    break;

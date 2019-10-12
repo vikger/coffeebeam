@@ -1,6 +1,8 @@
 {module, b}.  %% version = 0
 
-{exports, [{call,0},
+{exports, [{bin,1},
+           {bin1,1},
+           {call,0},
            {module_info,0},
            {module_info,1},
            {old_catch,1},
@@ -10,7 +12,7 @@
 
 {attributes, []}.
 
-{labels, 21}.
+{labels, 25}.
 
 
 {function, call, 0, 2}.
@@ -102,21 +104,47 @@
     {call_ext,1,{extfunc,erlang,throw,1}}.
 
 
-{function, module_info, 0, 18}.
+{function, bin, 1, 18}.
   {label,17}.
+    {line,[{location,"b.erl",35}]}.
+    {func_info,{atom,b},{atom,bin},1}.
+  {label,18}.
+    {line,[{location,"b.erl",36}]}.
+    {bs_init2,{f,0},4,0,1,{field_flags,[]},{x,1}}.
+    {bs_put_integer,{f,0},{integer,8},1,{field_flags,[unsigned,big]},{x,0}}.
+    {bs_put_string,3,{string,<<"def">>}}.
+    {move,{x,1},{x,0}}.
+    return.
+
+
+{function, bin1, 1, 20}.
+  {label,19}.
+    {line,[{location,"b.erl",38}]}.
+    {func_info,{atom,b},{atom,bin1},1}.
+  {label,20}.
+    {line,[{location,"b.erl",39}]}.
+    {bs_init2,{f,0},5,0,1,{field_flags,[]},{x,1}}.
+    {bs_put_string,4,{string,<<"0123">>}}.
+    {bs_put_integer,{f,0},{integer,8},1,{field_flags,[unsigned,big]},{x,0}}.
+    {move,{x,1},{x,0}}.
+    return.
+
+
+{function, module_info, 0, 22}.
+  {label,21}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,18}.
+  {label,22}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 20}.
-  {label,19}.
+{function, module_info, 1, 24}.
+  {label,23}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,20}.
+  {label,24}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.

@@ -153,4 +153,10 @@
 % b old_catch 1
 % ErlInt 1
 
-b throw 0
+% b throw 0
+
+b bin 1
+ErlInt 10
+
+b bin1 1
+ErlInt 11
