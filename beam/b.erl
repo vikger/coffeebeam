@@ -1,6 +1,6 @@
 -module(b).
 
--export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1]).
+-export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1]).
 
 call() ->
     ok.
@@ -37,3 +37,8 @@ bin(X) ->
 
 bin1(X) ->
     <<48,49,50,51,X>>.
+
+bin2(<<A:1,B:2,C:5,D/binary>>) ->
+    [{A, B, C} | bin2(D)];
+bin2(<<>>) ->
+    [].

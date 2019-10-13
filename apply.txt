@@ -155,8 +155,5 @@
 
 % b throw 0
 
-b bin 1
-ErlInt 10
-
-b bin1 1
-ErlInt 11
+b bin2 1
+ErlBinary 161 194

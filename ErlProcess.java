@@ -20,6 +20,8 @@ public class ErlProcess {
     private MessageQueue mq;
     private boolean timeout = false;
     private ErlBinary binary = null;
+    private ErlBinary match_binary = null;
+    private int match_position;
 
     public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
@@ -342,6 +344,24 @@ public class ErlProcess {
 	    set_reg((ErlRegister) op.args.get(5), binary); // target register
 	    ip++;
 	    return null;
+	case 117: // bs_get_integer2
+	    ErlBinary getintbin = (ErlBinary) getValue(op.args.get(1));
+	    int getintlength = ((ErlInt) op.args.get(3)).getValue();
+	    if (getintbin.bitSize() >= getintlength) {
+		int getintvalue = getintbin.getInteger(getintlength);
+		set_reg((ErlRegister) op.args.get(6), new ErlInt(getintvalue));
+		ip++;
+		return null;
+	    }
+	    jump((ErlLabel) op.args.get(0));
+	    return null;
+	case 121: // bs_test_tail2
+	    if (((ErlBinary) getValue(op.args.get(1))).bitSize() == ((ErlInt) op.args.get(2)).getValue()) {
+		ip++;
+		return null;
+	    }
+	    jump((ErlLabel) op.args.get(0));
+	    return null;
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
@@ -351,6 +371,13 @@ public class ErlProcess {
             set_reg(op.args.get(5), bif2_result);
             ip++;
             return null;
+	case 131: // bs_test_unit
+	    if (((ErlBinary) getValue(op.args.get(1))).position != 0) {
+		jump((ErlLabel) op.args.get(0));
+		return null;
+	    }
+	    ip++;
+	    return null;
         case 136: // trim
             y_reg.trim(((ErlInt) op.args.get(0)).getValue());
             ip++;
@@ -387,6 +414,25 @@ public class ErlProcess {
             set_reg(op.args.get(0), tuple);
             ip++;
             return null;
+	case 166: // bs_start_match3
+	    ErlTerm matchbin = getValue(op.args.get(1));
+	    if (matchbin instanceof ErlBinary) {
+		ErlBinary bin = (ErlBinary) matchbin;
+		set_reg(op.args.get(3), matchbin); // TODO: clone, startMatch, set startpos
+		ip++;
+	    } else {
+		jump(op.args.get(0));
+	    }
+	    return null;
+	case 167: // bs_get_position
+	    ErlBinary bin = (ErlBinary) getValue(op.args.get(0));
+	    set_reg(op.args.get(1), new ErlInt(bin.getPosition()));
+	    ip++;
+	    return null;
+	case 168: // bs_set_position
+	    ((ErlBinary) getValue(op.args.get(0))).position = ((ErlInt) getValue(op.args.get(1))).getValue();
+	    ip++;
+	    return null;
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
         }
         ip++; return null;

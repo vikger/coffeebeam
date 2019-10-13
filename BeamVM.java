@@ -96,6 +96,12 @@ public class BeamVM {
                 map.add(readTerm(reader), readTerm(reader));
             }
             return map;
+	} else if (term[0].equals("ErlBinary")) {
+	    String[] binstr = term[1].split(" ");
+	    ErlBinary bin = new ErlBinary();
+	    for (int i = 0; i < binstr.length; i++)
+		bin.add(Integer.valueOf(binstr[i]));
+	    return bin;
         } else System.out.println("Unknown type: '" + term[0] + "'");
         return null;
     }

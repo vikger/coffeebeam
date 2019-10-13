@@ -756,6 +756,7 @@ class ErlMap extends ErlTerm {
 
 class ErlBinary extends ErlTerm {
     ArrayList<Integer> bytes;
+    int position = 0;
 
     public ErlBinary() {
 	super("binary");
@@ -775,6 +776,38 @@ class ErlBinary extends ErlTerm {
 	for (int i = index; i < index + length; i++)
 	    result.add(bytes.get(i));
 	return result;
+    }
+
+    public int getBit() {
+	int b = bytes.get(0);
+	int bit = (b & (1 << (7 - position))) >> (7 - position);
+	position++;
+	if (position == 8) {
+	    bytes.remove(0);
+	    position = 0;
+	}
+	return bit;
+    }
+
+    public int getInteger(int length) {
+	int result = 0;
+	while (length > 0) {
+	    result = (result << 1) + getBit();
+	    length--;
+	}
+	return result;
+    }
+
+    public int startMatch() {
+	return position;
+    }
+
+    public int getPosition() {
+	return position;
+    }
+
+    public int bitSize() {
+	return 8 * bytes.size() - position;
     }
 
     public String toString() {

@@ -2,6 +2,7 @@
 
 {exports, [{bin,1},
            {bin1,1},
+           {bin2,1},
            {call,0},
            {module_info,0},
            {module_info,1},
@@ -12,7 +13,7 @@
 
 {attributes, []}.
 
-{labels, 25}.
+{labels, 29}.
 
 
 {function, call, 0, 2}.
@@ -130,21 +131,77 @@
     return.
 
 
-{function, module_info, 0, 22}.
+{function, bin2, 1, 22}.
   {label,21}.
+    {line,[{location,"b.erl",41}]}.
+    {func_info,{atom,b},{atom,bin2},1}.
+  {label,22}.
+    {'%',{type_info,{x,0},match_context}}.
+    {test,bs_start_match3,{f,21},1,[{x,0}],{x,1}}.
+    {bs_get_position,{x,1},{x,0},2}.
+    {test,bs_get_integer2,
+          {f,23},
+          2,
+          [{x,1},
+           {integer,1},
+           1,
+           {field_flags,[{anno,[41,{file,"b.erl"}]},unsigned,big]}],
+          {x,2}}.
+    {test,bs_get_integer2,
+          {f,23},
+          3,
+          [{x,1},
+           {integer,2},
+           1,
+           {field_flags,[{anno,[41,{file,"b.erl"}]},unsigned,big]}],
+          {x,3}}.
+    {test,bs_get_integer2,
+          {f,23},
+          4,
+          [{x,1},
+           {integer,5},
+           1,
+           {field_flags,[{anno,[41,{file,"b.erl"}]},unsigned,big]}],
+          {x,4}}.
+    {test,bs_test_unit,{f,23},[{x,1},8]}.
+    {allocate,3,5}.
+    {move,{x,4},{y,0}}.
+    {move,{x,3},{y,1}}.
+    {move,{x,2},{y,2}}.
+    {move,{x,1},{x,0}}.
+    {line,[{location,"b.erl",42}]}.
+    {call,1,{f,22}}.
+    {'%',{type_info,{x,0},list}}.
+    {test_heap,6,1}.
+    {put_tuple2,{x,1},{list,[{y,2},{y,1},{y,0}]}}.
+    {put_list,{x,1},{x,0},{x,0}}.
+    {deallocate,3}.
+    return.
+  {label,23}.
+    {bs_set_position,{x,1},{x,0}}.
+    {test,bs_test_tail2,{f,24},[{x,1},0]}.
+    {move,nil,{x,0}}.
+    return.
+  {label,24}.
+    {bs_get_tail,{x,1},{x,0},2}.
+    {jump,{f,21}}.
+
+
+{function, module_info, 0, 26}.
+  {label,25}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,22}.
+  {label,26}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 24}.
-  {label,23}.
+{function, module_info, 1, 28}.
+  {label,27}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,24}.
+  {label,28}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
