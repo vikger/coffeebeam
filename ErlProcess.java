@@ -362,6 +362,15 @@ public class ErlProcess {
 	    }
 	    jump((ErlLabel) op.args.get(0));
 	    return null;
+	case 124: // gc_bif1
+            Import bif1_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
+            ErlTerm bif1_result = gc_bif1(bif1_mfa, getValue(op.args.get(3)));
+            if (bif1_result instanceof ErlException) {
+                return bif1_result;
+            }
+            set_reg(op.args.get(4), bif1_result);
+            ip++;
+            return null;
         case 125: // gc_bif2
             Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
@@ -440,6 +449,17 @@ public class ErlProcess {
 
     public void timeout() {
         timeout = true;
+    }
+
+    private ErlTerm gc_bif1(Import mfa, ErlTerm arg) {
+        String mod = file.getAtomName(mfa.getModule());
+        String function = file.getAtomName(mfa.getFunction());
+        if (mod.equals("erlang")) {
+	    // if ... special functions
+	    return ErlBif.op(function, arg);
+        }
+	System.out.println(function + " " + arg);
+        return new ErlException(new ErlAtom("badarg"));
     }
 
     private ErlTerm gc_bif2(Import mfa, ErlTerm arg1, ErlTerm arg2) {
