@@ -109,6 +109,8 @@ public class BeamVM {
     public Scheduler getScheduler() { return scheduler; }
 
     public static void main(String[] args) throws Exception {
+	if (args.length > 0 && args[0].equals("debug"))
+	    BeamDebug.debug = true;
         BeamVM vm = new BeamVM();
         vm.loadModules("load.txt");
         vm.runApplies("apply.txt");

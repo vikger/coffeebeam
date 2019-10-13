@@ -581,11 +581,11 @@ public class ErlProcess {
     }
 
     private void save() {
-        reg_stack.push(y_reg.clone()); System.out.println("save: y_reg(" + y_reg.size() + ")");
+        reg_stack.push(y_reg.clone()); BeamDebug.println("save: y_reg(" + y_reg.size() + ")");
     }
 
     private void restore() {
-        y_reg = reg_stack.pop(); System.out.println("restore: y_reg(" + y_reg.size() + ")");
+        y_reg = reg_stack.pop(); BeamDebug.println("restore: y_reg(" + y_reg.size() + ")");
     }
 
     private void save_ip(int cp) {
@@ -643,11 +643,11 @@ class Register {
     }
 
     public void dump() {
-        System.out.print("    reg(" + slots.size() + "):");
+        BeamDebug.print("    reg(" + slots.size() + "):");
         for (int i = 0; i < slots.size(); i++) {
-            System.out.print("\t" + slots.get(i));
+            BeamDebug.print("\t" + slots.get(i));
         }
-        System.out.println();
+        BeamDebug.println();
     }
 
     public int size() {

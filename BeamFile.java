@@ -132,60 +132,60 @@ public class BeamFile {
 
     private void printAtoms() {
         for (int i = 0; i < atoms.size(); i++) {
-            System.out.println("Atom(" + i + "): " + atoms.get(i));
+            BeamDebug.println("Atom(" + i + "): " + atoms.get(i));
         }
     }
 
     private void printLiterals() {
         for (int i = 0; i < literals.size(); i++) {
-            System.out.println("Literal(" + i + "): " + literals.get(i).toString());
+            BeamDebug.println("Literal(" + i + "): " + literals.get(i).toString());
         }
     }
 
     private void printImports() {
         for (int i = 0; i < imports.size(); i++) {
             Import imp = imports.get(i);
-            System.out.println("Import(" + i + "): [atom " + imp.getModule() + "]:[atom " + imp.getFunction() + "] / " + imp.getArity());
+            BeamDebug.println("Import(" + i + "): [atom " + imp.getModule() + "]:[atom " + imp.getFunction() + "] / " + imp.getArity());
         }
     }
 
     private void printExports() {
         for (int i = 0; i < exports.size(); i++) {
             Export exp = exports.get(i);
-            System.out.println("Export(" + i + "): [atom " + exp.getFunction() + "] / " + exp.getArity() + " - label " + exp.getLabel());
+            BeamDebug.println("Export(" + i + "): [atom " + exp.getFunction() + "] / " + exp.getArity() + " - label " + exp.getLabel());
         }
     }
 
     private void printLocalFunctions() {
         for (int i = 0; i < localFunctions.size(); i++) {
             ErlFun loc = localFunctions.get(i);
-            System.out.println("LocalFunction(" + i + "): " + loc.toString());
+            BeamDebug.println("LocalFunction(" + i + "): " + loc.toString());
         }
     }
 
     private void printCodeTable() {
         for (int i = 0; i < codeTable.size(); i++) {
             ErlOp erlop = codeTable.get(i);
-            System.out.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
+            BeamDebug.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
             for (int j = 0; j < erlop.args.size(); j++) {
                 ErlTerm arg = erlop.args.get(j);
-                System.out.println("---- " + arg.toString());
+                BeamDebug.println("---- " + arg.toString());
             }
         }
     }
 
     public void printLabelRefs() {
         for (int i = 0; i < labelRefs.size(); i++) {
-            System.out.println("labelRefs " + i + " -> " + labelRefs.get(i));
+            BeamDebug.println("labelRefs " + i + " -> " + labelRefs.get(i));
         }
     }
 
     public void printAttributes() {
-        System.out.println("Attributes: " + attributes.toString());
+        BeamDebug.println("Attributes: " + attributes.toString());
     }
 
     public void printStrTable() {
-	System.out.println("StrTable: " + strTable.toString());
+	BeamDebug.println("StrTable: " + strTable.toString());
     }
 
     public String getModuleName() {
