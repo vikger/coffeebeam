@@ -446,20 +446,10 @@ public class ErlProcess {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         if (mod.equals("erlang")) {
-            if (function.equals("+")) {
-                if (arg1 instanceof ErlInt) {
-                    if (arg2 instanceof ErlInt) {
-                        return new ErlInt(((ErlInt) arg1).getValue() + ((ErlInt) arg2).getValue());
-                    }
-                }
-            } else if (function.equals("-")) {
-                if (arg1 instanceof ErlInt) {
-                    if (arg2 instanceof ErlInt) {
-                        return new ErlInt(((ErlInt) arg1).getValue() - ((ErlInt) arg2).getValue());
-                    }
-                }
-            }
+	    // if ... special functions
+	    return ErlBif.op(function, arg1, arg2);
         }
+	System.out.println(function + " " + arg1 + " " + arg2);
         return new ErlException(new ErlAtom("badarg"));
     }
 

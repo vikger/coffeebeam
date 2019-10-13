@@ -155,5 +155,9 @@
 
 % b throw 0
 
-b bin2 1
-ErlBinary 161 194
+% b bin2 1
+% ErlBinary 161 194
+
+numop int 2
+ErlInt 1
+ErlInt 2
