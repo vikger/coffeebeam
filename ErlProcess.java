@@ -152,6 +152,24 @@ public class ErlProcess {
             set_reg(op.args.get(1), bif0_result);
             ip++;
             return null;
+        case 10: // bif1
+            Import bif1_mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+            ErlTerm bif1_result = bif1(bif1_mfa, getValue(op.args.get(2)));
+            if (bif1_result instanceof ErlException) {
+                return bif1_result;
+            }
+            set_reg(op.args.get(3), bif1_result);
+            ip++;
+            return null;
+        case 11: // bif2
+            Import bif2_mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+            ErlTerm bif2_result = bif2(bif2_mfa, getValue(op.args.get(2)), getValue(op.args.get(3)));
+            if (bif2_result instanceof ErlException) {
+                return bif2_result;
+            }
+            set_reg(op.args.get(4), bif2_result);
+            ip++;
+            return null;
         case 12: ip++; return null; // skip allocate
         case 13: ip++; return null; // skip allocate_heap
         case 14: // allocate_zero
@@ -203,6 +221,13 @@ public class ErlProcess {
             }
             state = State.WAITING;
             vm.setTimeout(pid, ((ErlInt) op.args.get(1)).getValue());
+            jump((ErlLabel) op.args.get(0));
+            return null;
+        case 40: // is_ge
+            if (ErlBif.compare(getValue(op.args.get(1)), getValue(op.args.get(2))) >= 0) {
+                ip++;
+                return null;
+            }
             jump((ErlLabel) op.args.get(0));
             return null;
         case 43: // is_eq_exact, TODO: apply for all types
@@ -266,6 +291,9 @@ public class ErlProcess {
                 dest = (ErlList) dest_tail.tail;
             }
             jump(op.args.get(1));
+            return null;
+        case 61: // jump
+            jump((ErlLabel) op.args.get(0));
             return null;
         case 62: // catch
             try_catch_stack.push(new TryCatch("catch", (ErlLabel) op.args.get(1), (ErlRegister) op.args.get(0)));
@@ -396,21 +424,21 @@ public class ErlProcess {
 	    jump((ErlLabel) op.args.get(0));
 	    return null;
 	case 124: // gc_bif1
-            Import bif1_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
-            ErlTerm bif1_result = gc_bif1(bif1_mfa, getValue(op.args.get(3)));
-            if (bif1_result instanceof ErlException) {
-                return bif1_result;
+            Import gc_bif1_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
+            ErlTerm gc_bif1_result = bif1(gc_bif1_mfa, getValue(op.args.get(3)));
+            if (gc_bif1_result instanceof ErlException) {
+                return gc_bif1_result;
             }
-            set_reg(op.args.get(4), bif1_result);
+            set_reg(op.args.get(4), gc_bif1_result);
             ip++;
             return null;
         case 125: // gc_bif2
-            Import bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
-            ErlTerm bif2_result = gc_bif2(bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
-            if (bif2_result instanceof ErlException) {
-                return bif2_result;
+            Import gc_bif2_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
+            ErlTerm gc_bif2_result = bif2(gc_bif2_mfa, getValue(op.args.get(3)), getValue(op.args.get(4)));
+            if (gc_bif2_result instanceof ErlException) {
+                return gc_bif2_result;
             }
-            set_reg(op.args.get(5), bif2_result);
+            set_reg(op.args.get(5), gc_bif2_result);
             ip++;
             return null;
 	case 131: // bs_test_unit
@@ -484,7 +512,7 @@ public class ErlProcess {
         timeout = true;
     }
 
-    private ErlTerm gc_bif1(Import mfa, ErlTerm arg) {
+    private ErlTerm bif1(Import mfa, ErlTerm arg) {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         if (mod.equals("erlang")) {
@@ -495,7 +523,7 @@ public class ErlProcess {
         return new ErlException(new ErlAtom("badarg"));
     }
 
-    private ErlTerm gc_bif2(Import mfa, ErlTerm arg1, ErlTerm arg2) {
+    private ErlTerm bif2(Import mfa, ErlTerm arg1, ErlTerm arg2) {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         if (mod.equals("erlang")) {

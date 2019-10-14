@@ -2,6 +2,8 @@ public class ErlBif {
     public static ErlTerm op(String op, ErlTerm arg) {
 	if (op.equals("bnot"))
 	    return bnot(arg);
+        else if (op.equals("not"))
+            return not(arg);
 	ErlTuple funtuple = new ErlTuple();
 	funtuple.add(new ErlAtom("erlang"));
 	funtuple.add(new ErlAtom(op));
@@ -35,6 +37,18 @@ public class ErlBif {
 	    return bor(arg1, arg2);
 	else if (op.equals("bxor"))
 	    return bxor(arg1, arg2);
+        else if (op.equals("=<"))
+            return new ErlAtom(compare(arg1, arg2) <= 0);
+        else if (op.equals("<"))
+            return new ErlAtom(compare(arg1, arg2) < 0);
+        else if (op.equals(">="))
+            return new ErlAtom(compare(arg1, arg2) >= 0);
+        else if (op.equals(">"))
+            return new ErlAtom(compare(arg1, arg2) > 0);
+        else if (op.equals("and"))
+            return and(arg1, arg2);
+        else if (op.equals("or"))
+            return or(arg1, arg2);
 	ErlTuple funtuple = new ErlTuple();
 	funtuple.add(new ErlAtom("erlang"));
 	funtuple.add(new ErlAtom(op));
@@ -203,5 +217,122 @@ public class ErlBif {
         if (Float.isInfinite(result))
             return null;
         return new ErlFloat(result);
+    }
+
+    public static int compare(ErlTerm a, ErlTerm b) {
+        if (a.getOrder() != b.getOrder()) return compare_order(a, b);
+        if (a instanceof ErlNumber) return compare((ErlNumber) a, (ErlNumber) b);
+        if (a instanceof ErlAtom) return compare((ErlAtom) a, (ErlAtom) b);
+        if (a instanceof ErlFun) return compare((ErlFun) a, (ErlFun) b);
+        if (a instanceof ErlPid) return compare((ErlPid) a, (ErlPid) b);
+        if (a instanceof ErlTuple) return compare((ErlTuple) a, (ErlTuple) b);
+        return 0;
+    }
+
+    private static int compare(ErlNumber a, ErlNumber b) {
+        if (a instanceof ErlInt) {
+            if (b instanceof ErlInt) {
+                return compare(((ErlInt) a).getValue(), ((ErlInt) b).getValue());
+            } else if (b instanceof ErlFloat) {
+                return compare((float) ((ErlInt) a).getValue(), ((ErlFloat) b).getValue());
+            }
+        } else if (a instanceof ErlFloat) {
+            if (b instanceof ErlInt) {
+                return compare(((ErlFloat) a).getValue(), (float) ((ErlInt) b).getValue());
+            } else if (b instanceof ErlFloat) {
+                return compare(((ErlFloat) a).getValue(), ((ErlFloat) b).getValue());
+            }
+        }
+        return 0;
+    }
+
+    private static int compare_order(ErlTerm a, ErlTerm b) {
+        if (a.getOrder() < b.getOrder()) return -1;
+        if (a.getOrder() == b.getOrder()) return 0;
+        return 1;
+    }
+
+    private static int compare(ErlAtom a, ErlAtom b) {
+        return a.getValue().compareTo(b.getValue());
+    }
+
+    private static int compare(int a, int b) {
+        if (a < b) return -1;
+        if (a == b) return 0;
+        return 1;
+    }
+
+    private static int compare(float a, float b) {
+        if (a < b) return -1;
+        if (a == b) return 0;
+        return 1;
+    }
+
+    private static int compare(long a, long b) {
+        if (a < b) return -1;
+        if (a == b) return 0;
+        return 1;
+    }
+
+    private static int compare(ErlFun a, ErlFun b) {
+        if (compare(a.getName(), b.getName()) != 0) return compare(a.getName(), b.getName());
+        return compare(a.getArity(), b.getArity());
+    }
+
+    private static int compare(ErlPid a, ErlPid b) {
+        return compare(a.getValue(), b.getValue());
+    }
+
+    private static int compare(ErlTuple a, ErlTuple b) {
+        if (compare(a.size(), b.size()) != 0) return compare(a.size(), b.size());
+        for (int i = 0; i < a.size(); i++) {
+            if (compare(a.get(i), b.get(i)) != 0)
+                return compare(a.get(i), b.get(i));
+        }
+        return 0;
+    }
+
+    private static ErlTerm and(ErlTerm a, ErlTerm b) {
+        if (a instanceof ErlAtom && b instanceof ErlAtom) {
+            ErlAtom atoma = (ErlAtom) a;
+            ErlAtom atomb = (ErlAtom) b;
+            if (atoma.getValue().equals("true")) {
+                if (atomb.getValue().equals("true"))
+                    return new ErlAtom("true");
+                else if (atomb.getValue().equals("false"))
+                    return new ErlAtom("false");
+            } else if (atoma.getValue().equals("false")) {
+                if (atomb.getValue().equals("true") || atomb.getValue().equals("false"))
+                    return new ErlAtom("false");
+            }
+        }
+        return new ErlException(new ErlAtom("badarg"));
+    }
+
+    private static ErlTerm or(ErlTerm a, ErlTerm b) {
+        if (a instanceof ErlAtom && b instanceof ErlAtom) {
+            ErlAtom atoma = (ErlAtom) a;
+            ErlAtom atomb = (ErlAtom) b;
+            if (atoma.getValue().equals("true")) {
+                if (atomb.getValue().equals("true") || atomb.getValue().equals("false"))
+                    return new ErlAtom("true");
+            } else if (atoma.getValue().equals("false")) {
+                if (atomb.getValue().equals("true"))
+                    return new ErlAtom("true");
+                else if (atomb.getValue().equals("false"))
+                    return new ErlAtom("false");
+            }
+        }
+        return new ErlException(new ErlAtom("badarg"));
+    }
+
+    private static ErlTerm not(ErlTerm a) {
+        if (a instanceof ErlAtom) {
+            if (((ErlAtom) a).getValue().equals("true"))
+                return new ErlAtom("false");
+            else if (((ErlAtom) a).getValue().equals("false"))
+                return new ErlAtom("true");
+        }
+        return new ErlException(new ErlAtom("badarg"));
     }
 }

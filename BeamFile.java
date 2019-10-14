@@ -294,7 +294,7 @@ class ErlFun extends ErlTerm {
     ErlLabel label;
     private BeamFile beamfile;
     public ErlFun(BeamFile bf, int f, int a, int l) {
-        super("fun");
+        super("fun", 4);
         name = new ErlAtom(bf, f);
         arity = a;
         label = new ErlLabel(l);
@@ -321,12 +321,14 @@ class ErlOp {
 abstract class ErlTerm {
     String tag;
     boolean reference = false;
+    int order = 0;
     private ErlTerm() {}
-    public ErlTerm(String t) { tag = t; }
+    public ErlTerm(String t, int o) { tag = t; order = o; }
     public abstract String toString();
     public abstract String toId();
     public String getTag() { return tag; }
     public boolean isReference() { return reference; }
+    public int getOrder() { return order; }
     public static ErlTerm parse(String s) {
         ParseResult pr = parse_term(s);
         return pr.term;
@@ -469,7 +471,7 @@ class ParseResult {
 class GenericErlTerm extends ErlTerm {
     int value;
     public GenericErlTerm(int v) {
-        super("generic");
+        super("generic", 0);
         value = v;
     }
 
@@ -481,7 +483,7 @@ class GenericErlTerm extends ErlTerm {
 
 abstract class ErlNumber extends ErlTerm {
     public ErlNumber(String tag) {
-        super(tag);
+        super(tag, 1);
     }
 }
 
@@ -600,14 +602,19 @@ class ErlAtom extends ErlTerm {
     private BeamFile beamfile;
 
     public ErlAtom(String v) {
-        super("atom");
+        super("atom", 2);
         value = v;
     }
     public ErlAtom(BeamFile bf, int i) {
-        super("atom");
+        super("atom", 2);
         index = i;
         reference = true;
         beamfile = bf;
+    }
+    public ErlAtom(boolean b) {
+        super("atom", 2);
+        if (b) value = "true";
+        else value = "false";
     }
     public String toString() {
         return getValue();
@@ -626,10 +633,10 @@ class ErlList extends ErlTerm {
     boolean nil = true;
 
     public ErlList() {
-        super("list");
+        super("list", 9);
     }
     public ErlList(ErlTerm hd, ErlTerm tl) {
-        super("list");
+        super("list", 9);
         nil = false;
         head = hd;
         tail = tl;
@@ -690,7 +697,7 @@ class ErlTuple extends ErlTerm {
     int maxindex = -1;
 
     public ErlTuple() {
-        super("tuple");
+        super("tuple", 7);
         elements = new ArrayList<ErlTerm>();
     }
     public ErlTerm get(int i) {
@@ -739,7 +746,7 @@ class ErlMap extends ErlTerm {
     private ArrayList<ErlTerm> values;
 
     public ErlMap() {
-        super("map");
+        super("map", 8);
         keys = new ArrayList<ErlTerm>();
         values = new ArrayList<ErlTerm>();
     }
@@ -781,7 +788,7 @@ class ErlBinary extends ErlTerm {
     int position = 0;
 
     public ErlBinary() {
-	super("binary");
+	super("binary", 10);
 	bytes = new ArrayList<Integer>();
     }
 
@@ -852,7 +859,7 @@ class ErlLiteral extends ErlTerm {
     private BeamFile beamfile;
     private int value;
     public ErlLiteral(BeamFile bf, int v) {
-        super("literal");
+        super("literal", 0);
         value = v;
         beamfile = bf;
         reference = true;
@@ -865,7 +872,7 @@ class ErlLiteral extends ErlTerm {
 class ErlLabel extends ErlTerm {
     private int value;
     public ErlLabel(int v) {
-        super("label");
+        super("label", 0);
         value = v;
         reference = true;
     }
@@ -876,7 +883,7 @@ class ErlLabel extends ErlTerm {
 
 class ErlString extends ErlTerm {
     private String value;
-    public ErlString(String v) { super("string"); value = v; }
+    public ErlString(String v) { super("string", 10); value = v; }
     public String toString() { return "\"" + value + "\""; }
     public String toId() { return tag + "(" + value + ")"; }
     public ErlList toList() {
@@ -890,7 +897,7 @@ class ErlString extends ErlTerm {
 
 class ErlException extends ErlTerm {
     private ErlTerm value;
-    public ErlException(ErlTerm v) { super("exception"); value = v; }
+    public ErlException(ErlTerm v) { super("exception", 0); value = v; }
     public String toString() { return "** exception: " + value.toString(); }
     public String toId() { return tag + "(" + value.toId() + ")"; }
     public ErlTerm getValue() { return value; }
@@ -900,7 +907,7 @@ class ErlRegister extends ErlTerm {
     private int index;
     private String type;
     public ErlRegister(String t, int i) {
-        super(t + "register");
+        super(t + "register", 0);
         type = t;
         index = i;
     }
@@ -1104,7 +1111,7 @@ class ErlPid extends ErlTerm {
     private long pid;
 
     public ErlPid(long p) {
-	super("pid");
+	super("pid", 6);
 	pid = p;
     }
     public String toString() { return "PID<" + pid + ">"; }

@@ -1,11 +1,13 @@
 public class Test {
     private TestCase[] tests = {
         new TestCase("a", "test", new ErlTerm[]{new ErlAtom("a")}, ErlTerm.parse("ok")),
-        new TestCase("a", "test", new ErlTerm[]{new ErlAtom("b")}, new ErlException(ErlTerm.parse("{function_clause, {a, test, [b]}}"))),
+        new TestCase("a", "test", new ErlTerm[]{new ErlAtom("b")},
+                     new ErlException(ErlTerm.parse("{function_clause, {a, test, [b]}}"))),
         new TestCase("a", "list", new ErlTerm[]{}, ErlTerm.parse("[a, 1]")),
         new TestCase("lists", "append", new ErlTerm[]{new ErlList()}, ErlTerm.parse("[]")),
         new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[1, 2], [3]]")}, ErlTerm.parse("[1, 2, 3]")),
-        new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[a] | b]")}, new ErlException(ErlTerm.parse("{function_clause, {lists, append, [b]}}"))),
+        new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[[a] | b]")},
+                     new ErlException(ErlTerm.parse("{function_clause, {lists, append, [b]}}"))),
         new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message")),
         new TestCase("b", "try_catch", new ErlTerm[]{}, ErlTerm.parse("{error, undef}")),
         new TestCase("b", "old_catch", new ErlTerm[]{new ErlInt(1)}, new ErlInt(2)),
@@ -15,7 +17,13 @@ public class Test {
 	new TestCase("b", "bin2", new ErlTerm[]{ErlTerm.parse("<<161,194>>")}, ErlTerm.parse("[{1, 1, 1}, {1, 2, 2}]")),
         new TestCase("numop", "int", new ErlTerm[]{new ErlInt(1), new ErlInt(2)}, ErlTerm.parse("{3, -1, 2, 0.5, 0, 1}")),
         new TestCase("numop", "int", new ErlTerm[]{new ErlInt(1), new ErlInt(0)}, new ErlException(new ErlAtom("badarg"))),
-        new TestCase("numop", "int2", new ErlTerm[]{new ErlInt(10), new ErlInt(1)}, ErlTerm.parse("{20, 5, 0, 11, 11, -11}"))
+        new TestCase("numop", "int2", new ErlTerm[]{new ErlInt(10), new ErlInt(1)}, ErlTerm.parse("{20, 5, 0, 11, 11, -11}")),
+        new TestCase("numop", "and_or_not", new ErlTerm[]{new ErlAtom("false"), new ErlAtom("true"), new ErlAtom("false")},
+                     new ErlAtom("true")),
+        new TestCase("numop", "and_or_not", new ErlTerm[]{new ErlAtom("true"), new ErlAtom("true"), new ErlAtom("true")},
+                     new ErlAtom("true")),
+        new TestCase("numop", "and_or_not", new ErlTerm[]{new ErlAtom("true"), new ErlAtom("false"), new ErlAtom("true")},
+                     new ErlAtom("false"))
     };
 
     public Test() throws Exception {
