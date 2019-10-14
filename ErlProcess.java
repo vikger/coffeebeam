@@ -469,6 +469,7 @@ public class ErlProcess {
 		binary.add(file.getStrByte(i));
 	    ip++;
 	    return null;
+            // 93 deprecated
         case 94: // fclearerror
             ferror = false;
             ip++;
@@ -630,6 +631,7 @@ public class ErlProcess {
             set_reg(op.args.get(5), gc_bif2_result);
             ip++;
             return null;
+            // 126..128 deprecated
 	case 131: // bs_test_unit
 	    if (((ErlBinary) getValue(op.args.get(1))).position != 0) {
 		jump((ErlLabel) op.args.get(0));
@@ -656,6 +658,11 @@ public class ErlProcess {
                 maplist = (ErlList) maplist.tail;
             }
             set_reg(op.args.get(2), map);
+            ip++;
+            return null;
+        case 162: // get_hd
+            ErlTerm get_hd = ((ErlList) getValue(op.args.get(0))).head;
+            set_reg(op.args.get(1), get_hd);
             ip++;
             return null;
         case 163: // get_tl
