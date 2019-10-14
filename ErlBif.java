@@ -226,6 +226,7 @@ public class ErlBif {
         if (a instanceof ErlFun) return compare((ErlFun) a, (ErlFun) b);
         if (a instanceof ErlPid) return compare((ErlPid) a, (ErlPid) b);
         if (a instanceof ErlTuple) return compare((ErlTuple) a, (ErlTuple) b);
+        if (a instanceof ErlMap) return compare((ErlMap) a, (ErlMap) b);
         return 0;
     }
 
@@ -289,6 +290,36 @@ public class ErlBif {
             if (compare(a.get(i), b.get(i)) != 0)
                 return compare(a.get(i), b.get(i));
         }
+        return 0;
+    }
+
+    private static int compare(ErlMap a, ErlMap b) {
+        if (compare(a.size(), b.size()) != 0) return compare(a.size(), b.size());
+        for (int i = 0; i < a.size(); i++) {
+            ErlTerm akey = a.getKey(i);
+            ErlTerm bkey = b.getKey(i);
+            if (compare(akey, bkey) != 0) return compare(akey, bkey);
+            if (compare(a.get(akey), b.get(bkey)) != 0) return compare(a.get(akey), b.get(bkey));
+        }
+        return 0;
+    }
+
+    private static int compare(ErlList a, ErlList b) {
+        if (a.isNil()) {
+            if (b.isNil()) return 0;
+            return -1;
+        }
+        if (b.isNil()) return 1;
+        if (compare(a.head, b.head) != 0) return compare(a.head, b.head);
+        return compare(a.tail, b.tail);
+    }
+
+    private static int compare(ErlBinary a, ErlBinary b) {
+        for (int i = 0; i < a.size(); i++) {
+            if (i >= b.size()) return 1;
+            if (compare(a.get(i), b.get(i)) != 0) return compare(a.get(i), b.get(i));
+        }
+        if (a.size() < b.size()) return -1;
         return 0;
     }
 

@@ -763,6 +763,22 @@ class ErlMap extends ErlTerm {
         }
         return null;
     }
+    public ErlTerm getKey(int n) {
+        for (int i = 0; i < keys.size(); i++) {
+            if (getKeyOrder(keys.get(i)) == n)
+                return keys.get(i);
+        }
+        return null;
+    }
+
+    private int getKeyOrder(ErlTerm key) {
+        int order = 0;
+        for (int i = 0; i < keys.size(); i++) {
+            if (ErlBif.compare(keys.get(i), key) == -1) order++;
+        }
+        return order;
+    }
+
     public String toString() {
         String str = "#{";
         for (int i = 0; i < keys.size(); i++) {
@@ -837,6 +853,10 @@ class ErlBinary extends ErlTerm {
 
     public int bitSize() {
 	return 8 * bytes.size() - position;
+    }
+
+    public int size() {
+        return bytes.size();
     }
 
     public String toString() {
