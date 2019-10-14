@@ -4,6 +4,10 @@ public class ErlBif {
 	    return bnot(arg);
         else if (op.equals("not"))
             return not(arg);
+	else if (op.equals("bit_size"))
+	    return bit_size(arg);
+	else if (op.equals("byte_size"))
+	    return byte_size(arg);
 	ErlTuple funtuple = new ErlTuple();
 	funtuple.add(new ErlAtom("erlang"));
 	funtuple.add(new ErlAtom(op));
@@ -386,5 +390,19 @@ public class ErlBif {
                 return new ErlAtom("true");
         }
         return new ErlException(new ErlAtom("badarg"));
+    }
+
+    private static ErlInt bit_size(ErlTerm bin) {
+	if (bin instanceof ErlBinary) {
+	    return new ErlInt(((ErlBinary) bin).bitSize());
+	}
+	return null;
+    }
+
+    private static ErlInt byte_size(ErlTerm bin) {
+	if (bin instanceof ErlBinary){
+	    return new ErlInt(((ErlBinary) bin).size());
+	}
+	return null;
     }
 }

@@ -321,8 +321,14 @@ public class ErlProcess {
             jump(op.args.get(0));
             return null;
         case 53: // is_binary
-            if (getValue(op.args.get(1)) instanceof ErlBinary) ip++;
-            else jump(op.args.get(0));
+	    ErlTerm ib_bin = getValue(op.args.get(1));
+            if (ib_bin instanceof ErlBinary) {
+		if (((ErlBinary) ib_bin).getPosition() == 0) {
+		    ip++;
+		    return null;
+		}
+	    }
+            jump(op.args.get(0));
             return null;
             // 54 deprecated
         case 55: // is_list
@@ -461,6 +467,20 @@ public class ErlProcess {
 	    } else {
 		jump(op.args.get(0)); // error
 	    }
+	    return null;
+	case 90: // bs_put_binary
+	    // TODO: what is field_flag: all?
+	    ErlTerm put_bin = getValue(op.args.get(4));
+	    if (put_bin instanceof ErlBinary) {
+		ErlBinary put_bin2 = (ErlBinary) put_bin;
+		for (int i = 0; i < put_bin2.size(); i++) {
+		    System.out.println("put " + i);
+		    binary.add(put_bin2.get(i));
+		}
+		ip++;
+		return null;
+	    }
+	    jump((ErlLabel) op.args.get(0));
 	    return null;
 	case 92: // bs_put_string
 	    int bs_put_index = ((ErlInt) op.args.get(1)).getValue();
@@ -632,11 +652,24 @@ public class ErlProcess {
             ip++;
             return null;
             // 126..128 deprecated
+        case 129: // is_bitstr
+	    if (getValue(op.args.get(1)) instanceof ErlBinary) {
+		ip++;
+		return null;
+	    }
+            jump(op.args.get(0));
+            return null;
 	case 131: // bs_test_unit
 	    if (((ErlBinary) getValue(op.args.get(1))).position != 0) {
 		jump((ErlLabel) op.args.get(0));
 		return null;
 	    }
+	    ip++;
+	    return null;
+	case 134: // bs_append
+	    binary = (ErlBinary) getValue(op.args.get(5));
+	    set_reg((ErlRegister) op.args.get(7), binary);
+	    // TODO: append different registers
 	    ip++;
 	    return null;
         case 136: // trim

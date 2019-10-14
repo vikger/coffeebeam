@@ -3,6 +3,8 @@
 {exports, [{bin,1},
            {bin1,1},
            {bin2,1},
+           {bin3,2},
+           {bin4,2},
            {call,0},
            {module_info,0},
            {module_info,1},
@@ -13,7 +15,7 @@
 
 {attributes, []}.
 
-{labels, 29}.
+{labels, 33}.
 
 
 {function, call, 0, 2}.
@@ -187,21 +189,50 @@
     {jump,{f,21}}.
 
 
-{function, module_info, 0, 26}.
+{function, bin3, 2, 26}.
   {label,25}.
+    {line,[{location,"b.erl",46}]}.
+    {func_info,{atom,b},{atom,bin3},2}.
+  {label,26}.
+    {line,[{location,"b.erl",47}]}.
+    {gc_bif,bit_size,{f,0},2,[{x,1}],{x,2}}.
+    {line,[{location,"b.erl",47}]}.
+    {bs_append,{f,0},{x,2},0,3,8,{x,0},{field_flags,[]},{x,0}}.
+    {bs_put_binary,{f,0},{atom,all},8,{field_flags,[unsigned,big]},{x,1}}.
+    return.
+
+
+{function, bin4, 2, 28}.
+  {label,27}.
+    {line,[{location,"b.erl",49}]}.
+    {func_info,{atom,b},{atom,bin4},2}.
+  {label,28}.
+    {line,[{location,"b.erl",50}]}.
+    {gc_bif,byte_size,{f,0},2,[{x,1}],{x,2}}.
+    {bs_add,{f,0},[{x,2},{integer,1},1],{x,2}}.
+    {line,[{location,"b.erl",50}]}.
+    {bs_init2,{f,0},{x,2},0,3,{field_flags,[]},{x,2}}.
+    {bs_put_integer,{f,0},{integer,8},1,{field_flags,[unsigned,big]},{x,0}}.
+    {bs_put_binary,{f,0},{atom,all},8,{field_flags,[unsigned,big]},{x,1}}.
+    {move,{x,2},{x,0}}.
+    return.
+
+
+{function, module_info, 0, 30}.
+  {label,29}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,26}.
+  {label,30}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 28}.
-  {label,27}.
+{function, module_info, 1, 32}.
+  {label,31}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,28}.
+  {label,32}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
