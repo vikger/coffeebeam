@@ -1,6 +1,7 @@
 {module, numop}.  %% version = 0
 
 {exports, [{and_or_not,3},
+           {bool,1},
            {int,2},
            {int2,2},
            {module_info,0},
@@ -9,7 +10,7 @@
 
 {attributes, []}.
 
-{labels, 17}.
+{labels, 20}.
 
 
 {function, int, 2, 2}.
@@ -101,21 +102,34 @@
     return.
 
 
-{function, module_info, 0, 14}.
+{function, bool, 1, 14}.
   {label,13}.
+    {line,[{location,"numop.erl",17}]}.
+    {func_info,{atom,numop},{atom,bool},1}.
+  {label,14}.
+    {test,is_boolean,{f,15},[{x,0}]}.
+    {move,{atom,yes},{x,0}}.
+    return.
+  {label,15}.
+    {move,{atom,no},{x,0}}.
+    return.
+
+
+{function, module_info, 0, 17}.
+  {label,16}.
     {line,[]}.
     {func_info,{atom,numop},{atom,module_info},0}.
-  {label,14}.
+  {label,17}.
     {move,{atom,numop},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 16}.
-  {label,15}.
+{function, module_info, 1, 19}.
+  {label,18}.
     {line,[]}.
     {func_info,{atom,numop},{atom,module_info},1}.
-  {label,16}.
+  {label,19}.
     {move,{x,0},{x,1}}.
     {move,{atom,numop},{x,0}}.
     {line,[]}.

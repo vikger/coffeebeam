@@ -433,7 +433,7 @@ public class ErlProcess {
             System.out.println("if_end"); // TODO: remove after testing
             return new ErlException(new ErlAtom("if_clause"));
         case 74: // case_end
-            System.out.println("case_end"); // TODO: remove after testing
+            System.out.println("case_end " + getValue(op.args.get(0))); // TODO: remove after testing
             return new ErlException(new ErlAtom("case_clause"));
         case 75: // call_fun
             int fun_arity = ((ErlInt) op.args.get(0)).getValue();
@@ -558,11 +558,31 @@ public class ErlProcess {
             x_reg.set(1, getValue(op.args.get(0)));
             ip++;
             return null;
+        case 107: // try_case_end
+            System.out.println("try_case_end " + getValue(op.args.get(0))); // TODO: remove after testing
+            return new ErlException(new ErlAtom("try_case_clause"));
+        case 108: // raise
+            System.out.println("raise " + getValue(op.args.get(0)) + " " + getValue(op.args.get(1))); // TODO: remove after testing
+            ErlTuple raise = new ErlTuple();
+            raise.add(getValue(op.args.get(1)));
+            raise.add(getValue(op.args.get(0)));
+            return new ErlException(raise);
 	case 109: // bs_init2
 	    binary = new ErlBinary();
 	    set_reg((ErlRegister) op.args.get(5), binary); // target register
 	    ip++;
 	    return null;
+            // 110 deprecated
+        case 114: // is_boolean
+            ErlTerm boolterm = getValue(op.args.get(1));
+            if (boolterm instanceof ErlAtom) {
+                if (((ErlAtom) boolterm).getValue().equals("true") || ((ErlAtom) boolterm).getValue().equals("false")) {
+                    ip++;
+                    return null;
+                }
+            }
+            jump(op.args.get(0));
+            return null;
         case 115: // is_function2
             System.out.println("is_function2 " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
             ErlTerm isf2_fun = getValue(op.args.get(1));

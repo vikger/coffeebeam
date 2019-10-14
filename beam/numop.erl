@@ -1,6 +1,6 @@
 -module(numop).
 
--export([int/2, int2/2, relation/3, and_or_not/3]).
+-export([int/2, int2/2, relation/3, and_or_not/3, bool/1]).
 
 int(A, B) ->
     {A + B, A - B, A * B, A / B, A div B, A rem B}.
@@ -13,3 +13,8 @@ and_or_not(A, B, C) ->
 
 relation(A, B, C) ->
     ((A =< B) and (A < C)) or ((A >= B) andalso (B > C)) orelse ((A == C) and (B =:= C)).
+
+bool(A) when is_boolean(A) ->
+    yes;
+bool(_) ->
+    no.

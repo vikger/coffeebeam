@@ -155,7 +155,10 @@
 
 % b throw 0
 
-numop relation 3
-ErlInt 1
-ErlInt 2
-ErlInt 3
+% numop relation 3
+% ErlInt 1
+% ErlInt 2
+% ErlInt 3
+
+numop bool 1
+ErlAtom true

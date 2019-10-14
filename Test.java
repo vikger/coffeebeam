@@ -23,7 +23,10 @@ public class Test {
         new TestCase("numop", "and_or_not", new ErlTerm[]{new ErlAtom("true"), new ErlAtom("true"), new ErlAtom("true")},
                      new ErlAtom("true")),
         new TestCase("numop", "and_or_not", new ErlTerm[]{new ErlAtom("true"), new ErlAtom("false"), new ErlAtom("true")},
-                     new ErlAtom("false"))
+                     new ErlAtom("false")),
+        new TestCase("numop", "bool", new ErlTerm[]{new ErlInt(1)}, new ErlAtom("no")),
+        new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("a")}, new ErlAtom("no")),
+        new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("true")}, new ErlAtom("yes"))
     };
 
     public Test() throws Exception {
