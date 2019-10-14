@@ -453,7 +453,7 @@ abstract class ErlTerm {
 	return new ParseResult(bin, s);
     }
     private static boolean isAtomSubChar(char c) {
-        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || isDigit(c) || c == '_';
     }
     private static boolean isDigit(char c) {
         return c >= '0' && c <= '9';
