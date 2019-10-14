@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.zip.InflaterInputStream;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class BeamFile {
     private String filename;
@@ -1137,4 +1138,27 @@ class ErlPid extends ErlTerm {
     public String toString() { return "PID<" + pid + ">"; }
     public String toId() { return tag + "(" + pid + ")"; }
     public long getValue() { return pid; }
+}
+
+class ErlReference extends ErlTerm {
+    private long ref;
+
+    public ErlReference() {
+        super("reference", 3);
+        ref = (new Random()).nextLong();
+    }
+    public String toString() { return "#Ref<" + ref + ">"; }
+    public String toId() { return tag + "(" + ref + ")"; }
+    public long getValue() { return ref; }
+}
+
+class ErlPort extends ErlTerm {
+    private long id;
+
+    public ErlPort() {
+        super("port", 5);
+    }
+    public String toString() { return "#Port<" + id + ">"; }
+    public String toId() { return tag + "(" + id + ")"; }
+    public long getValue() { return id; }
 }

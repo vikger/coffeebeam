@@ -22,8 +22,7 @@ public class ErlProcess {
     private MessageQueue mq;
     private boolean timeout = false;
     private ErlBinary binary = null;
-    private ErlBinary match_binary = null;
-    private int match_position;
+    private ErlRegister put_tuple_dest = null;
 
     public ErlProcess(BeamVM bv, ErlPid p) {
         vm = bv;
@@ -125,6 +124,8 @@ public class ErlProcess {
             func_info.add(new ErlAtom("function_clause"));
             func_info.add(func);
             return new ErlException(func_info);
+        case 3: // int_code_end
+            return new ErlException(new ErlAtom("unexpected_end_of_file"));
         case 4: // call
             save_ip(ip + 1);
             save();
@@ -178,7 +179,17 @@ public class ErlProcess {
                 y_reg.set(i, null);
             ip++;
             return null;
+        case 15: // allocate_heap_zero
+            int heap_zeros = ((ErlInt) op.args.get(0)).getValue();
+            for (int i = 0; i < heap_zeros; i++)
+                y_reg.set(i, null);
+            ip++;
+            return null;
         case 16: ip++; return null; // skip test_heap
+        case 17: // init
+            set_reg(op.args.get(0), null);
+            ip++;
+            return null;
         case 18: ip++; return null; // skip deallocate
         case 19: // return
             if (!reg_stack.isEmpty()) restore();
@@ -198,12 +209,17 @@ public class ErlProcess {
             ip++;
             return null;
         case 23: // loop_rec
-            if (mq.size() > 0) {
-                x_reg.set(0, mq.getNext());
+            ErlTerm loop_rec_msg = mq.getNext();
+            if (loop_rec_msg != null) {
+                x_reg.set(0, loop_rec_msg);
                 ip++;
             } else {
                 jump((ErlLabel) op.args.get(0));
             }
+            return null;
+        case 24: // loop_rec_end
+            mq.setNext();
+            jump((ErlLabel) op.args.get(0));
             return null;
         case 25: // wait
             if (mq.size() == 0) {
@@ -223,6 +239,14 @@ public class ErlProcess {
             vm.setTimeout(pid, ((ErlInt) op.args.get(1)).getValue());
             jump((ErlLabel) op.args.get(0));
             return null;
+            // 27..38 deprecated
+        case 39: // is_lt
+            if (ErlBif.compare(getValue(op.args.get(1)), getValue(op.args.get(2))) < 0) {
+                ip++;
+                return null;
+            }
+            jump((ErlLabel) op.args.get(0));
+            return null;
         case 40: // is_ge
             if (ErlBif.compare(getValue(op.args.get(1)), getValue(op.args.get(2))) >= 0) {
                 ip++;
@@ -230,8 +254,29 @@ public class ErlProcess {
             }
             jump((ErlLabel) op.args.get(0));
             return null;
-        case 43: // is_eq_exact, TODO: apply for all types
+        case 41: // is_eq
+            if (ErlBif.compare(getValue(op.args.get(1)), getValue(op.args.get(2))) == 0) {
+                ip++;
+                return null;
+            }
+            jump((ErlLabel) op.args.get(0));
+            return null;
+        case 42: // is_ne
+            if (ErlBif.compare(getValue(op.args.get(1)), getValue(op.args.get(2))) != 0) {
+                ip++;
+                return null;
+            }
+            jump((ErlLabel) op.args.get(0));
+            return null;
+        case 43: // is_eq_exact
             if (getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
+                ip++;
+            } else {
+                jump(op.args.get(0));
+            }
+            return null;
+        case 44: // is_ne_exact
+            if (!getValue(op.args.get(1)).toId().equals(getValue(op.args.get(2)).toId())) {
                 ip++;
             } else {
                 jump(op.args.get(0));
@@ -245,8 +290,24 @@ public class ErlProcess {
             if (getValue(op.args.get(1)) instanceof ErlFloat) ip++;
             else jump(op.args.get(0));
             return null;
+        case 47: // is_number
+            if (getValue(op.args.get(1)) instanceof ErlNumber) ip++;
+            else jump(op.args.get(0));
+            return null;
         case 48: // is_atom
             if (getValue(op.args.get(1)) instanceof ErlAtom) ip++;
+            else jump(op.args.get(0));
+            return null;
+        case 49: // is_pid
+            if (getValue(op.args.get(1)) instanceof ErlPid) ip++;
+            else jump(op.args.get(0));
+            return null;
+        case 50: // is_reference
+            if (getValue(op.args.get(1)) instanceof ErlReference) ip++;
+            else jump(op.args.get(0));
+            return null;
+        case 51: // is_port
+            if (getValue(op.args.get(1)) instanceof ErlPort) ip++;
             else jump(op.args.get(0));
             return null;
         case 52: // is_nil
@@ -259,6 +320,11 @@ public class ErlProcess {
             }
             jump(op.args.get(0));
             return null;
+        case 53: // is_binary
+            if (getValue(op.args.get(1)) instanceof ErlBinary) ip++;
+            else jump(op.args.get(0));
+            return null;
+            // 54 deprecated
         case 55: // is_list
             if (getValue(op.args.get(1)) instanceof ErlList) ip++;
             else jump(op.args.get(0));
@@ -292,6 +358,19 @@ public class ErlProcess {
             }
             jump(op.args.get(1));
             return null;
+        case 60: // select_tuple_arity
+            ErlTuple sta_tuple = (ErlTuple) getValue(op.args.get(0));
+            ErlList sta_dest = (ErlList) op.args.get(2);
+            System.out.println("select_tuple_arity " + sta_tuple + " " + sta_dest); // TODO: remove after testing
+            for (int i = 0; !sta_dest.isNil(); i++) {
+                if (i == sta_tuple.size()) {
+                    jump(sta_dest.head);
+                    return null;
+                }
+                sta_dest = (ErlList) sta_dest.tail;
+            }
+            jump((ErlLabel) op.args.get(1));
+            return null;
         case 61: // jump
             jump((ErlLabel) op.args.get(0));
             return null;
@@ -321,6 +400,13 @@ public class ErlProcess {
             set_reg(op.args.get(2), ((ErlTuple) getValue(op.args.get(0))).get(((ErlInt) op.args.get(1)).getValue()));
             ip++;
             return null;
+        case 67: // set_tuple_element
+            ErlTuple ste_tuple = (ErlTuple) getValue(op.args.get(1));
+            ste_tuple.setElement(((ErlInt) op.args.get(2)).getValue() - 1, getValue(op.args.get(0)));
+            System.out.println("set_tuple_element " + getValue(op.args.get(0)) + " " + ste_tuple + " " + op.args.get(2)); // TODO: remove after testing
+            ip++;
+            return null;
+            // 68 deprecated
         case 69: // put_list
             ErlTerm head = getValue(op.args.get(0));
             ErlTerm tail = getValue(op.args.get(1));
@@ -328,6 +414,27 @@ public class ErlProcess {
             set_reg(op.args.get(2), list);
             ip++;
             return null;
+        case 70: // put_tuple
+            // arg0 (size) is not used, tuple is dynamic
+            System.out.println("put_tuple " + (ErlInt) op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            put_tuple_dest = (ErlRegister) op.args.get(1);
+            set_reg(put_tuple_dest, new ErlTuple());
+            ip++;
+            return null;
+        case 71: // put
+            System.out.println("put " + getValue(op.args.get(0))); // TODO: remove after testing
+            ((ErlTuple) getValue(put_tuple_dest)).add(getValue(op.args.get(0)));
+            ip++;
+            return null;
+        case 72: // badmatch
+            System.out.println("badmatch " + op.args.get(0)); // TODO: remove after testing
+            return new ErlException(new ErlAtom("badmatch"));
+        case 73: // if_end
+            System.out.println("if_end"); // TODO: remove after testing
+            return new ErlException(new ErlAtom("if_clause"));
+        case 74: // case_end
+            System.out.println("case_end"); // TODO: remove after testing
+            return new ErlException(new ErlAtom("case_clause"));
         case 75: // call_fun
             int fun_arity = ((ErlInt) op.args.get(0)).getValue();
             ErlFun fun = (ErlFun) x_reg.get(fun_arity);
@@ -336,9 +443,16 @@ public class ErlProcess {
             file = fun.getModule();
             jump(fun.getLabel());
             return null;
+            // 76 deprecated
+        case 77: // is_function
+            System.out.println("is_function " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            if (getValue(op.args.get(1)) instanceof ErlFun) ip++;
+            else jump(op.args.get(0));
+            return null;
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, true);
+            // 79..88 deprecated
 	case 89: // bs_put_integer
 	    ErlTerm bs_put_value = getValue(op.args.get(4));
 	    if (bs_put_value instanceof ErlInt) {
@@ -374,6 +488,39 @@ public class ErlProcess {
             set_reg((ErlRegister) op.args.get(1), new ErlFloat(getValue(op.args.get(0))));
             ip++;
             return null;
+        case 98: // fadd
+            ErlFloat faddresult = ErlBif.fadd(getValue(op.args.get(1)), getValue(op.args.get(2)));
+            System.out.println("fadd result: " + faddresult); // TODO: remove after testing
+            if (faddresult == null) {
+                ferror = true;
+                ip++;
+                return null;
+            }
+            set_reg(op.args.get(3), faddresult);
+            ip++;
+            return null;
+        case 99: // fsub
+            ErlFloat fsubresult = ErlBif.fsub(getValue(op.args.get(1)), getValue(op.args.get(2)));
+            System.out.println("fsub result: " + fsubresult); // TODO: remove after testing
+            if (fsubresult == null) {
+                ferror = true;
+                ip++;
+                return null;
+            }
+            set_reg(op.args.get(3), fsubresult);
+            ip++;
+            return null;
+        case 100: // fmul
+            ErlFloat fmulresult = ErlBif.fmul(getValue(op.args.get(1)), getValue(op.args.get(2)));
+            System.out.println("fmul result: " + fmulresult); // TODO: remove after testing
+            if (fmulresult == null) {
+                ferror = true;
+                ip++;
+                return null;
+            }
+            set_reg(op.args.get(3), fmulresult);
+            ip++;
+            return null;
         case 101: // fdiv
             ErlFloat fdivresult = ErlBif.fdiv(getValue(op.args.get(1)), getValue(op.args.get(2)));
             if (fdivresult == null) {
@@ -382,6 +529,17 @@ public class ErlProcess {
                 return null;
             }
             set_reg(op.args.get(3), fdivresult);
+            ip++;
+            return null;
+        case 102: // fnegate
+            System.out.println("fnegate: " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
+            ErlFloat fnegateresult = ErlBif.fnegate(getValue(op.args.get(1)));
+            if (fnegateresult == null) {
+                ferror = true;
+                ip++;
+                return null;
+            }
+            set_reg(op.args.get(2), fnegateresult);
             ip++;
             return null;
         case 103: // make_fun2
@@ -405,6 +563,17 @@ public class ErlProcess {
 	    set_reg((ErlRegister) op.args.get(5), binary); // target register
 	    ip++;
 	    return null;
+        case 115: // is_function2
+            System.out.println("is_function2 " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
+            ErlTerm isf2_fun = getValue(op.args.get(1));
+            if (isf2_fun instanceof ErlFun) {
+                if (((ErlFun) isf2_fun).getArity() == ((ErlInt) op.args.get(2)).getValue()) {
+                    ip++;
+                    return null;
+                }
+            }
+            jump(op.args.get(0));
+            return null;
 	case 117: // bs_get_integer2
 	    ErlBinary getintbin = (ErlBinary) getValue(op.args.get(1));
 	    int getintlength = ((ErlInt) op.args.get(3)).getValue();
@@ -759,7 +928,7 @@ class Stack<T> {
 
 class MessageQueue {
     ArrayList<ErlTerm> messages;
-    int current;
+    int current = 0;
 
     public MessageQueue() {
         messages = new ArrayList<ErlTerm>();
@@ -770,13 +939,22 @@ class MessageQueue {
     }
 
     public ErlTerm getNext() {
-        ErlTerm message = messages.get(current++);
+        if (size() > 0) {
+            ErlTerm message = messages.get(current++);
+            if (current >= size()) current = 0;
+            return message;
+        }
+        return null;
+    }
+
+    public void setNext() {
+        current++;
         if (current >= size()) current = 0;
-        return message;
     }
 
     public void remove() {
         messages.remove(current);
+        current = 0;
     }
 
     public void reset() {

@@ -203,20 +203,41 @@ public class ErlBif {
 	return new ErlInt(~(a.getValue()));
     }
 
+    public static ErlFloat fadd(ErlTerm a, ErlTerm b) {
+        if (a instanceof ErlFloat && b instanceof ErlFloat)
+            return new ErlFloat(((ErlFloat) a).getValue() + ((ErlFloat) b).getValue());
+        return null;
+    }
+
+    public static ErlFloat fsub(ErlTerm a, ErlTerm b) {
+        if (a instanceof ErlFloat && b instanceof ErlFloat)
+            return new ErlFloat(((ErlFloat) a).getValue() - ((ErlFloat) b).getValue());
+        return null;
+    }
+
+    public static ErlFloat fmul(ErlTerm a, ErlTerm b) {
+        if (a instanceof ErlFloat && b instanceof ErlFloat)
+            return new ErlFloat(((ErlFloat) a).getValue() * ((ErlFloat) b).getValue());
+        return null;
+    }
+
     public static ErlFloat fdiv(ErlTerm a, ErlTerm b) {
-        BeamDebug.println("fdiv " + a + " " + b);
-        if (a instanceof ErlFloat && b instanceof ErlFloat) {
+        if (a instanceof ErlFloat && b instanceof ErlFloat)
             return fdiv((ErlFloat) a, (ErlFloat) b);
-        }
         return null;
     }
 
     private static ErlFloat fdiv(ErlFloat a, ErlFloat b) {
-        BeamDebug.println("fdiv " + a + " " + b);
         float result = a.getValue() / b.getValue();
         if (Float.isInfinite(result))
             return null;
         return new ErlFloat(result);
+    }
+
+    public static ErlFloat fnegate(ErlTerm a) {
+        if (a instanceof ErlFloat)
+            return new ErlFloat(-(((ErlFloat) a).getValue()));
+        return null;
     }
 
     public static int compare(ErlTerm a, ErlTerm b) {
