@@ -188,4 +188,20 @@ public class ErlBif {
     private static ErlInt bnot(ErlInt a) {
 	return new ErlInt(~(a.getValue()));
     }
+
+    public static ErlFloat fdiv(ErlTerm a, ErlTerm b) {
+        BeamDebug.println("fdiv " + a + " " + b);
+        if (a instanceof ErlFloat && b instanceof ErlFloat) {
+            return fdiv((ErlFloat) a, (ErlFloat) b);
+        }
+        return null;
+    }
+
+    private static ErlFloat fdiv(ErlFloat a, ErlFloat b) {
+        BeamDebug.println("fdiv " + a + " " + b);
+        float result = a.getValue() / b.getValue();
+        if (Float.isInfinite(result))
+            return null;
+        return new ErlFloat(result);
+    }
 }

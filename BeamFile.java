@@ -335,7 +335,7 @@ abstract class ErlTerm {
         s = skipWs(s);
         if (s.charAt(0) >= 'a' && s.charAt(0) <= 'z')
             return parseAtom(s);
-        else if (isDigit(s.charAt(0)))
+        else if (isDigit(s.charAt(0)) || s.charAt(0) == '-')
             return parseNumber(s);
         else if (s.charAt(0) == '[')
             return parseList(s);
@@ -363,13 +363,29 @@ abstract class ErlTerm {
         return new ParseResult(new ErlAtom(name), s);
     }
     private static ParseResult parseNumber(String s) {
-        int intvalue = s.charAt(0) - '0';
-        s = s.substring(1);
+        int sign;
+        if (s.charAt(0) == '-') {
+            sign = -1;
+            s = s.substring(1);
+        } else
+            sign = 1;
+        int intvalue = 0;
         while (!s.isEmpty() && isDigit(s.charAt(0))) {
             intvalue = 10 * intvalue + s.charAt(0) - '0';
             s = s.substring(1);
-        } // TODO: parse float
-        return new ParseResult(new ErlInt(intvalue), s);
+        }
+        if (!s.isEmpty() && s.charAt(0) == '.') {
+            s = s.substring(1);
+            float result = (float) intvalue;
+            int divider = 10;
+            while (!s.isEmpty() && isDigit(s.charAt(0))) {
+                result += (s.charAt(0) - '0') / (float) divider;
+                divider *= 10;
+                s = s.substring(1);
+            }
+            return new ParseResult(new ErlFloat(sign * result), s);
+        }
+        return new ParseResult(new ErlInt(sign * intvalue), s);
     }
     private static ParseResult parseList(String s) {
         s = s.substring(1);
@@ -490,7 +506,13 @@ class ErlFloat extends ErlNumber {
         super("float");
         value = v;
     }
-    public String toString() { return "f(" + value + ")"; }
+    public ErlFloat(ErlTerm t) {
+        super("float");
+        if (t instanceof ErlInt) {
+            value = (float) ((ErlInt) t).getValue();
+        }
+    }
+    public String toString() { return Float.toString(value); }
     public String toId() { return tag + "(" + value + ")"; }
     public float getValue() { return value; }
 }
@@ -542,7 +564,7 @@ class ErlBigNum extends ErlNumber {
     }
 
     public String toId() {
-        return tag + "(" + Long.toString(getValue()) + ")"; // TODO: fix
+        return tag + "(" + toString() + ")";
     }
 
     public ErlBigNum div10() {
@@ -874,7 +896,6 @@ class ErlException extends ErlTerm {
     public ErlTerm getValue() { return value; }
 }
 
-
 class ErlRegister extends ErlTerm {
     private int index;
     private String type;
@@ -1049,9 +1070,13 @@ class InternalTerm {
                     }
                     return list;
                 case 2: // floating point register
-                    tagname += "floating point register";
-                    break;
+                    return new ErlRegister("FP", value >> 4);
                 case 3: // allocation list
+                    int alloc_list_size = value >> 4; // tag_u
+                    for (int i = 0; i < alloc_list_size; i++) {
+                        read(br, bf); // type
+                        read(br, bf); // number allocated
+                    }
                     tagname += "allocation list";
                     break;
                 case 4: // literal

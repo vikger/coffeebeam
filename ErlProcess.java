@@ -4,6 +4,8 @@ public class ErlProcess {
     private BeamVM vm;
     private Register x_reg;
     private Register y_reg;
+    private Register fp_reg;
+    private boolean ferror = false;
     private int ip;
     private BeamFile file;
     private Stack<Integer> ip_stack;
@@ -28,6 +30,7 @@ public class ErlProcess {
 	pid = p;
         x_reg = new Register();
         y_reg = new Register();
+        fp_reg = new Register();
         ip_stack = new Stack<Integer>();
         reg_stack = new Stack<Register>();
         module_stack = new Stack<BeamFile>();
@@ -105,6 +108,7 @@ public class ErlProcess {
         System.out.println();
         x_reg.dump();
         y_reg.dump();
+        fp_reg.dump();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
         case 2: // func_info
@@ -323,6 +327,35 @@ public class ErlProcess {
 		binary.add(file.getStrByte(i));
 	    ip++;
 	    return null;
+        case 94: // fclearerror
+            ferror = false;
+            ip++;
+            return null;
+        case 95: // fcheckerror
+            if (ferror) {
+                jump((ErlLabel) op.args.get(0));
+                return null;
+            }
+            ip++;
+            return null;
+        case 96: // fmove
+            set_reg((ErlRegister) op.args.get(1), getValue(op.args.get(0)));
+            ip++;
+            return null;
+        case 97: // fconv
+            set_reg((ErlRegister) op.args.get(1), new ErlFloat(getValue(op.args.get(0))));
+            ip++;
+            return null;
+        case 101: // fdiv
+            ErlFloat fdivresult = ErlBif.fdiv(getValue(op.args.get(1)), getValue(op.args.get(2)));
+            if (fdivresult == null) {
+                ferror = true;
+                ip++;
+                return null;
+            }
+            set_reg(op.args.get(3), fdivresult);
+            ip++;
+            return null;
         case 103: // make_fun2
             x_reg.set(0, file.getLocalFunction(((ErlInt) op.args.get(0)).getValue()));
             ip++;
@@ -490,6 +523,8 @@ public class ErlProcess {
             x_reg.set(register.getIndex(), value);
         } else if (register.getType().equals("Y")) {
             y_reg.set(register.getIndex(), value);
+        } else if (register.getType().equals("FP")) {
+            fp_reg.set(register.getIndex(), value);
         }
     }
 
@@ -570,6 +605,8 @@ public class ErlProcess {
                 value = x_reg.get(reg.getIndex());
             } else if (reg.getType().equals("Y")) {
                 value = y_reg.get(reg.getIndex());
+            } else if (reg.getType().equals("FP")) {
+                value = fp_reg.get(reg.getIndex());
             }
         } else {
             value = source;

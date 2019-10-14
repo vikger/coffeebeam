@@ -9,10 +9,11 @@ public class Test {
         new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message")),
         new TestCase("b", "try_catch", new ErlTerm[]{}, ErlTerm.parse("{error, undef}")),
         new TestCase("b", "old_catch", new ErlTerm[]{new ErlInt(1)}, new ErlInt(2)),
-        new TestCase("b", "old_catch", new ErlTerm[]{new ErlAtom("a")}, new ErlAtom("badarg")),
+        new TestCase("b", "old_catch", new ErlTerm[]{new ErlAtom("a")}, new ErlAtom("badarith")),
 	new TestCase("b", "bin", new ErlTerm[]{new ErlInt(99)}, ErlTerm.parse("<<99,100,101,102>>")),
 	new TestCase("b", "bin", new ErlTerm[]{new ErlAtom("a")}, new ErlException(new ErlAtom("badarg"))),
-	new TestCase("b", "bin2", new ErlTerm[]{ErlTerm.parse("<<161,194>>")}, ErlTerm.parse("[{1, 1, 1}, {1, 2, 2}]"))
+	new TestCase("b", "bin2", new ErlTerm[]{ErlTerm.parse("<<161,194>>")}, ErlTerm.parse("[{1, 1, 1}, {1, 2, 2}]")),
+        new TestCase("numop", "int", new ErlTerm[]{new ErlInt(1), new ErlInt(2)}, ErlTerm.parse("{3, -1, 2, 0.5, 0, 1}"))
     };
 
     public Test() throws Exception {
