@@ -175,17 +175,13 @@
 % ErlInt 1
 % ErlBinary 2
 
-b applies 4
-ErlAtom b
-ErlAtom bin
-ErlInt 98
-ErlInt 99
+% b applies 4
+% ErlAtom b
+% ErlAtom bin
+% ErlInt 98
+% ErlInt 99
 
-lists append 2
-ErlList 3
-ErlInt 48
-ErlInt 100
-ErlInt 50
-ErlNil
-ErlList 0
-ErlNil
+b atomnames 3
+ErlAtom a
+ErlAtom b
+ErlAtom c

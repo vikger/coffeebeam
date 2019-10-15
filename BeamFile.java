@@ -338,13 +338,17 @@ abstract class ErlTerm {
         s = skipWs(s);
         if (s.charAt(0) >= 'a' && s.charAt(0) <= 'z')
             return parseAtom(s);
-        else if (isDigit(s.charAt(0)) || s.charAt(0) == '-')
+        if (s.charAt(0) == '\'')
+            return parseQuotedAtom(s);
+        if (isDigit(s.charAt(0)) || s.charAt(0) == '-')
             return parseNumber(s);
-        else if (s.charAt(0) == '[')
+        if (s.charAt(0) == '"')
+            return parseString(s);
+        if (s.charAt(0) == '[')
             return parseList(s);
-        else if (s.charAt(0) == '{')
+        if (s.charAt(0) == '{')
             return parseTuple(s);
-	else if (s.charAt(0) == '<') {
+	if (s.charAt(0) == '<') {
 	    if (s.charAt(1) == '<')
 		return parseBinary(s);
 	    // else parse pid, port, ...
@@ -363,6 +367,16 @@ abstract class ErlTerm {
             name += s.charAt(0);
             s = s.substring(1);
         }
+        return new ParseResult(new ErlAtom(name), s);
+    }
+    private static ParseResult parseQuotedAtom(String s) {
+        String name = "";
+        s = s.substring(1);
+        while (!s.isEmpty() && s.charAt(0) != '\'') {
+            name += s.charAt(0);
+            s = s.substring(1);
+        }
+        if (s.charAt(0) == '\'') s = s.substring(1);
         return new ParseResult(new ErlAtom(name), s);
     }
     private static ParseResult parseNumber(String s) {
@@ -417,6 +431,16 @@ abstract class ErlTerm {
         s = s.substring(1);
         return s;
     }
+    private static ParseResult parseString(String s) {
+        s = s.substring(1);
+        ErlList list = new ErlList();
+        while (s.charAt(0) != '"') {
+            list.add(new ErlInt(s.charAt(0)));
+            s = s.substring(1);
+        }
+        s = s.substring(1);
+        return new ParseResult(list, s);
+    }
     private static ParseResult parseTuple(String s) {
         s = s.substring(1);
         s = skipWs(s);
@@ -452,7 +476,7 @@ abstract class ErlTerm {
 	s = s.substring(2);
 	return new ParseResult(bin, s);
     }
-    private static boolean isAtomSubChar(char c) {
+    public static boolean isAtomSubChar(char c) {
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || isDigit(c) || c == '_';
     }
     private static boolean isDigit(char c) {
@@ -618,7 +642,25 @@ class ErlAtom extends ErlTerm {
         else value = "false";
     }
     public String toString() {
-        return getValue();
+        String s = getValue();
+        if (s.equals(""))
+            return "''";
+        char c = s.charAt(0);
+        if (c >= 'a' && c <= 'z')
+            return toSimple(s.substring(1), String.valueOf(c), "'" + String.valueOf(c));
+        return toQuoted(s.substring(1), "'" + String.valueOf(c));
+    }
+    private String toSimple(String s, String simple, String quoted) {
+        if (s.equals("")) return simple;
+        char c = s.charAt(0);
+        if (ErlTerm.isAtomSubChar(c))
+            return toSimple(s.substring(1), simple + String.valueOf(c), quoted + String.valueOf(c));
+        return toQuoted(s.substring(1), quoted + String.valueOf(c));
+    }
+    private String toQuoted(String s, String quoted) {
+        if (s.equals("")) return quoted + "'";
+        char c = s.charAt(0);
+        return toQuoted(s.substring(1), quoted + String.valueOf(c));
     }
     public String toId() { return tag + "(" + getValue() + ")"; }
     public int getIndex() { return index; }

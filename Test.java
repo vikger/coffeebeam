@@ -10,6 +10,8 @@ public class Test {
                      new ErlException(ErlTerm.parse("{function_clause, {lists, append11, [b, [a]]}}"))),
         new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("[a, b]"), ErlTerm.parse("[c, d]")},
                      ErlTerm.parse("[a, b, c, d]")),
+        new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("\"hello\""), ErlTerm.parse("\" world\"")},
+                     ErlTerm.parse("\"hello world\"")),
         new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message")),
         new TestCase("b", "try_catch", new ErlTerm[]{}, ErlTerm.parse("{error, undef}")),
         new TestCase("b", "old_catch", new ErlTerm[]{new ErlInt(1)}, new ErlInt(2)),
@@ -30,7 +32,9 @@ public class Test {
         new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("a")}, new ErlAtom("no")),
         new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("true")}, new ErlAtom("yes")),
         new TestCase("a", "tuple", new ErlTerm[]{new ErlAtom("a")},
-                     ErlTerm.parse("{a, {a, b, c, a}, {x, b, c, a}, {x, b, b, a}}"))
+                     ErlTerm.parse("{a, {a, b, c, a}, {x, b, c, a}, {x, b, b, a}}")),
+        new TestCase("b", "atomnames", new ErlTerm[]{ErlTerm.parse("alma"), ErlTerm.parse("'quoted atom'"), ErlTerm.parse("aToM_1")},
+                     ErlTerm.parse("{alma, 'quoted atom', aToM_1}"))
     };
 
     public Test() throws Exception {

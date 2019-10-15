@@ -1,6 +1,7 @@
 {module, b}.  %% version = 0
 
 {exports, [{applies,4},
+           {atomnames,3},
            {bin,1},
            {bin1,1},
            {bin2,1},
@@ -16,7 +17,7 @@
 
 {attributes, []}.
 
-{labels, 35}.
+{labels, 37}.
 
 
 {function, call, 0, 2}.
@@ -240,21 +241,31 @@
     {apply_last,1,3}.
 
 
-{function, module_info, 0, 32}.
+{function, atomnames, 3, 32}.
   {label,31}.
+    {line,[{location,"b.erl",56}]}.
+    {func_info,{atom,b},{atom,atomnames},3}.
+  {label,32}.
+    {test_heap,4,3}.
+    {put_tuple2,{x,0},{list,[{x,0},{x,1},{x,2}]}}.
+    return.
+
+
+{function, module_info, 0, 34}.
+  {label,33}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,32}.
+  {label,34}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 34}.
-  {label,33}.
+{function, module_info, 1, 36}.
+  {label,35}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,34}.
+  {label,36}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
