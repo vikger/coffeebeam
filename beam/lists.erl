@@ -27,16 +27,22 @@ any(Pred, [H|T]) ->
 any(_Pred, []) ->
     false.
 
-append([[H|T] | LL]) ->
-    [H | append([T | LL])];
-append([[] | LL]) ->
-    append(LL);
-append([]) ->
-    [].
+append(LL) ->
+    append11(LL, []).
 
-append([H|T], L) ->
-    [H | append(T, L)];
-append([], L) ->
+append11([[H|T] | LL], Acc) ->
+    append11([T|LL], [H|Acc]);
+append11([[] | LL], Acc) ->
+    append11(LL, Acc);
+append11([], Acc) ->
+    reverse(Acc).
+
+append(L1, L) ->
+    append21(reverse(L1), L).
+
+append21([H|T], L) ->
+    append21(T, [H | L]);
+append21([], L) ->
     L.
 
 concat([H|T]) when is_atom(H) ->

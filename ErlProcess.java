@@ -198,9 +198,7 @@ public class ErlProcess {
             if (stack.isEmpty()) {
                 ip = -1;
             } else {
-                CP cp = (CP) stack.pop();
-                ip = cp.value;
-                file = cp.file;
+                restore_ip();
             }
             System.out.println("return: " + x_reg.get(0));
             return x_reg.get(0);
