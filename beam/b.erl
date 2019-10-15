@@ -1,6 +1,6 @@
 -module(b).
 
--export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1, bin3/2, bin4/2]).
+-export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1, bin3/2, bin4/2, applies/4]).
 
 call() ->
     ok.
@@ -48,3 +48,7 @@ bin3(A, B) ->
 
 bin4(A, B) ->
     <<A:8, B/binary>>.
+
+applies(M, F, A1, A2) ->
+    M:F(A1),
+    M:F(A2).

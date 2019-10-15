@@ -1,6 +1,7 @@
 {module, b}.  %% version = 0
 
-{exports, [{bin,1},
+{exports, [{applies,4},
+           {bin,1},
            {bin1,1},
            {bin2,1},
            {bin3,2},
@@ -15,7 +16,7 @@
 
 {attributes, []}.
 
-{labels, 33}.
+{labels, 35}.
 
 
 {function, call, 0, 2}.
@@ -218,21 +219,42 @@
     return.
 
 
-{function, module_info, 0, 30}.
+{function, applies, 4, 30}.
   {label,29}.
+    {line,[{location,"b.erl",52}]}.
+    {func_info,{atom,b},{atom,applies},4}.
+  {label,30}.
+    {allocate,3,4}.
+    {move,{x,3},{y,0}}.
+    {move,{x,1},{y,1}}.
+    {move,{x,0},{y,2}}.
+    {move,{y,2},{x,1}}.
+    {move,{x,2},{x,0}}.
+    {move,{y,1},{x,2}}.
+    {line,[{location,"b.erl",53}]}.
+    {apply,1}.
+    {move,{y,1},{x,2}}.
+    {move,{y,2},{x,1}}.
+    {move,{y,0},{x,0}}.
+    {line,[{location,"b.erl",54}]}.
+    {apply_last,1,3}.
+
+
+{function, module_info, 0, 32}.
+  {label,31}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,30}.
+  {label,32}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 32}.
-  {label,31}.
+{function, module_info, 1, 34}.
+  {label,33}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,32}.
+  {label,34}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.

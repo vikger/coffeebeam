@@ -163,14 +163,20 @@
 % numop bool 1
 % ErlAtom true
 
-b bin3 2
-ErlBinary 1 2 3
-ErlBinary 4 5 6
+% b bin3 2
+% ErlBinary 1 2 3
+% ErlBinary 4 5 6
 
-b bin3 2
-ErlBinary 1
-ErlBinary 2
+% b bin3 2
+% ErlBinary 1
+% ErlBinary 2
 
-b bin4 2
-ErlInt 1
-ErlBinary 2
+% b bin4 2
+% ErlInt 1
+% ErlBinary 2
+
+b applies 4
+ErlAtom b
+ErlAtom bin
+ErlInt 98
+ErlInt 99

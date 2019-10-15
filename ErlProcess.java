@@ -12,6 +12,7 @@ public class ErlProcess {
     private Stack<Register> reg_stack;
     private Stack<BeamFile> module_stack;
     private Stack<TryCatch> try_catch_stack;
+    private Stack<ErlBinary> binary_stack;
     private Import mfa;
     private ErlPid pid;
     public static enum State {RUNNING, RUNNABLE, WAITING}
@@ -36,6 +37,7 @@ public class ErlProcess {
         reduction = reduction_max;
         mq = new MessageQueue();
         try_catch_stack = new Stack<TryCatch>();
+        binary_stack = new Stack<ErlBinary>();
     }
 
     public void prepare(String module, String function, ErlTerm[] args) {
@@ -140,6 +142,7 @@ public class ErlProcess {
         case 7: // call_ext
             // TODO: save module, ip, regs
             save_ip(ip + 1);
+            save();
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
             return setCallExt(mfa, false);
         case 8: // call_ext_last
@@ -482,6 +485,15 @@ public class ErlProcess {
 	    }
 	    jump((ErlLabel) op.args.get(0));
 	    return null;
+        case 91: // bs_put_float
+            ErlTerm bspf_float = getValue(op.args.get(4));
+            if (bspf_float instanceof ErlFloat) {
+                String floatstr = ((ErlFloat) bspf_float).toString();
+                for (int i = 0; i < floatstr.length(); i++)
+                    binary.add((int) floatstr.charAt(i));
+            }
+            jump((ErlLabel) op.args.get(0));
+            return null;
 	case 92: // bs_put_string
 	    int bs_put_index = ((ErlInt) op.args.get(1)).getValue();
 	    int bs_put_length = ((ErlInt) op.args.get(0)).getValue();
@@ -588,6 +600,10 @@ public class ErlProcess {
             raise.add(getValue(op.args.get(1)));
             raise.add(getValue(op.args.get(0)));
             return new ErlException(raise);
+        case 112: // apply
+            return apply(((ErlInt) op.args.get(0)).getValue(), false);
+        case 113: // apply_last
+            return apply(((ErlInt) op.args.get(0)).getValue(), true);
 	case 109: // bs_init2
 	    binary = new ErlBinary();
 	    set_reg((ErlRegister) op.args.get(5), binary); // target register
@@ -633,6 +649,16 @@ public class ErlProcess {
 	    }
 	    jump((ErlLabel) op.args.get(0));
 	    return null;
+        case 122: // bs_save2
+            System.out.println("bs_save2 " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            binary_stack.push(binary);
+            ip++;
+            return null;
+        case 123: // bs_restore2
+            System.out.println("bs_restore2 " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            binary = binary_stack.pop();
+            ip++;
+            return null;
 	case 124: // gc_bif1
             Import gc_bif1_mfa = file.getImport(((ErlInt) op.args.get(2)).getValue());
             ErlTerm gc_bif1_result = bif1(gc_bif1_mfa, getValue(op.args.get(3)));
@@ -844,6 +870,17 @@ public class ErlProcess {
             ip = file.getLabelRef(label);
         }
         return null;
+    }
+
+    private ErlTerm apply(int arity, boolean last) {
+        String mod = ((ErlAtom) x_reg.get(arity)).getValue();
+        String function = ((ErlAtom) x_reg.get(arity + 1)).getValue();
+        save_ip(ip + 1);
+        if (last) save();
+        file = vm.getModule(mod).file;
+        int label = file.getLabel(function, arity);
+        ip = file.getLabelRef(label);
+        return null; // TODO: check BIFs
     }
 
     private ErlList string_to_list(String str) {
