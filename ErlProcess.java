@@ -3,13 +3,12 @@ import java.util.ArrayList;
 public class ErlProcess {
     private BeamVM vm;
     private Register x_reg;
-    private Register y_reg;
     private Register fp_reg;
     private boolean ferror = false;
     private int ip;
+    private CP cp;
     private BeamFile file;
-    private Stack<Integer> ip_stack;
-    private Stack<Register> reg_stack;
+    private Stack<ErlTerm> stack;
     private Stack<BeamFile> module_stack;
     private Stack<TryCatch> try_catch_stack;
     private Stack<ErlBinary> binary_stack;
@@ -29,10 +28,8 @@ public class ErlProcess {
         vm = bv;
 	pid = p;
         x_reg = new Register();
-        y_reg = new Register();
         fp_reg = new Register();
-        ip_stack = new Stack<Integer>();
-        reg_stack = new Stack<Register>();
+        stack = new Stack<ErlTerm>();
         module_stack = new Stack<BeamFile>();
         reduction = reduction_max;
         mq = new MessageQueue();
@@ -86,9 +83,7 @@ public class ErlProcess {
                         jump(tc.label);
                     } else
                         return result;
-                } else if (!ip_stack.isEmpty()) {
-                    restore_ip(); // TODO: check if only occurs on return
-                } else {
+                } else if (ip == -1) {
                     return result;
                 }
             }
@@ -108,7 +103,7 @@ public class ErlProcess {
         for (int i = 0; i < OpCode.arity(op.opcode); i++) System.out.print("\t" + op.args.get(i).toString());
         System.out.println();
         x_reg.dump();
-        y_reg.dump();
+        stack.dump();
         fp_reg.dump();
         switch (op.opcode) {
         case 1: ip++; return null; // skip label
@@ -130,10 +125,10 @@ public class ErlProcess {
             return new ErlException(new ErlAtom("unexpected_end_of_file"));
         case 4: // call
             save_ip(ip + 1);
-            save();
             jump(op.args.get(1));
             return null;
         case 5: // call_last
+            stack.dealloc(((ErlInt) op.args.get(2)).getValue());
             jump(op.args.get(1));
             return null;
         case 6: // call_only
@@ -142,12 +137,12 @@ public class ErlProcess {
         case 7: // call_ext
             // TODO: save module, ip, regs
             save_ip(ip + 1);
-            save();
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
-            return setCallExt(mfa, false);
+            return setCallExt(mfa);
         case 8: // call_ext_last
+            stack.dealloc(((ErlInt) op.args.get(2)).getValue());
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
-            return setCallExt(mfa, true);
+            return setCallExt(mfa);
         case 9: // bif0
             Import bif0_mfa = file.getImport(((ErlInt) op.args.get(0)).getValue());
             ErlTerm bif0_result = bif0(bif0_mfa);
@@ -174,18 +169,20 @@ public class ErlProcess {
             set_reg(op.args.get(4), bif2_result);
             ip++;
             return null;
-        case 12: ip++; return null; // skip allocate
-        case 13: ip++; return null; // skip allocate_heap
+        case 12: // allocate
+            stack.alloc(((ErlInt) op.args.get(0)).getValue());
+            ip++;
+            return null;
+        case 13: // allocate_heap
+            stack.alloc(((ErlInt) op.args.get(0)).getValue());
+            ip++;
+            return null;
         case 14: // allocate_zero
-            int zeros = ((ErlInt) op.args.get(0)).getValue();
-            for (int i = 0; i < zeros; i++)
-                y_reg.set(i, null);
+            stack.alloc(((ErlInt) op.args.get(0)).getValue());
             ip++;
             return null;
         case 15: // allocate_heap_zero
-            int heap_zeros = ((ErlInt) op.args.get(0)).getValue();
-            for (int i = 0; i < heap_zeros; i++)
-                y_reg.set(i, null);
+            stack.alloc(((ErlInt) op.args.get(0)).getValue());
             ip++;
             return null;
         case 16: ip++; return null; // skip test_heap
@@ -193,9 +190,18 @@ public class ErlProcess {
             set_reg(op.args.get(0), null);
             ip++;
             return null;
-        case 18: ip++; return null; // skip deallocate
+        case 18: // deallocate
+            stack.dealloc(((ErlInt) op.args.get(0)).getValue());
+            ip++;
+            return null;
         case 19: // return
-            if (!reg_stack.isEmpty()) restore();
+            if (stack.isEmpty()) {
+                ip = -1;
+            } else {
+                CP cp = (CP) stack.pop();
+                ip = cp.value;
+                file = cp.file;
+            }
             System.out.println("return: " + x_reg.get(0));
             return x_reg.get(0);
         case 20: // send
@@ -447,7 +453,6 @@ public class ErlProcess {
         case 75: // call_fun
             int fun_arity = ((ErlInt) op.args.get(0)).getValue();
             ErlFun fun = (ErlFun) x_reg.get(fun_arity);
-            save();
             save_ip(ip + 1);
             file = fun.getModule();
             jump(fun.getLabel());
@@ -460,7 +465,7 @@ public class ErlProcess {
             return null;
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
-            return setCallExt(mfa, true);
+            return setCallExt(mfa);
             // 79..88 deprecated
 	case 89: // bs_put_integer
 	    ErlTerm bs_put_value = getValue(op.args.get(4));
@@ -603,6 +608,7 @@ public class ErlProcess {
         case 112: // apply
             return apply(((ErlInt) op.args.get(0)).getValue(), false);
         case 113: // apply_last
+            stack.dealloc(((ErlInt) op.args.get(1)).getValue());
             return apply(((ErlInt) op.args.get(0)).getValue(), true);
 	case 109: // bs_init2
 	    binary = new ErlBinary();
@@ -699,7 +705,7 @@ public class ErlProcess {
 	    ip++;
 	    return null;
         case 136: // trim
-            y_reg.trim(((ErlInt) op.args.get(0)).getValue());
+            stack.trim(((ErlInt) op.args.get(0)).getValue());
             ip++;
             return null;
         case 153: ip++; return null; // skip line
@@ -805,18 +811,19 @@ public class ErlProcess {
         if (register.getType().equals("X")) {
             x_reg.set(register.getIndex(), value);
         } else if (register.getType().equals("Y")) {
-            y_reg.set(register.getIndex(), value);
+            stack.set(register.getIndex(), value);
         } else if (register.getType().equals("FP")) {
             fp_reg.set(register.getIndex(), value);
         }
     }
 
-    public ErlTerm setCallExt(Import mfa, boolean last) {
+    public ErlTerm setCallExt(Import mfa) {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         int arity = mfa.getArity();
         System.out.println("CALL_EXT: " + mod + " " + function + " " + arity);
         if (mod.equals("erlang")) {
+            restore_ip(); // BIF, remove CP as not real external call
             if (function.equals("get_module_info")) {
                 return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
             } else if (function.equals("spawn")) {
@@ -857,14 +864,11 @@ public class ErlProcess {
                 x_reg.set(0, newtuple);
                 return newtuple;
             } else if (function.equals("throw")) {
-                if (!last) { ip_stack.pop(); module_stack.pop(); }
                 return new ErlException(x_reg.get(0));
             }
             x_reg.set(0, new ErlAtom("error"));
-            if (!last) { ip_stack.pop(); module_stack.pop(); }
             return new ErlException(new ErlAtom("undef"));
         } else {
-            if (!last) { save(); save_ip(ip + 1); }
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);
             ip = file.getLabelRef(label);
@@ -875,8 +879,7 @@ public class ErlProcess {
     private ErlTerm apply(int arity, boolean last) {
         String mod = ((ErlAtom) x_reg.get(arity)).getValue();
         String function = ((ErlAtom) x_reg.get(arity + 1)).getValue();
-        save_ip(ip + 1);
-        if (last) save();
+        if (!last) save_ip(ip + 1);
         file = vm.getModule(mod).file;
         int label = file.getLabel(function, arity);
         ip = file.getLabelRef(label);
@@ -898,7 +901,7 @@ public class ErlProcess {
             if (reg.getType().equals("X")) {
                 value = x_reg.get(reg.getIndex());
             } else if (reg.getType().equals("Y")) {
-                value = y_reg.get(reg.getIndex());
+                value = stack.get(reg.getIndex());
             } else if (reg.getType().equals("FP")) {
                 value = fp_reg.get(reg.getIndex());
             }
@@ -911,22 +914,16 @@ public class ErlProcess {
         return value;
     }
 
-    private void save() {
-        reg_stack.push(y_reg.clone()); BeamDebug.println("save: y_reg(" + y_reg.size() + ")");
-    }
-
-    private void restore() {
-        y_reg = reg_stack.pop(); BeamDebug.println("restore: y_reg(" + y_reg.size() + ")");
-    }
-
     private void save_ip(int cp) {
-        ip_stack.push(cp); System.out.println("push: " + file.getModuleName() + " " + cp + " size " + ip_stack.size());
-        module_stack.push(file);
+        stack.push(new CP(cp, file));
+        System.out.println("push " + cp + " size " + stack.size());
     }
 
     private void restore_ip() {
-        ip = ip_stack.pop();
-        file = module_stack.pop(); System.out.println("pop: " + file.getModuleName() + " " + ip + " size " + ip_stack.size());
+        CP cp = (CP) stack.pop();
+        ip = cp.value;
+        file = cp.file;
+        System.out.println("pop " + ip + " size " + stack.size());
     }
 
     private void jump(ErlTerm label) {
@@ -1000,18 +997,25 @@ class Stack<T> {
     }
 
     public void push(T item) {
-        items.add(item);
+        items.add(0, item);
     }
 
     public T pop() {
-        int index = items.size() - 1;
-        T item = items.get(index);
-        items.remove(index);
+        T item = items.get(0);
+        items.remove(0);
         return item;
+    }
+
+    public void set(int index, T value) {
+        items.set(index, value);
     }
 
     public T get() {
         return items.get(items.size() - 1);
+    }
+
+    public T get(int index) {
+        return items.get(index);
     }
 
     public boolean isEmpty() {
@@ -1020,6 +1024,30 @@ class Stack<T> {
 
     public int size() {
         return items.size();
+    }
+
+    public void alloc(int size) {
+        for (int i = 0; i < size; i++)
+            push(null);
+    }
+
+    public void dealloc(int size) {
+        for (int i = 0; i < size; i++)
+            pop();
+    }
+
+    public void trim(int n) {
+        for (int i = 0; i < n; i++) {
+            items.remove(0);
+        }
+    }
+
+    public void dump() {
+        BeamDebug.print("    stack(" + items.size() + "):");
+        for (int i = 0; i < items.size(); i++) {
+            BeamDebug.print("\t" + items.get(i));
+        }
+        BeamDebug.println();
     }
 }
 
@@ -1072,4 +1100,16 @@ class TryCatch {
         label = l;
         register = r;
     }
+}
+
+class CP extends ErlTerm {
+    int value;
+    BeamFile file;
+    public CP(int v, BeamFile f) {
+        super("CP", 0);
+        value = v;
+        file = f;
+    }
+    public String toString() { return "CP(" + Integer.toString(value) + ")"; }
+    public String toId() { return toString(); }
 }

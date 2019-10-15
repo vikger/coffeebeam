@@ -26,7 +26,9 @@ public class Test {
                      new ErlAtom("false")),
         new TestCase("numop", "bool", new ErlTerm[]{new ErlInt(1)}, new ErlAtom("no")),
         new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("a")}, new ErlAtom("no")),
-        new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("true")}, new ErlAtom("yes"))
+        new TestCase("numop", "bool", new ErlTerm[]{new ErlAtom("true")}, new ErlAtom("yes")),
+        new TestCase("a", "tuple", new ErlTerm[]{new ErlAtom("a")},
+                     ErlTerm.parse("{a, {a, b, c, a}, {x, b, c, a}, {x, b, b, a}}"))
     };
 
     public Test() throws Exception {
@@ -54,6 +56,8 @@ public class Test {
     }
 
     public static void main(String[] args) throws Exception {
+	if (args.length > 0 && args[0].equals("debug"))
+	    BeamDebug.debug = true;
         new Test();
     }
 }
