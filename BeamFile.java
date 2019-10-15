@@ -669,9 +669,38 @@ class ErlList extends ErlTerm {
     }
     public String toString() {
         if (isNil()) return "[]";
-        else return "[" + toStringValues();
+        return toPrintable("\"", "[");
     }
-    public String toStringValues() {
+    private String toPrintable(String p, String nonp) {
+        if (tail instanceof ErlList) {
+            ErlList t = (ErlList) tail;
+            if (t.isNil()) {
+                if (isPrintable(head))
+                    return p + String.valueOf((char) ((ErlInt) head).getValue()) + "\"";
+                else
+                    return nonp + head.toString() + "]";
+            } else {
+                if (isPrintable(head))
+                    return t.toPrintable(p + String.valueOf((char) ((ErlInt) head).getValue()), nonp + head.toString() + ", ");
+                else
+                    return t.toNonPrintable(nonp + head.toString() + ", ");
+            }
+        }
+        return nonp + head.toString() + " | " + tail.toString() + "]";
+    }
+    private String toNonPrintable(String nonp) {
+        if (tail instanceof ErlList) {
+            ErlList t = (ErlList) tail;
+            if (t.isNil()) {
+                return nonp + head.toString() + "]";
+            } else {
+                return t.toNonPrintable(nonp + head.toString() + ", ");
+            }
+        } else {
+            return nonp + head.toString() + " | " + tail.toString() + "]";
+        }
+    }
+    private String toStringValues() {
         if (tail instanceof ErlList) {
             if (((ErlList)tail).isNil()) {
                 return head.toString() + "]";
@@ -681,6 +710,13 @@ class ErlList extends ErlTerm {
         } else {
             return head.toString() + " | " + tail.toString() + "]";
         }
+    }
+    private boolean isPrintable(ErlTerm item) {
+        if (item instanceof ErlInt) {
+            int c = ((ErlInt) item).getValue();
+            return (/*(c >= 8 && c <= 13) || (c == 27) || */(c >= 32 && c <= 126)/* || (c >= 160 && c <= 255)*/);
+        }
+        return false;
     }
     public String toId() {
         if (isNil()) return "nil";
