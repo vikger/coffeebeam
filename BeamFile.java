@@ -908,7 +908,8 @@ class ErlMap extends ErlTerm {
 
 class ErlBinary extends ErlTerm {
     ArrayList<Integer> bytes;
-    int position = 0;
+    int first = 0;
+    int next = 0;
 
     public ErlBinary() {
 	super("binary", 10);
@@ -930,15 +931,31 @@ class ErlBinary extends ErlTerm {
 	return result;
     }
 
+    public void set(int index, int value) {
+        bytes.set(index, value);
+    }
+
     public int getBit() {
 	int b = bytes.get(0);
-	int bit = (b & (1 << (7 - position))) >> (7 - position);
-	position++;
-	if (position == 8) {
+	int bit = (b & (1 << (7 - first))) >> (7 - first);
+	first++;
+	if (first == 8) {
 	    bytes.remove(0);
-	    position = 0;
+	    first = 0;
 	}
 	return bit;
+    }
+
+    public void putBit(int bit) {
+        int b;
+        if (next == 0) {
+            bytes.add(0);
+            b = 0;
+        } else
+            b = bytes.get(bytes.size() - 1);
+        b |= bit << (7 - next);
+        bytes.set(bytes.size() - 1, b);
+        next = (next + 1) % 8;
     }
 
     public int getInteger(int length) {
@@ -950,16 +967,23 @@ class ErlBinary extends ErlTerm {
 	return result;
     }
 
+    public void putInteger(int value, int length) {
+        while (length > 0) {
+            putBit((value >> (length - 1)) & 1);
+            length--;
+        }
+    }
+
     public int startMatch() {
-	return position;
+	return first;
     }
 
     public int getPosition() {
-	return position;
+	return first;
     }
 
     public int bitSize() {
-	return 8 * bytes.size() - position;
+	return 8 * bytes.size() - first + next - 8;
     }
 
     public int size() {

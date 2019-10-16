@@ -465,8 +465,9 @@ public class ErlProcess {
             // 79..88 deprecated
 	case 89: // bs_put_integer
 	    ErlTerm bs_put_value = getValue(op.args.get(4));
+            int bs_put_int_length = ((ErlInt) getValue(op.args.get(1))).getValue(); // bit size
 	    if (bs_put_value instanceof ErlInt) {
-		binary.add(((ErlInt) bs_put_value).getValue());
+		binary.putInteger(((ErlInt) bs_put_value).getValue(), bs_put_int_length);
 		ip++;
 	    } else {
 		jump(op.args.get(0)); // error
@@ -688,7 +689,7 @@ public class ErlProcess {
             jump(op.args.get(0));
             return null;
 	case 131: // bs_test_unit
-	    if (((ErlBinary) getValue(op.args.get(1))).position != 0) {
+	    if (((ErlBinary) getValue(op.args.get(1))).first != 0) {
 		jump((ErlLabel) op.args.get(0));
 		return null;
 	    }
@@ -757,7 +758,7 @@ public class ErlProcess {
 	    ip++;
 	    return null;
 	case 168: // bs_set_position
-	    ((ErlBinary) getValue(op.args.get(0))).position = ((ErlInt) getValue(op.args.get(1))).getValue();
+	    ((ErlBinary) getValue(op.args.get(0))).first = ((ErlInt) getValue(op.args.get(1))).getValue();
 	    ip++;
 	    return null;
         default: System.out.println("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");

@@ -6,7 +6,7 @@
            {bin1,1},
            {bin2,1},
            {bin3,2},
-           {bin4,2},
+           {bin4,3},
            {call,0},
            {module_info,0},
            {module_info,1},
@@ -204,19 +204,20 @@
     return.
 
 
-{function, bin4, 2, 28}.
+{function, bin4, 3, 28}.
   {label,27}.
     {line,[{location,"b.erl",49}]}.
-    {func_info,{atom,b},{atom,bin4},2}.
+    {func_info,{atom,b},{atom,bin4},3}.
   {label,28}.
     {line,[{location,"b.erl",50}]}.
-    {gc_bif,byte_size,{f,0},2,[{x,1}],{x,2}}.
-    {bs_add,{f,0},[{x,2},{integer,1},1],{x,2}}.
+    {gc_bif,byte_size,{f,0},3,[{x,2}],{x,3}}.
+    {bs_add,{f,0},[{x,3},{integer,1},1],{x,3}}.
     {line,[{location,"b.erl",50}]}.
-    {bs_init2,{f,0},{x,2},0,3,{field_flags,[]},{x,2}}.
-    {bs_put_integer,{f,0},{integer,8},1,{field_flags,[unsigned,big]},{x,0}}.
-    {bs_put_binary,{f,0},{atom,all},8,{field_flags,[unsigned,big]},{x,1}}.
-    {move,{x,2},{x,0}}.
+    {bs_init2,{f,0},{x,3},0,4,{field_flags,[]},{x,3}}.
+    {bs_put_integer,{f,0},{integer,2},1,{field_flags,[unsigned,big]},{x,0}}.
+    {bs_put_integer,{f,0},{integer,6},1,{field_flags,[unsigned,big]},{x,1}}.
+    {bs_put_binary,{f,0},{atom,all},8,{field_flags,[unsigned,big]},{x,2}}.
+    {move,{x,3},{x,0}}.
     return.
 
 
