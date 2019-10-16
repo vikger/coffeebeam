@@ -41,7 +41,7 @@ public class BeamClient {
     }
 
     public void handleCall(String function, ErlTerm arg) {
-        System.out.println("client handleCall " + function + " " + arg);
+        BeamDebug.debug("client handleCall " + function + " " + arg);
     }
 
     public void handleResult(ErlTerm r) {
@@ -52,7 +52,7 @@ public class BeamClient {
         ErlProcess p = vm.newProcess(this);
         p.prepare(module, function, args);
         ErlTerm r = waitForResult();
-        System.out.println("client result: " + r);
+        BeamDebug.debug("client result: " + r);
         return r;
     }
 
@@ -66,8 +66,8 @@ public class BeamClient {
     public void stopVM() { vm.halt(); }
 
     public static void main(String[] args) throws Exception {
-	if (args.length > 0 && args[0].equals("debug"))
-	    BeamDebug.debug = true;
+	if (args.length > 0)
+	    BeamDebug.loglevel = Integer.valueOf(args[0]);
         BeamClient client = new BeamClient();
         client.loadModules("load.txt");
         client.runApplies("apply.txt");

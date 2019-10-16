@@ -58,17 +58,17 @@ public class Test {
 
     public boolean assertEqual(ErlTerm expected, ErlTerm result) {
         if (expected.toId().equals(result.toId())) {
-            System.out.println("OK");
+            BeamDebug.info("OK");
             return true;
         } else {
-            System.out.println("ERROR - expected: " + expected.toString() + ", result: " + result.toString());
+            BeamDebug.error("ERROR - expected: " + expected.toString() + ", result: " + result.toString());
             return false;
         }
     }
 
     public static void main(String[] args) throws Exception {
-	if (args.length > 0 && args[0].equals("debug"))
-	    BeamDebug.debug = true;
+	if (args.length > 0)
+	    BeamDebug.loglevel = Integer.valueOf(args[0]);
         new Test();
     }
 }

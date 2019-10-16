@@ -44,14 +44,13 @@ public class BeamFile {
         long maxopcode = br.read32BitUnsigned();
         long labelcount = br.read32BitUnsigned();
         long funcount = br.read32BitUnsigned();
-        System.out.println("version: " + codeversion +
-                           ", maxopcode: " + maxopcode +
-                           ", labels: " + labelcount +
-                           ", functions: " + funcount);
+        BeamDebug.debug("version: " + codeversion +
+                       ", maxopcode: " + maxopcode +
+                       ", labels: " + labelcount +
+                       ", functions: " + funcount);
         int opcode;
         while ((opcode = br.readByte()) != -1) {
             int arity = OpCode.arity(opcode);
-            //System.out.println("-- " + OpCode.name(opcode) + " / " + arity);
             ArrayList<ErlTerm> terms = new ArrayList<ErlTerm>();
             for (int j = 0; j < arity; j++) {
                 terms.add(InternalTerm.read(br, this));
@@ -64,14 +63,12 @@ public class BeamFile {
 
     public void readLiterals(ByteReader br) throws IOException {
         int uncompressedSize = (int) br.read32BitUnsigned();
-        //System.out.println(uncompressedSize);
 
         InflaterInputStream iis = new InflaterInputStream(br.getStream());
         byte[] uncompressed = new byte[uncompressedSize];
         iis.read(uncompressed);
         br = new ByteReader(new ByteArrayInputStream(uncompressed));
         int count = (int) br.read32BitUnsigned();
-        //System.out.println("Count: " + count);
         for (int i = 0; i < count; i++) {
             int size = (int) br.read32BitUnsigned();
             literals.add(ExternalTerm.read(br));
@@ -133,60 +130,60 @@ public class BeamFile {
 
     private void printAtoms() {
         for (int i = 0; i < atoms.size(); i++) {
-            BeamDebug.println("Atom(" + i + "): " + atoms.get(i));
+            BeamDebug.debug("Atom(" + i + "): " + atoms.get(i));
         }
     }
 
     private void printLiterals() {
         for (int i = 0; i < literals.size(); i++) {
-            BeamDebug.println("Literal(" + i + "): " + literals.get(i).toString());
+            BeamDebug.debug("Literal(" + i + "): " + literals.get(i).toString());
         }
     }
 
     private void printImports() {
         for (int i = 0; i < imports.size(); i++) {
             Import imp = imports.get(i);
-            BeamDebug.println("Import(" + i + "): [atom " + imp.getModule() + "]:[atom " + imp.getFunction() + "] / " + imp.getArity());
+            BeamDebug.debug("Import(" + i + "): [atom " + imp.getModule() + "]:[atom " + imp.getFunction() + "] / " + imp.getArity());
         }
     }
 
     private void printExports() {
         for (int i = 0; i < exports.size(); i++) {
             Export exp = exports.get(i);
-            BeamDebug.println("Export(" + i + "): [atom " + exp.getFunction() + "] / " + exp.getArity() + " - label " + exp.getLabel());
+            BeamDebug.debug("Export(" + i + "): [atom " + exp.getFunction() + "] / " + exp.getArity() + " - label " + exp.getLabel());
         }
     }
 
     private void printLocalFunctions() {
         for (int i = 0; i < localFunctions.size(); i++) {
             ErlFun loc = localFunctions.get(i);
-            BeamDebug.println("LocalFunction(" + i + "): " + loc.toString());
+            BeamDebug.debug("LocalFunction(" + i + "): " + loc.toString());
         }
     }
 
     private void printCodeTable() {
         for (int i = 0; i < codeTable.size(); i++) {
             ErlOp erlop = codeTable.get(i);
-            BeamDebug.println("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
+            BeamDebug.debug("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
             for (int j = 0; j < erlop.args.size(); j++) {
                 ErlTerm arg = erlop.args.get(j);
-                BeamDebug.println("---- " + arg.toString());
+                BeamDebug.debug("---- " + arg.toString());
             }
         }
     }
 
     public void printLabelRefs() {
         for (int i = 0; i < labelRefs.size(); i++) {
-            BeamDebug.println("labelRefs " + i + " -> " + labelRefs.get(i));
+            BeamDebug.debug("labelRefs " + i + " -> " + labelRefs.get(i));
         }
     }
 
     public void printAttributes() {
-        BeamDebug.println("Attributes: " + attributes.toString());
+        BeamDebug.debug("Attributes: " + attributes.toString());
     }
 
     public void printStrTable() {
-	BeamDebug.println("StrTable: " + strTable.toString());
+	BeamDebug.debug("StrTable: " + strTable.toString());
     }
 
     public String getModuleName() {
@@ -1079,7 +1076,7 @@ class ExternalTerm {
         case 131: // external term format
             return read_term();
         default:
-            System.out.println("UNKNOWN term code " + b);
+            BeamDebug.error("UNKNOWN term code " + b);
             return null;
         }
     }
@@ -1089,18 +1086,18 @@ class ExternalTerm {
         switch (tag) {
         case 82: // atom_cache_ref
             int index = br.readByte();
-            System.out.println("ATOM_CACHE_REF: " + index);
+            BeamDebug.warning("ATOM_CACHE_REF: " + index);
             break;
         case 97: // small integer
             int smallint = br.readByte();
             return new ErlInt(smallint);
         case 98: // integer
             long biginteger = br.read32BitUnsigned();
-            System.out.println("INTEGER_EXT: " + biginteger);
+            BeamDebug.warning("INTEGER_EXT: " + biginteger);
             break;
         case 99: // FLOAT_EXT
             byte[] floatstr = br.readBytes(31);
-            System.out.println("FLOAT_EXT: " + new String(floatstr));
+            BeamDebug.warning("FLOAT_EXT: " + new String(floatstr));
             break;
         case 100: // ATOM_EXT
             int atom_length = br.read16BitUnsigned();
@@ -1157,11 +1154,11 @@ class ExternalTerm {
             }
             return map;
         default:
-            System.out.println("other " + tag);
-            System.out.println(" " + br.readByte());
+            BeamDebug.debug("other " + tag);
+            BeamDebug.debug(" " + br.readByte());
             break;
         }
-        System.out.println("UNKNOWN ext_term " + tag);
+        BeamDebug.warning("UNKNOWN ext_term " + tag);
         return new GenericErlTerm(tag);
     }
 }
@@ -1170,7 +1167,6 @@ class InternalTerm {
     public static ErlTerm read(ByteReader br, BeamFile bf) throws IOException {
         String[] tags = {"literal", "integer", "atom", "X register", "Y register", "label", "character", "extended - "};
         int b = br.readByte();
-        //System.out.print("---- [" + BeamDebug.dec_to_bin(b) + "] ");
         // read tag
         String tagname = null;
         int value = -1234;
@@ -1198,11 +1194,10 @@ class InternalTerm {
                     return bigint;
                 }
                 for (int i = 0; i < following_bytes; i++)
-                    System.out.print("skipped [" + BeamDebug.dec_to_bin(br.readByte()) + "] ");
-                System.out.print("skipped(" + following_bytes + ") ");
+                    BeamDebug.warning("skipped [" + BeamDebug.dec_to_bin(br.readByte()) + "] ");
+                BeamDebug.warning("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte
                 int cont1 = br.readByte();
-                // System.out.print("[" + BeamDebug.dec_to_bin(cont1) + "] ");
                 value = ((b & 0xE0) << 3) + cont1;
                 switch (tag) {
                 case 0: return new ErlInt(value);
@@ -1217,7 +1212,6 @@ class InternalTerm {
         } else { // bit 3 is 0, no continuation
             if (extended) {
                 value = br.readByte();
-                //System.out.print("[" + BeamDebug.dec_to_bin(value) + "] ");
                 switch ((b & 0xF0) >> 4) {
                 case 1: // list
                     tagname += "list";
@@ -1254,7 +1248,7 @@ class InternalTerm {
                 }
             }
         }
-        System.out.println("Generic " + tagname + " " + BeamDebug.dec_to_bin(value));
+        BeamDebug.warning("Generic " + tagname + " " + BeamDebug.dec_to_bin(value));
         return new GenericErlTerm(value);
     }
 }

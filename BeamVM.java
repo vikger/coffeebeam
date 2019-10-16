@@ -16,7 +16,7 @@ public class BeamVM {
         BeamFile bf = br.read();
         modules.add(new BeamModule(bf.getModuleName(), bf));
         bf.dump();
-        System.out.println("BeamVM: loaded '" + bf.getModuleName() + "'");
+        BeamDebug.info("BeamVM: loaded '" + bf.getModuleName() + "'");
     }
 
     public BeamModule getModule(String name) {
@@ -110,11 +110,11 @@ class Scheduler extends Thread {
                 if (p.getState() == ErlProcess.State.RUNNABLE) {
                     ErlTerm result = p.run();
                     if (result == null) {
-                        System.out.println("VM: reschedule " + p.getPid());
+                        BeamDebug.info("VM: reschedule " + p.getPid());
                         removeProcess(p);
                         processes.add(p);
                     } else {
-                        System.out.println("result: " + result.toString());
+                        BeamDebug.info("result: " + result.toString());
                         removeProcess(p);
                         BeamClient client = p.getClient();
                         if (client != null)
@@ -126,7 +126,7 @@ class Scheduler extends Thread {
                 }
             }
         }
-        System.out.println("Scheduler exited.");
+        BeamDebug.info("Scheduler exited.");
     }
     public void send(ErlPid pid, ErlTerm message) {
         ErlProcess p = getProcess(pid);

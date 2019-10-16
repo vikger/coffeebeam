@@ -72,7 +72,7 @@ public class BeamReader {
         case "Attr": beamfile.readAttributes(br); break;
 	case "StrT": beamfile.readStr(br); break;
 	default:
-            System.out.println("Skipped chunk " + chunkname + "(" + chunklength + ")");
+            BeamDebug.info("Skipped chunk " + chunkname + "(" + chunklength + ")");
 	    break;
 	}
 	readPadding(chunklength);

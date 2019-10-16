@@ -1,5 +1,5 @@
 public class BeamDebug {
-    public static boolean debug = false;
+    public static int loglevel = 2; // 0: nothing, 1: error, 2: warning, 3: info, 4: debug
 
     public static String dec_to_bin(int b) {
         String result = "";
@@ -9,18 +9,25 @@ public class BeamDebug {
         return result;
     }
 
+    public static void error(String s) {
+        if (loglevel >= 1) println(s);
+    }
+    public static void warning(String s) {
+        if (loglevel >= 2) println(s);
+    }
+    public static void info(String s) {
+        if (loglevel >= 3) println(s);
+    }
+    public static void debug(String s) {
+        if (loglevel >= 4) println(s);
+    }
     public static void print(String s) {
-	if (debug)
 	    System.out.print(s);
     }
-
     public static void println(String s) {
-	if (debug)
 	    System.out.println(s);
     }
-
     public static void println() {
-	if (debug)
 	    System.out.println();
     }
 }
