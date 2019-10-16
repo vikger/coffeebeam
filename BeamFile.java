@@ -983,7 +983,8 @@ class ErlBinary extends ErlTerm {
     }
 
     public int bitSize() {
-	return 8 * bytes.size() - first + next - 8;
+        int lastdiff = (8 - next) % 8;
+	return 8 * bytes.size() - first - lastdiff;
     }
 
     public int size() {
