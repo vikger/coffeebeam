@@ -10,16 +10,16 @@ public class BeamDebug {
     }
 
     public static void error(String s) {
-        if (loglevel >= 1) println(s);
+        if (loglevel >= 1) println("\u001B[31m" + s);
     }
     public static void warning(String s) {
-        if (loglevel >= 2) println(s);
+        if (loglevel >= 2) println("\u001B[33m" + s);
     }
     public static void info(String s) {
-        if (loglevel >= 3) println(s);
+        if (loglevel >= 3) println("\u001B[0m" + s);
     }
     public static void debug(String s) {
-        if (loglevel >= 4) println(s);
+        if (loglevel >= 4) println("\u001B[35m" + s);
     }
     public static void print(String s) {
 	    System.out.print(s);

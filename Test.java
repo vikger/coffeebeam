@@ -52,7 +52,7 @@ public class Test {
             else
                 failed++;
         }
-        System.out.println(passed + " passed, " + failed + " failed");
+        System.out.println("\u001B[32m" + passed + " passed, " + failed + " failed");
         client.stopVM();
     }
 

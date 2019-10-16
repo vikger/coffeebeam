@@ -762,7 +762,7 @@ public class ErlProcess {
 	    ((ErlBinary) getValue(op.args.get(0))).first = ((ErlInt) getValue(op.args.get(1))).getValue();
 	    ip++;
 	    return null;
-        default: BeamDebug.error("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + ")");
+        default: BeamDebug.error("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + "), module: " + file.getModuleName());
         }
         ip++; return null;
     }
