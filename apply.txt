@@ -1,15 +1,11 @@
 % a listlength 1
-% ErlList 3
-% ErlInt 1
-% ErlInt 2
-% ErlInt 3
-% ErlNil
+% [1, 2, 3]
 
 % a listlength 1
-% ErlNil
+% []
 
 % a newproc 1
-% ErlAtom np
+% np
 
 % a list 0
 
@@ -18,127 +14,71 @@
 % example module_info 0
 
 % a call 1
-% ErlInt 10
+% 10
 
 % a module_info 0
 
 % a test 1
-% ErlAtom a
+% a
 
 % a test 1
-% ErlAtom b
+% b
 
 % a test 1
-% ErlInt 0
+% 0
 
 % lists append 2
-% ErlList 3
-% ErlInt 1
-% ErlInt 2
-% ErlInt 3
-% ErlNil
-% ErlList 3
-% ErlInt 4
-% ErlInt 5
-% ErlInt 6
-% ErlNil
+% [1, 2, 3]
+% [4, 5, 6]
 
 % lists append 1
-% ErlList 3
-% ErlList 2
-% ErlInt 1
-% ErlInt 2
-% ErlNil
-% ErlList 0
-% ErlNil
-% ErlList 1
-% ErlInt 3
-% ErlNil
-% ErlNil
+% [[1, 2], [], [3]]
 
 % lists concat 1
-% ErlList 4
-% ErlAtom a
-% ErlInt 1
-% ErlFloat 1.5
-% ErlList 3
-% ErlInt 55
-% ErlInt 56
-% ErlInt 57
-% ErlNil
-% ErlNil
+% [a, 1, 1.5, [55, 56, 57]]
 
 % lists duplicate 2
-% ErlInt 3
-% ErlAtom d
+% 3
+% d
 
 % lists zip 2
-% ErlList 2
-% ErlAtom a
-% ErlAtom b
-% ErlNil
-% ErlList 2
-% ErlInt 1
-% ErlInt 2
-% ErlNil
+% [a, b]
+% [1, 2]
 
 % lists reverse 1
-% ErlAtom a
+% a
 
 % lists reverse 1
-% ErlList 3
-% ErlAtom a
-% ErlAtom b
-% ErlAtom c
-% ErlNil
+% [a, b, c]
 
 % lists reverse 2
-% ErlList 2
-% ErlInt 1
-% ErlInt 2
-% ErlNil
-% ErlList 1
-% ErlInt 0
-% ErlNil
+% [1, 2]
+% [0]
 
 % a map 1
-% ErlAtom mapitem
+% mapitem
 
 % a tuple 1
-% ErlList 0
-% ErlNil
+% []
 
 % add add 2
-% ErlInt 1
-% ErlInt 2
+% 1
+% 2
 
 % a call 1
-% ErlInt 1
+% 1
 
 % a funs 1
-% ErlList 3
-% ErlInt 1
-% ErlInt 2
-% ErlInt 3
-% ErlNil
+% [1, 2, 3]
 
 % a all 1
-% ErlList 2
-% ErlAtom a
-% ErlAtom a
-% ErlNil
+% [a, a]
 
 % a all 1
-% ErlList 2
-% ErlAtom a
-% ErlAtom b
-% ErlNil
+% [a, b]
 
 % a any 1
-% ErlList 2
-% ErlAtom b
-% ErlAtom a
-% ErlNil
+% [b, a]
 
 % a sending 0
 
@@ -149,39 +89,39 @@
 % a bignum3 0
 
 % b recv_catch 1
-% ErlInt 1
+% 1
 % b old_catch 1
-% ErlInt 1
+% 1
 
 % b throw 0
 
 % numop relation 3
-% ErlInt 1
-% ErlInt 2
-% ErlInt 3
+% 1
+% 2
+% 3
 
 % numop bool 1
-% ErlAtom true
+% true
 
 % b bin3 2
-% ErlBinary 1 2 3
-% ErlBinary 4 5 6
+% <<1, 2, 3>>
+% <<4, 5, 6>>
 
 % b bin3 2
-% ErlBinary 1
-% ErlBinary 2
+% <<1>>
+% <<2>>
 
-% b bin4 2
-% ErlInt 1
-% ErlBinary 2
+b bin4 2
+1
+<<2>>
 
-% b applies 4
-% ErlAtom b
-% ErlAtom bin
-% ErlInt 98
-% ErlInt 99
+b applies 4
+b
+bin
+98
+99
 
 b atomnames 3
-ErlAtom a
-ErlAtom b
-ErlAtom c
+'a'
+'0244'
+'EXIT'

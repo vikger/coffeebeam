@@ -76,34 +76,7 @@ public class BeamVM {
 
     private ErlTerm readTerm(BufferedReader reader) throws Exception {
         String line = reader.readLine();
-        String[] term = line.split(" ", 2);
-        if (term[0].equals("ErlInt")) return new ErlInt(Integer.valueOf(term[1]));
-        else if (term[0].equals("ErlFloat")) return new ErlFloat(Float.valueOf(term[1]));
-        else if (term[0].equals("ErlAtom")) return new ErlAtom(term[1]);
-        else if (term[0].equals("ErlList")) {
-            int length = Integer.valueOf(term[1]);
-            ErlList list = new ErlList();
-            for (int i = 0; i < length; i++) {
-                list.add(readTerm(reader));
-            }
-            list.setTail(readTerm(reader));
-            return list;
-        } else if (term[0].equals("ErlNil")) return new ErlList();
-        else if (term[0].equals("ErlMap")) {
-            int maplength = Integer.valueOf(term[1]);
-            ErlMap map = new ErlMap();
-            for (int i = 0; i < maplength; i++) {
-                map.add(readTerm(reader), readTerm(reader));
-            }
-            return map;
-	} else if (term[0].equals("ErlBinary")) {
-	    String[] binstr = term[1].split(" ");
-	    ErlBinary bin = new ErlBinary();
-	    for (int i = 0; i < binstr.length; i++)
-		bin.add(Integer.valueOf(binstr[i]));
-	    return bin;
-        } else System.out.println("Unknown type: '" + term[0] + "'");
-        return null;
+        return ErlTerm.parse(line);
     }
 
     public Scheduler getScheduler() { return scheduler; }

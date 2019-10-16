@@ -330,11 +330,11 @@ abstract class ErlTerm {
     public String getTag() { return tag; }
     public boolean isReference() { return reference; }
     public int getOrder() { return order; }
-    public static ErlTerm parse(String s) {
-        ParseResult pr = parse_term(s);
+    public static ErlTerm parse(String s) throws ErlSyntaxException {
+        ParseResult pr = parseTerm(s);
         return pr.term;
     }
-    public static ParseResult parse_term(String s) {
+    public static ParseResult parseTerm(String s) throws ErlSyntaxException {
         s = skipWs(s);
         if (s.charAt(0) >= 'a' && s.charAt(0) <= 'z')
             return parseAtom(s);
@@ -353,6 +353,8 @@ abstract class ErlTerm {
 		return parseBinary(s);
 	    // else parse pid, port, ...
 	}
+        if (s.charAt(0) == '%')
+            return parseMap(s);
         return new ParseResult(null, s);
     }
     private static String skipWs(String s) {
@@ -373,6 +375,7 @@ abstract class ErlTerm {
         String name = "";
         s = s.substring(1);
         while (!s.isEmpty() && s.charAt(0) != '\'') {
+            if (s.charAt(0) == '\\') s = s.substring(1);
             name += s.charAt(0);
             s = s.substring(1);
         }
@@ -404,16 +407,16 @@ abstract class ErlTerm {
         }
         return new ParseResult(new ErlInt(sign * intvalue), s);
     }
-    private static ParseResult parseList(String s) {
+    private static ParseResult parseList(String s) throws ErlSyntaxException {
         s = s.substring(1);
         s = skipWs(s);
         ErlList list = new ErlList();
         s = parseFromHead(s, list);
         return new ParseResult(list, s);
     }
-    private static String parseFromHead(String s, ErlList list) {
+    private static String parseFromHead(String s, ErlList list)  throws ErlSyntaxException {
         while (s.charAt(0) != ']') {
-            ParseResult prhead = parse_term(s);
+            ParseResult prhead = parseTerm(s);
             list.add(prhead.term);
             s = prhead.remaining;
             s = skipWs(s);
@@ -422,7 +425,7 @@ abstract class ErlTerm {
                 s = skipWs(s);
             } else if (s.charAt(0) == '|') {
                 s = s.substring(1);
-                ParseResult prtail = parse_term(s);
+                ParseResult prtail = parseTerm(s);
                 list.setTail(prtail.term);
                 s = prtail.remaining;
                 s = skipWs(s);
@@ -441,12 +444,12 @@ abstract class ErlTerm {
         s = s.substring(1);
         return new ParseResult(list, s);
     }
-    private static ParseResult parseTuple(String s) {
+    private static ParseResult parseTuple(String s) throws ErlSyntaxException {
         s = s.substring(1);
         s = skipWs(s);
         ErlTuple tuple = new ErlTuple();
         while (s.charAt(0) != '}') {
-            ParseResult pritem = parse_term(s);
+            ParseResult pritem = parseTerm(s);
             tuple.add(pritem.term);
             s = pritem.remaining;
             s = skipWs(s);
@@ -476,12 +479,37 @@ abstract class ErlTerm {
 	s = s.substring(2);
 	return new ParseResult(bin, s);
     }
+    private static ParseResult parseMap(String s) throws ErlSyntaxException {
+        s = s.substring(1);
+        if (s.charAt(0) != '{') throw new ErlSyntaxException();
+        s = s.substring(1);
+        s = skipWs(s);
+        ErlMap map = new ErlMap();
+        while (s.charAt(0) != '}') {
+            ParseResult keypr = parseTerm(s);
+            s = keypr.remaining;
+            s = skipWs(s);
+            if (s.charAt(0) != '=') throw new ErlSyntaxException();
+            s = s.substring(1);
+            if (s.charAt(0) != '>') throw new ErlSyntaxException();
+            ParseResult valuepr = parseTerm(s);
+            map.add(keypr.term, valuepr.term);
+            s = valuepr.remaining;
+            s = skipWs(s);
+            if (s.charAt(0) == ',') s = s.substring(1);
+        }
+        s = s.substring(1);
+        return new ParseResult(map, s);
+    }
     public static boolean isAtomSubChar(char c) {
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || isDigit(c) || c == '_';
     }
     private static boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
+}
+
+class ErlSyntaxException extends Exception {
 }
 
 class ParseResult {
@@ -647,20 +675,20 @@ class ErlAtom extends ErlTerm {
             return "''";
         char c = s.charAt(0);
         if (c >= 'a' && c <= 'z')
-            return toSimple(s.substring(1), String.valueOf(c), "'" + String.valueOf(c));
-        return toQuoted(s.substring(1), "'" + String.valueOf(c));
+            return toSimple(s.substring(1), String.valueOf(c));
+        return toQuoted(s.substring(1), String.valueOf(c));
     }
-    private String toSimple(String s, String simple, String quoted) {
-        if (s.equals("")) return simple;
+    private String toSimple(String s, String output) {
+        if (s.equals("")) return output;
         char c = s.charAt(0);
         if (ErlTerm.isAtomSubChar(c))
-            return toSimple(s.substring(1), simple + String.valueOf(c), quoted + String.valueOf(c));
-        return toQuoted(s.substring(1), quoted + String.valueOf(c));
+            return toSimple(s.substring(1), output + String.valueOf(c));
+        return toQuoted(s.substring(1), output + String.valueOf(c));
     }
-    private String toQuoted(String s, String quoted) {
-        if (s.equals("")) return quoted + "'";
+    private String toQuoted(String s, String output) {
+        if (s.equals("")) return "'" + output + "'";
         char c = s.charAt(0);
-        return toQuoted(s.substring(1), quoted + String.valueOf(c));
+        return toQuoted(s.substring(1), output + String.valueOf(c));
     }
     public String toId() { return tag + "(" + getValue() + ")"; }
     public int getIndex() { return index; }
