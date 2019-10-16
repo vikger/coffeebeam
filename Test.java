@@ -12,6 +12,8 @@ public class Test {
                      ErlTerm.parse("[a, b, c, d]")),
         new TestCase("lists", "append", new ErlTerm[]{ErlTerm.parse("\"hello\""), ErlTerm.parse("\" world\"")},
                      ErlTerm.parse("\"hello world\"")),
+        new TestCase("lists", "zip", new ErlTerm[]{ErlTerm.parse("[1,2,3,4]"), ErlTerm.parse("[a,b,c,d]")},
+                     ErlTerm.parse("[{1,a},{2,b},{3,c},{4,d}]")),
         new TestCase("a", "sending", new ErlTerm[]{}, new ErlAtom("message")),
         new TestCase("b", "try_catch", new ErlTerm[]{}, ErlTerm.parse("{error, undef}")),
         new TestCase("b", "old_catch", new ErlTerm[]{new ErlInt(1)}, new ErlInt(2)),

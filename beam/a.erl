@@ -1,6 +1,6 @@
 -module(a).
 
--export([call/1, test/1, newproc/1, list/0, sending/0, tuple/1, map/1, funs/1, all/1, any/1, sendrecv/0, bignum1/0, bignum2/0, bignum3/0]).
+-export([call/1, test/1, newproc/1, list/0, sending/0, tuple/1, map/1, funs/1, all/1, any/1, sendrecv/0, bignum1/0, bignum2/0, bignum3/0, append/2]).
 
 call(_) ->
     test(b:call()).
@@ -53,6 +53,9 @@ any(L) ->
                       true;
                   (_) ->
                       false end, L).
+
+append(A, B) ->
+    A ++ B.
 
 bignum1() ->
     [12345678910111213141516,

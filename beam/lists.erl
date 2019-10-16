@@ -11,6 +11,13 @@
          dropwhile/2,
          duplicate/2,
          filter/2,
+         filtermap/2,
+         flatlength/1,
+         flatten/1,
+         flatten/2,
+         flatmap/2,
+         foldl/3,
+         foldr/3,
          map/2,
          reverse/1,
          reverse/2,
@@ -92,6 +99,45 @@ filter(Pred, [H|T]) ->
     end;
 filter(_Pred, []) ->
     [].
+
+filtermap(Fun, List1) ->
+    foldr(fun(Elem, Acc) ->
+                  case Fun(Elem) of
+                      false -> Acc;
+                      true -> [Elem|Acc];
+                      {true,Value} -> [Value|Acc]
+                  end
+          end, [], List1).
+
+flatlength(DeepList) ->
+    length(flatten(DeepList)).
+
+flatmap(Fun, List1) ->
+    append(map(Fun, List1)).
+
+flatten(List) when is_list(List) ->
+    do_flatten(List, []).
+
+flatten(List, Tail) when is_list(List), is_list(Tail) ->
+    do_flatten(List, Tail).
+
+do_flatten([H|T], Tail) when is_list(H) ->
+    do_flatten(H, do_flatten(T, Tail));
+do_flatten([H|T], Tail) ->
+    [H|do_flatten(T, Tail)];
+do_flatten([], Tail) ->
+    Tail.
+
+
+foldl(Fun, Acc, [H|T]) ->
+    foldl(Fun, Fun(H, Acc), T);
+foldl(_, Acc, []) ->
+    Acc.
+
+foldr(Fun, Acc, [H|T]) ->
+    Fun(H, foldr(Fun, Acc, T));
+foldr(_, Acc, []) ->
+    Acc.
 
 map(F, [H|T]) ->
     [F(H) | map(F, T)];

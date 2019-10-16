@@ -816,6 +816,12 @@ public class ErlProcess {
         String function = file.getAtomName(mfa.getFunction());
         int arity = mfa.getArity();
         System.out.println("CALL_EXT: " + mod + " " + function + " " + arity);
+        if (mod.equals("erlang")) { // replace operators with external calls
+            if (function.equals("++")) {
+                mod = "lists";
+                function = "append";
+            }
+        }
         if (mod.equals("erlang")) {
             restore_ip(); // BIF, remove CP as not real external call
             if (function.equals("get_module_info")) {

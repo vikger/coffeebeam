@@ -117,3 +117,7 @@ b atomnames 3
 'a'
 '0244'
 'EXIT'
+
+a append 2
+[1]
+[2]
