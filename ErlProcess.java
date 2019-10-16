@@ -15,7 +15,7 @@ public class ErlProcess {
     private Import mfa;
     private ErlPid pid;
     public static enum State {RUNNING, RUNNABLE, WAITING}
-    private State state = State.RUNNABLE;
+    private State state = State.WAITING;
     private final long reduction_max = 1000;
     private long reduction;
     private ErlTerm result = null;
@@ -48,6 +48,7 @@ public class ErlProcess {
             System.out.print("\t" + args[i]);
         }
         System.out.println();
+        state = State.RUNNABLE;
     }
 
     public void prepare(BeamFile f, ErlFun fun, ErlTerm[] args) {
@@ -57,6 +58,7 @@ public class ErlProcess {
 	    x_reg.set(i, args[i]);
 	}
 	jump(fun.getLabel());
+        state = State.RUNNABLE;
     }
 
     public ErlTerm run() {

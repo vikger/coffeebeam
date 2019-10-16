@@ -144,7 +144,7 @@ class Scheduler {
                 ErlTerm result = p.run();
                 if (result == null) {
                     System.out.println("VM: reschedule " + p.getPid());
-                    processes.remove(0);
+                    removeProcess(p);
                     processes.add(p);
                 } else {
                     System.out.println("result: " + result.toString());
