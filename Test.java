@@ -43,16 +43,17 @@ public class Test {
 
     public Test() throws Exception {
         int passed = 0, failed = 0;
-        BeamVM vm = new BeamVM();
-        vm.loadModules("load.txt");
+        BeamClient client = new BeamClient();
+        client.loadModules("load.txt");
         for (int i = 0; i < tests.length; i++) {
             TestCase test = tests[i];
-            if (assertEqual(test.expected, vm.test(test.module, test.function, test.args)))
+            if (assertEqual(test.expected, client.test(test.module, test.function, test.args)))
                 passed++;
             else
                 failed++;
         }
         System.out.println(passed + " passed, " + failed + " failed");
+        client.stopVM();
     }
 
     public boolean assertEqual(ErlTerm expected, ErlTerm result) {

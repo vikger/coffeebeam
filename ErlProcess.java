@@ -23,8 +23,9 @@ public class ErlProcess {
     private boolean timeout = false;
     private ErlBinary binary = null;
     private ErlRegister put_tuple_dest = null;
+    private BeamClient client = null;
 
-    public ErlProcess(BeamVM bv, ErlPid p) {
+    public ErlProcess(BeamVM bv, ErlPid p, BeamClient c) {
         vm = bv;
 	pid = p;
         x_reg = new Register();
@@ -35,6 +36,7 @@ public class ErlProcess {
         mq = new MessageQueue();
         try_catch_stack = new Stack<TryCatch>();
         binary_stack = new Stack<ErlBinary>();
+        client = c;
     }
 
     public void prepare(String module, String function, ErlTerm[] args) {
@@ -479,7 +481,6 @@ public class ErlProcess {
 	    if (put_bin instanceof ErlBinary) {
 		ErlBinary put_bin2 = (ErlBinary) put_bin;
 		for (int i = 0; i < put_bin2.size(); i++) {
-		    System.out.println("put " + i);
 		    binary.add(put_bin2.get(i));
 		}
 		ip++;
@@ -830,7 +831,7 @@ public class ErlProcess {
             if (function.equals("get_module_info")) {
                 return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
             } else if (function.equals("spawn")) {
-		ErlProcess p = vm.getScheduler().newProcess();
+		ErlProcess p = vm.newProcess(null);
 		// TODO: check argument input (start / end)
 		int spawnarity = ((ErlFun) x_reg.get(0)).getArity();
 		ErlTerm[] spawnargs = new ErlTerm[spawnarity];
@@ -952,6 +953,7 @@ public class ErlProcess {
             state = state.RUNNABLE;
         }
     }
+    public BeamClient getClient() { return client; }
 }
 
 class Register {
