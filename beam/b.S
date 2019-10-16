@@ -8,6 +8,7 @@
            {bin3,2},
            {bin4,3},
            {call,0},
+           {client_call,1},
            {module_info,0},
            {module_info,1},
            {old_catch,1},
@@ -17,12 +18,12 @@
 
 {attributes, []}.
 
-{labels, 37}.
+{labels, 39}.
 
 
 {function, call, 0, 2}.
   {label,1}.
-    {line,[{location,"b.erl",5}]}.
+    {line,[{location,"b.erl",6}]}.
     {func_info,{atom,b},{atom,call},0}.
   {label,2}.
     {move,{atom,ok},{x,0}}.
@@ -31,7 +32,7 @@
 
 {function, recv_catch, 1, 4}.
   {label,3}.
-    {line,[{location,"b.erl",8}]}.
+    {line,[{location,"b.erl",9}]}.
     {func_info,{atom,b},{atom,recv_catch},1}.
   {label,4}.
     {allocate_zero,2,1}.
@@ -51,7 +52,7 @@
     {'try',{y,1},{f,8}}.
     {move,{y,0},{x,0}}.
     {kill,{y,0}}.
-    {line,[{location,"b.erl",14}]}.
+    {line,[{location,"b.erl",15}]}.
     {call_ext,1,{extfunc,erlang,unknown_function,1}}.
     {try_end,{y,1}}.
     {deallocate,2}.
@@ -66,12 +67,12 @@
 
 {function, old_catch, 1, 10}.
   {label,9}.
-    {line,[{location,"b.erl",21}]}.
+    {line,[{location,"b.erl",22}]}.
     {func_info,{atom,b},{atom,old_catch},1}.
   {label,10}.
     {allocate,1,1}.
     {'catch',{y,0},{f,11}}.
-    {line,[{location,"b.erl",22}]}.
+    {line,[{location,"b.erl",23}]}.
     {gc_bif,'-',{f,0},1,[{integer,3},{x,0}],{x,0}}.
   {label,11}.
     {catch_end,{y,0}}.
@@ -81,12 +82,12 @@
 
 {function, try_catch, 0, 13}.
   {label,12}.
-    {line,[{location,"b.erl",24}]}.
+    {line,[{location,"b.erl",25}]}.
     {func_info,{atom,b},{atom,try_catch},0}.
   {label,13}.
     {allocate,1,0}.
     {'try',{y,0},{f,14}}.
-    {line,[{location,"b.erl",26}]}.
+    {line,[{location,"b.erl",27}]}.
     {call_ext,0,{extfunc,erlang,unknown_function,0}}.
     {try_end,{y,0}}.
     {deallocate,1}.
@@ -101,20 +102,20 @@
 
 {function, throw, 0, 16}.
   {label,15}.
-    {line,[{location,"b.erl",32}]}.
+    {line,[{location,"b.erl",33}]}.
     {func_info,{atom,b},{atom,throw},0}.
   {label,16}.
     {move,{atom,strange},{x,0}}.
-    {line,[{location,"b.erl",33}]}.
+    {line,[{location,"b.erl",34}]}.
     {call_ext,1,{extfunc,erlang,throw,1}}.
 
 
 {function, bin, 1, 18}.
   {label,17}.
-    {line,[{location,"b.erl",35}]}.
+    {line,[{location,"b.erl",36}]}.
     {func_info,{atom,b},{atom,bin},1}.
   {label,18}.
-    {line,[{location,"b.erl",36}]}.
+    {line,[{location,"b.erl",37}]}.
     {bs_init2,{f,0},4,0,1,{field_flags,[]},{x,1}}.
     {bs_put_integer,{f,0},{integer,8},1,{field_flags,[unsigned,big]},{x,0}}.
     {bs_put_string,3,{string,<<"def">>}}.
@@ -124,10 +125,10 @@
 
 {function, bin1, 1, 20}.
   {label,19}.
-    {line,[{location,"b.erl",38}]}.
+    {line,[{location,"b.erl",39}]}.
     {func_info,{atom,b},{atom,bin1},1}.
   {label,20}.
-    {line,[{location,"b.erl",39}]}.
+    {line,[{location,"b.erl",40}]}.
     {bs_init2,{f,0},5,0,1,{field_flags,[]},{x,1}}.
     {bs_put_string,4,{string,<<"0123">>}}.
     {bs_put_integer,{f,0},{integer,8},1,{field_flags,[unsigned,big]},{x,0}}.
@@ -137,7 +138,7 @@
 
 {function, bin2, 1, 22}.
   {label,21}.
-    {line,[{location,"b.erl",41}]}.
+    {line,[{location,"b.erl",42}]}.
     {func_info,{atom,b},{atom,bin2},1}.
   {label,22}.
     {'%',{type_info,{x,0},match_context}}.
@@ -149,7 +150,7 @@
           [{x,1},
            {integer,1},
            1,
-           {field_flags,[{anno,[41,{file,"b.erl"}]},unsigned,big]}],
+           {field_flags,[{anno,[42,{file,"b.erl"}]},unsigned,big]}],
           {x,2}}.
     {test,bs_get_integer2,
           {f,23},
@@ -157,7 +158,7 @@
           [{x,1},
            {integer,2},
            1,
-           {field_flags,[{anno,[41,{file,"b.erl"}]},unsigned,big]}],
+           {field_flags,[{anno,[42,{file,"b.erl"}]},unsigned,big]}],
           {x,3}}.
     {test,bs_get_integer2,
           {f,23},
@@ -165,7 +166,7 @@
           [{x,1},
            {integer,5},
            1,
-           {field_flags,[{anno,[41,{file,"b.erl"}]},unsigned,big]}],
+           {field_flags,[{anno,[42,{file,"b.erl"}]},unsigned,big]}],
           {x,4}}.
     {test,bs_test_unit,{f,23},[{x,1},8]}.
     {allocate,3,5}.
@@ -173,7 +174,7 @@
     {move,{x,3},{y,1}}.
     {move,{x,2},{y,2}}.
     {move,{x,1},{x,0}}.
-    {line,[{location,"b.erl",42}]}.
+    {line,[{location,"b.erl",43}]}.
     {call,1,{f,22}}.
     {'%',{type_info,{x,0},list}}.
     {test_heap,6,1}.
@@ -193,12 +194,12 @@
 
 {function, bin3, 2, 26}.
   {label,25}.
-    {line,[{location,"b.erl",46}]}.
+    {line,[{location,"b.erl",47}]}.
     {func_info,{atom,b},{atom,bin3},2}.
   {label,26}.
-    {line,[{location,"b.erl",47}]}.
+    {line,[{location,"b.erl",48}]}.
     {gc_bif,bit_size,{f,0},2,[{x,1}],{x,2}}.
-    {line,[{location,"b.erl",47}]}.
+    {line,[{location,"b.erl",48}]}.
     {bs_append,{f,0},{x,2},0,3,8,{x,0},{field_flags,[]},{x,0}}.
     {bs_put_binary,{f,0},{atom,all},8,{field_flags,[unsigned,big]},{x,1}}.
     return.
@@ -206,13 +207,13 @@
 
 {function, bin4, 3, 28}.
   {label,27}.
-    {line,[{location,"b.erl",49}]}.
+    {line,[{location,"b.erl",50}]}.
     {func_info,{atom,b},{atom,bin4},3}.
   {label,28}.
-    {line,[{location,"b.erl",50}]}.
+    {line,[{location,"b.erl",51}]}.
     {gc_bif,byte_size,{f,0},3,[{x,2}],{x,3}}.
     {bs_add,{f,0},[{x,3},{integer,1},1],{x,3}}.
-    {line,[{location,"b.erl",50}]}.
+    {line,[{location,"b.erl",51}]}.
     {bs_init2,{f,0},{x,3},0,4,{field_flags,[]},{x,3}}.
     {bs_put_integer,{f,0},{integer,2},1,{field_flags,[unsigned,big]},{x,0}}.
     {bs_put_integer,{f,0},{integer,6},1,{field_flags,[unsigned,big]},{x,1}}.
@@ -223,7 +224,7 @@
 
 {function, applies, 4, 30}.
   {label,29}.
-    {line,[{location,"b.erl",52}]}.
+    {line,[{location,"b.erl",53}]}.
     {func_info,{atom,b},{atom,applies},4}.
   {label,30}.
     {allocate,3,4}.
@@ -233,18 +234,18 @@
     {move,{y,2},{x,1}}.
     {move,{x,2},{x,0}}.
     {move,{y,1},{x,2}}.
-    {line,[{location,"b.erl",53}]}.
+    {line,[{location,"b.erl",54}]}.
     {apply,1}.
     {move,{y,1},{x,2}}.
     {move,{y,2},{x,1}}.
     {move,{y,0},{x,0}}.
-    {line,[{location,"b.erl",54}]}.
+    {line,[{location,"b.erl",55}]}.
     {apply_last,1,3}.
 
 
 {function, atomnames, 3, 32}.
   {label,31}.
-    {line,[{location,"b.erl",56}]}.
+    {line,[{location,"b.erl",57}]}.
     {func_info,{atom,b},{atom,atomnames},3}.
   {label,32}.
     {test_heap,4,3}.
@@ -252,21 +253,30 @@
     return.
 
 
-{function, module_info, 0, 34}.
+{function, client_call, 1, 34}.
   {label,33}.
+    {line,[{location,"b.erl",60}]}.
+    {func_info,{atom,b},{atom,client_call},1}.
+  {label,34}.
+    {line,[{location,"b.erl",61}]}.
+    {call_ext_only,1,{extfunc,beamclient,call,1}}.
+
+
+{function, module_info, 0, 36}.
+  {label,35}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,34}.
+  {label,36}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 36}.
-  {label,35}.
+{function, module_info, 1, 38}.
+  {label,37}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,36}.
+  {label,38}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.

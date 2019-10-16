@@ -872,6 +872,10 @@ public class ErlProcess {
             }
             x_reg.set(0, new ErlAtom("error"));
             return new ErlException(new ErlAtom("undef"));
+        } else if (mod.equals("beamclient")) {
+            restore_ip();
+            client.handleCall(function, x_reg.get(0));
+            return new ErlAtom("ok");
         } else {
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);

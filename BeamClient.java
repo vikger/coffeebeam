@@ -40,6 +40,10 @@ public class BeamClient {
         vm.halt();
     }
 
+    public void handleCall(String function, ErlTerm arg) {
+        System.out.println("client handleCall " + function + " " + arg);
+    }
+
     public void handleResult(ErlTerm r) {
         result = r;
     }

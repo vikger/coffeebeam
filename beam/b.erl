@@ -1,6 +1,7 @@
 -module(b).
 
--export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1, bin3/2, bin4/3, applies/4, atomnames/3]).
+-export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1, bin3/2, bin4/3, applies/4, atomnames/3,
+         client_call/1]).
 
 call() ->
     ok.
@@ -55,3 +56,6 @@ applies(M, F, A1, A2) ->
 
 atomnames(A, B, C) ->
     {A, B, C}.
+
+client_call(X) ->
+    beamclient:call(X).
