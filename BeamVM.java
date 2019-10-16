@@ -1,13 +1,15 @@
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class BeamVM {
     private ArrayList<BeamModule> modules;
     private Scheduler scheduler;
+    private HashMap<String, ErlPid> regs;
 
     public BeamVM() {
         modules = new ArrayList<BeamModule>();
 	scheduler = new Scheduler(this);
+	regs = new HashMap<String, ErlPid>();
 	scheduler.start();
     }
 
@@ -34,8 +36,14 @@ public class BeamVM {
         scheduler.halt();
     }
 
-    public void send(ErlPid pid, ErlTerm message) {
-        scheduler.send(pid, message);
+    public void send(ErlTerm p, ErlTerm message) {
+	if (p instanceof ErlPid) {
+	    ErlPid pid = (ErlPid) p;
+	    scheduler.send(pid, message);
+	} else if (p instanceof ErlAtom) {
+	    ErlPid pid = getProcess((ErlAtom) p);
+	    scheduler.send(pid, message);
+	} // TODO: send to tuple {proc, node}
     }
 
     public void setTimeout(ErlPid pid, int timeout) {
@@ -44,6 +52,14 @@ public class BeamVM {
 
     public Scheduler getScheduler() { return scheduler; }
 
+    private ErlPid getProcess(ErlAtom name) {
+	return regs.get(name.getValue());
+    }
+
+    public ErlAtom register(ErlAtom name, ErlPid pid) {
+	regs.put(name.getValue(), pid);
+	return new ErlAtom("true");
+    }
 }
 
 class BeamModule {
@@ -101,6 +117,7 @@ class Scheduler extends Thread {
     public void run() {
         while (!stop) {
             if (processes.size() > 0) {
+		dump();
                 ErlProcess p = checkTimeout();
                 if (p != null) {
                     p.timeout();
@@ -128,6 +145,15 @@ class Scheduler extends Thread {
         }
         BeamDebug.info("Scheduler exited.");
     }
+
+    private void dump() {
+	for (int i = 0; i < processes.size(); i++) {
+	    ErlProcess p = processes.get(i);
+	    BeamDebug.debug("process " + i + " " + p.getPid() + " " + p.getState());
+	    BeamDebug.debug("");
+	}
+    }
+
     public void send(ErlPid pid, ErlTerm message) {
         ErlProcess p = getProcess(pid);
         p.put_message(message);
@@ -155,4 +181,11 @@ class Timeout {
         pid = p;
         timeout = System.currentTimeMillis() + t;
     }
+}
+
+class ProcReg {
+    ErlAtom name;
+    ErlPid pid;
+
+    public ProcReg(ErlAtom n, ErlPid p) { name = n; pid = p; }
 }

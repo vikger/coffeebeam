@@ -22,12 +22,12 @@ public class BeamDebug {
         if (loglevel >= 4) println("\u001B[35m" + s);
     }
     public static void print(String s) {
-	    System.out.print(s);
+	    System.out.print(s + "\u001B[0m");
     }
     public static void println(String s) {
-	    System.out.println(s);
+	    System.out.println(s + "\u001B[0m");
     }
     public static void println() {
-	    System.out.println();
+	    System.out.println("\u001B[0m");
     }
 }

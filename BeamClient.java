@@ -37,7 +37,7 @@ public class BeamClient {
             }
         }
         reader.close();
-        vm.halt();
+        stopVM();
     }
 
     public void handleCall(String function, ErlTerm arg) {

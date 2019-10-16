@@ -110,3 +110,8 @@ b bin4 3
 
 b client_call 1
 "hello client"
+
+pizza start 0
+
+pizza order 1
+margherita

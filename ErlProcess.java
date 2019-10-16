@@ -204,7 +204,7 @@ public class ErlProcess {
             return x_reg.get(0);
         case 20: // send
             ErlTerm message = getValue(x_reg.get(1));
-            vm.send((ErlPid) x_reg.get(0), message);
+            vm.send(x_reg.get(0), message);
             x_reg.set(0, message);
             ip++;
             return null;
@@ -869,7 +869,9 @@ public class ErlProcess {
                 return newtuple;
             } else if (function.equals("throw")) {
                 return new ErlException(x_reg.get(0));
-            }
+            } else if (function.equals("register")) {
+		return vm.register((ErlAtom) x_reg.get(0), (ErlPid) x_reg.get(1));
+	    }
             x_reg.set(0, new ErlAtom("error"));
             return new ErlException(new ErlAtom("undef"));
         } else if (mod.equals("beamclient")) {
