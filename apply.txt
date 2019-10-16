@@ -1,17 +1,9 @@
-% a listlength 1
-% [1, 2, 3]
-
-% a listlength 1
-% []
-
 % a newproc 1
 % np
 
-% a list 0
-
 % example greeting 0
 
-% example module_info 0
+example module_info 0
 
 % a call 1
 % 10

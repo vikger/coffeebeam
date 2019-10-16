@@ -195,11 +195,7 @@ public class ErlProcess {
             ip++;
             return null;
         case 19: // return
-            if (stack.isEmpty()) {
-                ip = -1;
-            } else {
-                restore_ip();
-            }
+            restore_ip();
             System.out.println("return: " + x_reg.get(0));
             return x_reg.get(0);
         case 20: // send
@@ -918,10 +914,19 @@ public class ErlProcess {
     }
 
     private void restore_ip() {
-        CP cp = (CP) stack.pop();
-        ip = cp.value;
-        file = cp.file;
-        System.out.println("pop " + ip + " size " + stack.size());
+        if (stack.isEmpty()) {
+            ip = -1;
+        } else {
+            ErlTerm top = stack.get(0);
+            if (top instanceof CP) {
+                CP cp = (CP) stack.pop();
+                ip = cp.value;
+                file = cp.file;
+                System.out.println("pop " + ip + " size " + stack.size());
+            } else { // try block, reserved slot for error
+                ip = -1;
+            }
+        }
     }
 
     private void jump(ErlTerm label) {
