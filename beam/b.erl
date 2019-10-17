@@ -48,7 +48,7 @@ bin3(A, B) ->
     <<A/binary, B/binary>>.
 
 bin4(A, B, C) ->
-    <<A:2, B:6, C/binary>>.
+    <<A:2, B:14, C/binary>>.
 
 applies(M, F, A1, A2) ->
     M:F(A1),

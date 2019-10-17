@@ -21,8 +21,8 @@ public class Test {
 	new TestCase("b", "bin", new ErlTerm[]{new ErlInt(99)}, ErlTerm.parse("<<99,100,101,102>>")),
 	new TestCase("b", "bin", new ErlTerm[]{new ErlAtom("a")}, new ErlException(new ErlAtom("badarg"))),
 	new TestCase("b", "bin2", new ErlTerm[]{ErlTerm.parse("<<161,194>>")}, ErlTerm.parse("[{1, 1, 1}, {1, 2, 2}]")),
-        new TestCase("b", "bin4", new ErlTerm[]{ErlTerm.parse("1"), ErlTerm.parse("2"), ErlTerm.parse("<<2>>")},
-                     ErlTerm.parse("<<66,2>>")),
+        new TestCase("b", "bin4", new ErlTerm[]{ErlTerm.parse("1"), ErlTerm.parse("513"), ErlTerm.parse("<<2,3>>")},
+                     ErlTerm.parse("<<66,1,2,3>>")),
         new TestCase("numop", "int", new ErlTerm[]{new ErlInt(1), new ErlInt(2)}, ErlTerm.parse("{3, -1, 2, 0.5, 0, 1}")),
         new TestCase("numop", "int", new ErlTerm[]{new ErlInt(1), new ErlInt(0)}, new ErlException(new ErlAtom("badarg"))),
         new TestCase("numop", "int2", new ErlTerm[]{new ErlInt(10), new ErlInt(1)}, ErlTerm.parse("{20, 5, 0, 11, 11, -11}")),
@@ -52,7 +52,8 @@ public class Test {
             else
                 failed++;
         }
-        System.out.println("\u001B[32m" + passed + " passed, " + failed + " failed");
+        if (failed == 0) System.out.println("\u001B[32m" + passed + " passed, " + failed + " failed");
+        else System.out.println("\u001B[31m" + passed + " passed, " + failed + " failed");
         client.stopVM();
     }
 

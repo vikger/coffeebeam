@@ -105,8 +105,8 @@
 
 b bin4 3
 1
-2
-<<2>>
+513
+<<2,3>>
 
 b client_call 1
 "hello client"

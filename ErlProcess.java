@@ -723,6 +723,19 @@ public class ErlProcess {
             set_reg(op.args.get(2), map);
             ip++;
             return null;
+        case 159: // is_tagged_tuple
+            ErlTerm tt = getValue(op.args.get(1));
+            if (tt instanceof ErlTuple) {
+                ErlTuple tt2 = (ErlTuple) tt;
+                if (tt2.size() == ((ErlInt) op.args.get(2)).getValue()) {
+                    if (ErlBif.compare(tt2.get(0), op.args.get(3)) == 0) {
+                        ip++;
+                        return null;
+                    }
+                }
+            }
+            jump((ErlLabel) op.args.get(0));
+            return null;
         case 162: // get_hd
             ErlTerm get_hd = ((ErlList) getValue(op.args.get(0))).head;
             set_reg(op.args.get(1), get_hd);

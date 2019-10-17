@@ -212,11 +212,11 @@
   {label,28}.
     {line,[{location,"b.erl",51}]}.
     {gc_bif,byte_size,{f,0},3,[{x,2}],{x,3}}.
-    {bs_add,{f,0},[{x,3},{integer,1},1],{x,3}}.
+    {bs_add,{f,0},[{x,3},{integer,2},1],{x,3}}.
     {line,[{location,"b.erl",51}]}.
     {bs_init2,{f,0},{x,3},0,4,{field_flags,[]},{x,3}}.
     {bs_put_integer,{f,0},{integer,2},1,{field_flags,[unsigned,big]},{x,0}}.
-    {bs_put_integer,{f,0},{integer,6},1,{field_flags,[unsigned,big]},{x,1}}.
+    {bs_put_integer,{f,0},{integer,14},1,{field_flags,[unsigned,big]},{x,1}}.
     {bs_put_binary,{f,0},{atom,all},8,{field_flags,[unsigned,big]},{x,2}}.
     {move,{x,3},{x,0}}.
     return.
