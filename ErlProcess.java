@@ -614,6 +614,10 @@ public class ErlProcess {
 	    ip++;
 	    return null;
             // 110 deprecated
+        case 111: // bs_add
+            set_reg(op.args.get(4), new ErlInt(((ErlInt) getValue(op.args.get(1))).getValue() + ((ErlInt) op.args.get(2)).getValue() * ((ErlInt) op.args.get(3)).getValue()));
+            ip++;
+            return null;
         case 114: // is_boolean
             ErlTerm boolterm = getValue(op.args.get(1));
             if (boolterm instanceof ErlAtom) {
