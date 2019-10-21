@@ -1,18 +1,22 @@
 <project name="CoffeeBeam" default="dist" basedir=".">
   <description>
-    simplest example build file
+    CoffeeBeam project
   </description>
   <!-- set global properties for this build -->
   <property name="src" location="src" />
   <property name="build" location="build" />
   <property name="dist" location="dist" />
+  <property name="src-test" location="src-test" />
+  <property name="test" location="test" />
   <property name="version" value="1.0" />
+  <property name="loglevel" value="2" />
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp />
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}" />
+    <mkdir dir="${test}" />
   </target>
 
   <target name="compile" depends="init" description="compile the source">
@@ -25,13 +29,43 @@
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}/lib" />
 
-    <!-- Put everything in ${build} into the MyApplication-${version}.${build.number}.jar -->
+    <!-- Put everything in ${build} into the CoffeeBeam-${version}.${build.number}.jar -->
     <jar destfile="${dist}/lib/CoffeeBeam-${version}.${build.number}.jar" basedir="${build}" />
+  </target>
+
+  <target name="test-dist" depends="compile" description="generate distribution for testing">
+    <jar destfile="${test}/CoffeeBeam.jar" basedir="${build}" />
+  </target>
+
+  <target name="test-compile" depends="test-dist" description="compile source for testing">
+    <javac srcdir="${src-test}" destdir="${test}">
+      <classpath>
+        <pathelement location="${test}/CoffeeBeam.jar" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="test" depends="test-compile,test-dist" description="run tests">
+    <java classname="MyClient">
+      <arg value="${loglevel}" />
+      <classpath>
+        <pathelement location="${test}" />
+        <pathelement location="${test}/CoffeeBeam.jar" />
+      </classpath>
+    </java>
+    <java classname="Test">
+      <arg value="${loglevel}" />
+      <classpath>
+        <pathelement location="${test}" />
+        <pathelement location="${test}/CoffeeBeam.jar" />
+      </classpath>
+    </java>
   </target>
 
   <target name="clean" description="clean up">
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}" />
     <delete dir="${dist}" />
+    <delete dir="${test}" />
   </target>
 </project>

@@ -71,12 +71,4 @@ public class BeamClient {
     }
 
     public void stopVM() { vm.halt(); }
-
-    public static void main(String[] args) throws Exception {
-	if (args.length > 0)
-	    BeamDebug.loglevel = Integer.valueOf(args[0]);
-        BeamClient client = new BeamClient();
-        client.loadModules("load.txt");
-        client.runApplies("apply.txt");
-    }
 }
