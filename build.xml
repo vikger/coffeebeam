@@ -21,7 +21,7 @@
 
   <target name="compile" depends="init" description="compile the source">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" />
+    <javac includeantruntime="false" srcdir="${src}" destdir="${build}" />
   </target>
 
   <target name="dist" depends="compile" description="generate the distribution">
@@ -38,7 +38,7 @@
   </target>
 
   <target name="test-compile" depends="test-dist" description="compile source for testing">
-    <javac srcdir="${src-test}" destdir="${test}">
+    <javac includeantruntime="false" srcdir="${src-test}" destdir="${test}">
       <classpath>
         <pathelement location="${test}/CoffeeBeam.jar" />
       </classpath>

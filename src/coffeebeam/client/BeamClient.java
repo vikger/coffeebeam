@@ -8,6 +8,11 @@ public class BeamClient {
     public BeamVM vm = null;
     public volatile ErlTerm result = null;
 
+    public void startVM() { vm = new BeamVM(); }
+    public void stopVM() { vm.halt(); }
+    public void attachToVM(BeamVM othervm) { vm = othervm; }
+
+    public void loadModule(String filename) throws Exception { vm.load(filename); }
     public void apply(String module, String function, ErlTerm[] args) {
         ErlProcess p = vm.newProcess(this);
         p.prepare(module, function, args);
@@ -35,8 +40,4 @@ public class BeamClient {
         result = null;
         return r;
     }
-
-    public void startVM() { vm = new BeamVM(); }
-    public void stopVM() { vm.halt(); }
-    public void attachToVM(BeamVM othervm) { vm = othervm; }
 }

@@ -7,9 +7,8 @@ public class MyClient extends BeamClient {
     public void loadModules(String filename) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         String module;
-        while ((module = reader.readLine()) != null) {
-            vm.load(module);
-        }
+        while ((module = reader.readLine()) != null)
+            loadModule(module);
         reader.close();
     }
 
