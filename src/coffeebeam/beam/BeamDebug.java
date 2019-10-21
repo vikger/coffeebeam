@@ -1,3 +1,5 @@
+package coffeebeam.beam;
+
 public class BeamDebug {
     public static int loglevel = 2; // 0: nothing, 1: error, 2: warning, 3: info, 4: debug
 

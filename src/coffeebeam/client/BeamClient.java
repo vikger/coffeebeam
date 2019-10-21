@@ -1,4 +1,11 @@
+package coffeebeam.client;
+
+import coffeebeam.erts.*;
+import coffeebeam.types.*;
+import coffeebeam.beam.BeamFile;
+import coffeebeam.beam.BeamDebug;
 import java.io.*;
+
 public class BeamClient {
     BeamVM vm;
     volatile ErlTerm result = null;

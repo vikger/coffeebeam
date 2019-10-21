@@ -1,3 +1,5 @@
+package coffeebeam.beam;
+
 public class OpCode {
     private static int[] arities =
     {-1,

@@ -1,3 +1,8 @@
+package coffeebeam.erts;
+
+import coffeebeam.types.*;
+import coffeebeam.beam.*;
+import coffeebeam.client.BeamClient;
 import java.util.ArrayList;
 
 public class ErlProcess {
@@ -846,7 +851,7 @@ public class ErlProcess {
         if (mod.equals("erlang")) {
             restore_ip(); // BIF, remove CP as not real external call
             if (function.equals("get_module_info")) {
-                return new ErlString("module_info(" + x_reg.get(0).toString() + ")");
+                return new ErlList("module_info(" + x_reg.get(0).toString() + ")");
             } else if (function.equals("spawn")) {
 		ErlProcess p = vm.newProcess(null);
 		// TODO: check argument input (start / end)

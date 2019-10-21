@@ -1,3 +1,11 @@
+package coffeebeam.erts;
+
+import coffeebeam.types.*;
+import coffeebeam.beam.BeamFormatException;
+import coffeebeam.client.BeamClient;
+import coffeebeam.beam.BeamDebug;
+import coffeebeam.beam.BeamFile;
+import coffeebeam.beam.BeamReader;
 import java.io.*;
 import java.util.*;
 

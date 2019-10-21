@@ -1,3 +1,7 @@
+package coffeebeam.erts;
+
+import coffeebeam.types.*;
+
 public class ErlBif {
     public static ErlTerm op(String op, ErlTerm arg) {
 	if (op.equals("bnot"))

@@ -1,3 +1,8 @@
+package coffeebeam.client;
+import coffeebeam.types.*;
+import coffeebeam.erts.BeamVM;
+import coffeebeam.beam.BeamDebug;
+
 public class Test {
     private TestCase[] tests = {
         new TestCase("a", "test", new ErlTerm[]{new ErlAtom("a")}, ErlTerm.parse("ok")),
