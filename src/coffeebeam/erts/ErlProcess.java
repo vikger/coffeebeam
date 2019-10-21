@@ -898,7 +898,8 @@ public class ErlProcess {
             return new ErlException(new ErlAtom("undef"));
         } else if (mod.equals("beamclient")) {
             restore_ip();
-            client.handleCall(function, x_reg.get(0));
+            if (client != null)
+                client.handleCall(function, x_reg.get(0));
             return new ErlAtom("ok");
         } else {
             file = vm.getModule(mod).file;

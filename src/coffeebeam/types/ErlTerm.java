@@ -11,9 +11,13 @@ public abstract class ErlTerm {
     public String getTag() { return tag; }
     public boolean isReference() { return reference; }
     public int getOrder() { return order; }
-    public static ErlTerm parse(String s) throws ErlSyntaxException {
-        ParseResult pr = parseTerm(s);
-        return pr.term;
+    public static ErlTerm parse(String s) {
+        try {
+            ParseResult pr = parseTerm(s);
+            return pr.term;
+        } catch (ErlSyntaxException e) {
+            return null;
+        }
     }
     public static ParseResult parseTerm(String s) throws ErlSyntaxException {
         s = skipWs(s);
@@ -188,9 +192,6 @@ public abstract class ErlTerm {
     private static boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
-}
-
-class ErlSyntaxException extends Exception {
 }
 
 class ParseResult {

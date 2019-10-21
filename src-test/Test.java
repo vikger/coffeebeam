@@ -1,8 +1,11 @@
 import coffeebeam.types.*;
 import coffeebeam.beam.BeamDebug;
 import coffeebeam.client.BeamClient;
+import java.io.*;
 
 public class Test extends BeamClient {
+    int passed = 0, failed = 0;
+
     private TestCase[] tests = {
         new TestCase("a", "test", new ErlTerm[]{new ErlAtom("a")}, ErlTerm.parse("ok")),
         new TestCase("a", "test", new ErlTerm[]{new ErlAtom("b")},
@@ -45,20 +48,47 @@ public class Test extends BeamClient {
                      ErlTerm.parse("{alma, 'quoted atom', aToM_1}"))
     };
 
-    public Test() throws Exception {
-        int passed = 0, failed = 0;
-        BeamClient client = new BeamClient();
-        client.loadModules("load.txt");
+    public void run() {
         for (int i = 0; i < tests.length; i++) {
             TestCase test = tests[i];
-            if (assertEqual(test.expected, client.test(test.module, test.function, test.args)))
+            if (assertEqual(test.expected, test(test.module, test.function, test.args)))
                 passed++;
             else
                 failed++;
         }
         if (failed == 0) System.out.println("\u001B[32m" + passed + " passed, " + failed + " failed");
         else System.out.println("\u001B[31m" + passed + " passed, " + failed + " failed");
-        client.stopVM();
+    }
+
+    public void loadModules(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        String module;
+        while ((module = reader.readLine()) != null) {
+            vm.load(module);
+        }
+        reader.close();
+    }
+
+    public void runApplies(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        String line;
+        String[] mfa;
+        ErlTerm[] args;
+        int arity;
+        while ((line = reader.readLine()) != null) {
+            if (!line.startsWith("%") && !line.equals("")) {
+                mfa = line.split(" ", 3);
+                arity = Integer.valueOf(mfa[2]);
+                args = new ErlTerm[arity];
+                for (int i = 0; i < arity; i++) {
+                    line = reader.readLine();
+                    args[i] = ErlTerm.parse(line);
+                }
+                apply(mfa[0], mfa[1], args);
+                waitForResult();
+            }
+        }
+        reader.close();
     }
 
     public boolean assertEqual(ErlTerm expected, ErlTerm result) {
@@ -74,7 +104,11 @@ public class Test extends BeamClient {
     public static void main(String[] args) throws Exception {
 	if (args.length > 0)
 	    BeamDebug.loglevel = Integer.valueOf(args[0]);
-        new Test();
+        Test client = new Test();
+        client.startVM();
+        client.loadModules("load.txt");
+        client.run();
+        client.stopVM();
     }
 }
 
