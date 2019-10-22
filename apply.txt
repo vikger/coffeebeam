@@ -1,117 +1,40 @@
-% a newproc 1
-% np
-
-% example greeting 0
-
-% example module_info 0
-
-% a call 1
-% 10
-
-% a module_info 0
-
-% a test 1
-% a
-
-% a test 1
-% b
-
-% a test 1
-% 0
-
-% lists append 2
-% [1, 2, 3]
-% [4, 5, 6]
-
-% lists append 1
-% [[1, 2], [], [3]]
-
-% lists concat 1
-% [a, 1, 1.5, [55, 56, 57]]
-
-% lists duplicate 2
-% 3
-% d
-
-% lists zip 2
-% [a, b]
-% [1, 2]
-
-% lists reverse 1
-% a
-
-% lists reverse 1
-% [a, b, c]
-
-% lists reverse 2
-% [1, 2]
-% [0]
-
-% a map 1
-% mapitem
-
-% a tuple 1
-% []
-
-% add add 2
-% 1
-% 2
-
-% a call 1
-% 1
-
-% a funs 1
-% [1, 2, 3]
-
-% a all 1
-% [a, a]
-
-% a all 1
-% [a, b]
-
-% a any 1
-% [b, a]
-
-% a sending 0
-
-% a sendrecv 0
-
-% a bignum1 0
-% a bignum2 0
-% a bignum3 0
-
-% b recv_catch 1
-% 1
-% b old_catch 1
-% 1
-
-% b throw 0
-
-% numop relation 3
-% 1
-% 2
-% 3
-
-% numop bool 1
-% true
-
-% b bin3 2
-% <<1, 2, 3>>
-% <<4, 5, 6>>
-
-% b bin3 2
-% <<1>>
-% <<2>>
-
-b bin4 3
-1
-513
-<<2,3>>
-
-b client_call 1
-"hello client"
-
-pizza start 0
-
-pizza order 1
-margherita
+% a newproc [np]
+% example greeting []
+% example module_info []
+% a call [10]
+% a module_info []
+% a test [a]
+% a test [b]
+% a test [0]
+% lists append [[1, 2, 3], 4, 5, 6]]
+% lists append [[[1, 2], [], [3]]]
+% lists concat [[a, 1, 1.5, [55, 56, 57]]]
+% lists duplicate [3, d]
+% lists zip [[a, b], [1, 2]]
+% lists reverse [a]
+% lists reverse [[a, b, c]]
+% lists reverse [[1, 2], [0]]
+% a map [mapitem]
+% a tuple [[]]
+% add add [1, 2]
+% a call [1]
+% a funs [[1, 2, 3]]
+% a all [[a, a]]
+% a all [[a, b]]
+% a any [[b, a]]
+% a sending []
+% a sendrecv []
+% a bignum1 []
+% a bignum2 []
+% a bignum3 []
+% b recv_catch [1]
+% b old_catch [1]
+% b throw []
+% numop relation [1, 2, 3]
+% numop bool [true]
+% b bin3 [<<1, 2, 3>>, <<4, 5, 6>>]
+% b bin3 [<<1>>, <<2>>]
+b bin4 [1, 513, <<2,3>>]
+b client_call ["hello client"]
+pizza start []
+pizza order [margherita]

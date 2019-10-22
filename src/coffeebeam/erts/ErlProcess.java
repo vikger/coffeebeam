@@ -44,17 +44,19 @@ public class ErlProcess {
         client = c;
     }
 
-    public void prepare(String module, String function, ErlTerm[] args) {
+    public void prepare(String module, String function, ErlList arglist) {
         file = vm.getModule(module).file;
-        int argc = args.length;
+        int argc = arglist.size();
         int label = file.getLabel(function, argc);
         ip = file.getLabelRef(label);
-        String debuginfo = "apply " + module + ":" + function + "/" + argc;
-        for (int i = 0; i < argc; i++) {
-            x_reg.set(i, args[i]);
-            debuginfo += "\t" + args[i];
+        BeamDebug.info("apply " + module + ":" + function + "/" + argc + " " + arglist);
+        ErlList args = arglist;
+        int i = 0;
+        while (!args.isNil()) {
+            x_reg.set(i, args.head);
+            args = (ErlList) args.tail;
+            i++;
         }
-        BeamDebug.info(debuginfo);
         state = State.RUNNABLE;
     }
 

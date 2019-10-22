@@ -16,17 +16,11 @@ public class MyClient extends BeamClient {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         String line;
         String[] mfa;
-        ErlTerm[] args;
-        int arity;
+        ErlList args;
         while ((line = reader.readLine()) != null) {
             if (!line.startsWith("%") && !line.equals("")) {
                 mfa = line.split(" ", 3);
-                arity = Integer.valueOf(mfa[2]);
-                args = new ErlTerm[arity];
-                for (int i = 0; i < arity; i++) {
-                    line = reader.readLine();
-                    args[i] = ErlTerm.parse(line);
-                }
+                args = (ErlList) ErlTerm.parse(mfa[2]);
                 apply(mfa[0], mfa[1], args);
                 waitForResult();
             }

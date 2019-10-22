@@ -13,7 +13,7 @@ public class BeamClient {
     public void attachToVM(BeamVM othervm) { vm = othervm; }
 
     public void loadModule(String filename) throws Exception { vm.load(filename); }
-    public void apply(String module, String function, ErlTerm[] args) {
+    public void apply(String module, String function, ErlList args) {
         ErlProcess p = vm.newProcess(this);
         p.prepare(module, function, args);
     }
@@ -26,7 +26,7 @@ public class BeamClient {
         result = r;
     }
 
-    public ErlTerm test(String module, String function, ErlTerm[] args) {
+    public ErlTerm test(String module, String function, ErlList args) {
         ErlProcess p = vm.newProcess(this);
         p.prepare(module, function, args);
         ErlTerm r = waitForResult();
