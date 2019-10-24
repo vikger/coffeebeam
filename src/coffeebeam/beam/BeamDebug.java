@@ -1,6 +1,8 @@
 package coffeebeam.beam;
 
-public class BeamDebug {
+import coffeebeam.erts.Logger;
+
+public class BeamDebug implements Logger {
     public static int loglevel = 2; // 0: nothing, 1: error, 2: warning, 3: info, 4: debug
 
     public static String dec_to_bin(int b) {
@@ -31,5 +33,18 @@ public class BeamDebug {
     }
     public static void println() {
 	    System.out.println("\u001B[0m");
+    }
+
+    public void e(String s) {
+        BeamDebug.error(s);
+    }
+    public void w(String s) {
+        BeamDebug.warning(s);
+    }
+    public void i(String s) {
+        BeamDebug.info(s);
+    }
+    public void d(String s) {
+        BeamDebug.debug(s);
     }
 }

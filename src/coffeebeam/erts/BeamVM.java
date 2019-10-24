@@ -3,7 +3,6 @@ package coffeebeam.erts;
 import coffeebeam.types.*;
 import coffeebeam.beam.BeamFormatException;
 import coffeebeam.client.BeamClient;
-import coffeebeam.beam.BeamDebug;
 import coffeebeam.beam.BeamFile;
 import coffeebeam.beam.BeamReader;
 import java.io.*;
@@ -13,10 +12,12 @@ public class BeamVM {
     private ArrayList<BeamModule> modules;
     private Scheduler scheduler;
     private HashMap<String, ErlPid> regs;
+    private Logger logger;
 
-    public BeamVM() {
+    public BeamVM(Logger l) {
+        logger = l;
         modules = new ArrayList<BeamModule>();
-	scheduler = new Scheduler(this);
+	scheduler = new Scheduler(this, logger);
 	regs = new HashMap<String, ErlPid>();
 	scheduler.start();
     }
@@ -26,7 +27,7 @@ public class BeamVM {
         BeamFile bf = br.read();
         modules.add(new BeamModule(bf.getModuleName(), bf));
         bf.dump();
-        BeamDebug.info("BeamVM: loaded '" + bf.getModuleName() + "'");
+        logger.i("BeamVM: loaded '" + bf.getModuleName() + "'");
     }
 
     public BeamModule getModule(String name) {
@@ -86,10 +87,12 @@ class Scheduler extends Thread {
     private ArrayList<ErlProcess> processes;
     private ArrayList<Timeout> timeouts;
     private volatile boolean stop = false;
+    private Logger logger;
 
-    public Scheduler(BeamVM bv) {
+    public Scheduler(BeamVM bv, Logger l) {
         super();
 	vm = bv;
+        logger = l;
 	processes = new ArrayList<ErlProcess>();
         timeouts = new ArrayList<Timeout>();
     }
@@ -135,11 +138,11 @@ class Scheduler extends Thread {
                 if (p.getState() == ErlProcess.State.RUNNABLE) {
                     ErlTerm result = p.run();
                     if (result == null) {
-                        BeamDebug.info("VM: reschedule " + p.getPid());
+                        logger.i("VM: reschedule " + p.getPid());
                         removeProcess(p);
                         processes.add(p);
                     } else {
-                        BeamDebug.info("result: " + result.toString());
+                        logger.i("result: " + result.toString());
                         removeProcess(p);
                         BeamClient client = p.getClient();
                         if (client != null)
@@ -151,14 +154,14 @@ class Scheduler extends Thread {
                 }
             }
         }
-        BeamDebug.info("Scheduler exited.");
+        logger.i("Scheduler exited.");
     }
 
     private void dump() {
 	for (int i = 0; i < processes.size(); i++) {
 	    ErlProcess p = processes.get(i);
-	    BeamDebug.debug("process " + i + " " + p.getPid() + " " + p.getState());
-	    BeamDebug.debug("");
+	    logger.d("process " + i + " " + p.getPid() + " " + p.getState());
+	    logger.d("");
 	}
     }
 

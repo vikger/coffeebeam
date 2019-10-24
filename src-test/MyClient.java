@@ -4,6 +4,10 @@ import coffeebeam.types.*;
 import java.io.*;
 
 public class MyClient extends BeamClient {
+    public MyClient() {
+        super(new BeamDebug());
+    }
+
     public void loadModules(String filename) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         String module;

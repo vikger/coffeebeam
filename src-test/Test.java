@@ -44,6 +44,10 @@ public class Test extends BeamClient {
                      ErlTerm.parse("{alma, 'quoted atom', aToM_1}"))
     };
 
+    public Test() {
+        super(new BeamDebug());
+    }
+
     public void run() {
         for (int i = 0; i < tests.length; i++) {
             TestCase test = tests[i];

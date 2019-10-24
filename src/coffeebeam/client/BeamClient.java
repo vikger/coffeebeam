@@ -7,8 +7,11 @@ import coffeebeam.beam.BeamDebug;
 public class BeamClient {
     public BeamVM vm = null;
     public volatile ErlTerm result = null;
+    private Logger logger;
 
-    public void startVM() { vm = new BeamVM(); }
+    private BeamClient() {}
+    public BeamClient(Logger l) { logger = l; }
+    public void startVM() { vm = new BeamVM(logger); }
     public void stopVM() { vm.halt(); }
     public void attachToVM(BeamVM othervm) { vm = othervm; }
 
