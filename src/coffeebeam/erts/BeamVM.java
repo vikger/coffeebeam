@@ -45,14 +45,16 @@ public class BeamVM {
         scheduler.halt();
     }
 
-    public void send(ErlTerm p, ErlTerm message) {
+    public ErlTerm send(ErlTerm p, ErlTerm message) {
+        ErlPid pid = null;
 	if (p instanceof ErlPid) {
-	    ErlPid pid = (ErlPid) p;
-	    scheduler.send(pid, message);
+	    pid = (ErlPid) p;
 	} else if (p instanceof ErlAtom) {
-	    ErlPid pid = getProcess((ErlAtom) p);
-	    scheduler.send(pid, message);
+	    pid = getProcess((ErlAtom) p);
+            if (pid == null)
+                return new ErlException(new ErlAtom("badarg"));
 	} // TODO: send to tuple {proc, node}
+        return scheduler.send(pid, message);
     }
 
     public void setTimeout(ErlPid pid, int timeout) {
@@ -68,6 +70,15 @@ public class BeamVM {
     public ErlAtom register(ErlAtom name, ErlPid pid) {
 	regs.put(name.getValue(), pid);
 	return new ErlAtom("true");
+    }
+
+    public ErlTerm unregister(ErlAtom name) {
+        ErlPid removed = regs.remove(name.getValue());
+        if (removed == null) {
+            return new ErlException(new ErlAtom("badarg"));
+        } else {
+            return new ErlAtom("true");
+        }
     }
 }
 
@@ -97,7 +108,7 @@ class Scheduler extends Thread {
         timeouts = new ArrayList<Timeout>();
     }
     public ErlProcess newProcess(BeamClient client) {
-	ErlProcess p = new ErlProcess(vm, new ErlPid(nextPid++), client);
+	ErlProcess p = new ErlProcess(vm, new ErlPid(nextPid++), client, logger);
 	processes.add(p);
 	return p;
     }
@@ -126,9 +137,10 @@ class Scheduler extends Thread {
     }
 
     public void run() {
+        super.run();
         while (!stop) {
             if (processes.size() > 0) {
-		dump();
+		//dump();
                 ErlProcess p = checkTimeout();
                 if (p != null) {
                     p.timeout();
@@ -165,9 +177,10 @@ class Scheduler extends Thread {
 	}
     }
 
-    public void send(ErlPid pid, ErlTerm message) {
+    public ErlTerm send(ErlPid pid, ErlTerm message) {
         ErlProcess p = getProcess(pid);
         p.put_message(message);
+        return message;
     }
 
     public void setTimeout(ErlPid pid, int timeout) {

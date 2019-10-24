@@ -29,18 +29,20 @@ public class ErlProcess {
     private ErlBinary binary = null;
     private ErlRegister put_tuple_dest = null;
     private BeamClient client = null;
+    private Logger logger;
 
-    public ErlProcess(BeamVM bv, ErlPid p, BeamClient c) {
+    public ErlProcess(BeamVM bv, ErlPid p, BeamClient c, Logger l) {
+        logger = l;
         vm = bv;
 	pid = p;
-        x_reg = new Register();
-        fp_reg = new Register();
-        stack = new Stack<ErlTerm>();
-        module_stack = new Stack<BeamFile>();
+        x_reg = new Register(logger);
+        fp_reg = new Register(logger);
+        stack = new Stack<ErlTerm>(logger);
+        module_stack = new Stack<BeamFile>(logger);
         reduction = reduction_max;
         mq = new MessageQueue();
-        try_catch_stack = new Stack<TryCatch>();
-        binary_stack = new Stack<ErlBinary>();
+        try_catch_stack = new Stack<TryCatch>(logger);
+        binary_stack = new Stack<ErlBinary>(logger);
         client = c;
     }
 
@@ -49,7 +51,7 @@ public class ErlProcess {
         int argc = arglist.size();
         int label = file.getLabel(function, argc);
         ip = file.getLabelRef(label);
-        BeamDebug.info("apply " + module + ":" + function + "/" + argc + " " + arglist);
+        logger.i("apply " + module + ":" + function + "/" + argc + " " + arglist);
         ErlList args = arglist;
         int i = 0;
         while (!args.isNil()) {
@@ -112,7 +114,7 @@ public class ErlProcess {
     public ErlTerm execute(ErlOp op) {
         String opcode_debuginfo = "  ip(" + ip + ")\t" + OpCode.name(op.opcode) + "(" + op.opcode + ")";
         for (int i = 0; i < OpCode.arity(op.opcode); i++) opcode_debuginfo += "\t" + op.args.get(i).toString();
-        BeamDebug.info(opcode_debuginfo);
+        logger.i(opcode_debuginfo);
         x_reg.dump();
         stack.dump();
         fp_reg.dump();
@@ -207,12 +209,14 @@ public class ErlProcess {
             return null;
         case 19: // return
             restore_ip();
-            BeamDebug.debug("return: " + x_reg.get(0));
+            logger.d("return: " + x_reg.get(0));
             return x_reg.get(0);
         case 20: // send
             ErlTerm message = getValue(x_reg.get(1));
-            vm.send(x_reg.get(0), message);
-            x_reg.set(0, message);
+            ErlTerm result_message = vm.send(x_reg.get(0), message);
+            x_reg.set(0, result_message);
+            if (result_message instanceof ErlException)
+                return result_message;
             ip++;
             return null;
         case 21: // remove_message
@@ -381,7 +385,7 @@ public class ErlProcess {
         case 60: // select_tuple_arity
             ErlTuple sta_tuple = (ErlTuple) getValue(op.args.get(0));
             ErlList sta_dest = (ErlList) op.args.get(2);
-            BeamDebug.warning("select_tuple_arity " + sta_tuple + " " + sta_dest); // TODO: remove after testing
+            logger.w("select_tuple_arity " + sta_tuple + " " + sta_dest); // TODO: remove after testing
             for (int i = 0; !sta_dest.isNil(); i++) {
                 if (i == sta_tuple.size()) {
                     jump(sta_dest.head);
@@ -423,7 +427,7 @@ public class ErlProcess {
         case 67: // set_tuple_element
             ErlTuple ste_tuple = (ErlTuple) getValue(op.args.get(1));
             ste_tuple.setElement(((ErlInt) op.args.get(2)).getValue() - 1, getValue(op.args.get(0)));
-            BeamDebug.warning("set_tuple_element " + getValue(op.args.get(0)) + " " + ste_tuple + " " + op.args.get(2)); // TODO: remove after testing
+            logger.w("set_tuple_element " + getValue(op.args.get(0)) + " " + ste_tuple + " " + op.args.get(2)); // TODO: remove after testing
             ip++;
             return null;
             // 68 deprecated
@@ -436,24 +440,24 @@ public class ErlProcess {
             return null;
         case 70: // put_tuple
             // arg0 (size) is not used, tuple is dynamic
-            BeamDebug.warning("put_tuple " + (ErlInt) op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            logger.w("put_tuple " + (ErlInt) op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
             put_tuple_dest = (ErlRegister) op.args.get(1);
             set_reg(put_tuple_dest, new ErlTuple());
             ip++;
             return null;
         case 71: // put
-            BeamDebug.warning("put " + getValue(op.args.get(0))); // TODO: remove after testing
+            logger.w("put " + getValue(op.args.get(0))); // TODO: remove after testing
             ((ErlTuple) getValue(put_tuple_dest)).add(getValue(op.args.get(0)));
             ip++;
             return null;
         case 72: // badmatch
-            BeamDebug.warning("badmatch " + op.args.get(0)); // TODO: remove after testing
+            logger.w("badmatch " + op.args.get(0)); // TODO: remove after testing
             return new ErlException(new ErlAtom("badmatch"));
         case 73: // if_end
-            BeamDebug.warning("if_end"); // TODO: remove after testing
+            logger.w("if_end"); // TODO: remove after testing
             return new ErlException(new ErlAtom("if_clause"));
         case 74: // case_end
-            BeamDebug.warning("case_end " + getValue(op.args.get(0))); // TODO: remove after testing
+            logger.w("case_end " + getValue(op.args.get(0))); // TODO: remove after testing
             return new ErlException(new ErlAtom("case_clause"));
         case 75: // call_fun
             int fun_arity = ((ErlInt) op.args.get(0)).getValue();
@@ -464,7 +468,7 @@ public class ErlProcess {
             return null;
             // 76 deprecated
         case 77: // is_function
-            BeamDebug.warning("is_function " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            logger.w("is_function " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
             if (getValue(op.args.get(1)) instanceof ErlFun) ip++;
             else jump(op.args.get(0));
             return null;
@@ -533,7 +537,7 @@ public class ErlProcess {
             return null;
         case 98: // fadd
             ErlFloat faddresult = ErlBif.fadd(getValue(op.args.get(1)), getValue(op.args.get(2)));
-            BeamDebug.warning("fadd result: " + faddresult); // TODO: remove after testing
+            logger.w("fadd result: " + faddresult); // TODO: remove after testing
             if (faddresult == null) {
                 ferror = true;
                 ip++;
@@ -544,7 +548,7 @@ public class ErlProcess {
             return null;
         case 99: // fsub
             ErlFloat fsubresult = ErlBif.fsub(getValue(op.args.get(1)), getValue(op.args.get(2)));
-            BeamDebug.warning("fsub result: " + fsubresult); // TODO: remove after testing
+            logger.w("fsub result: " + fsubresult); // TODO: remove after testing
             if (fsubresult == null) {
                 ferror = true;
                 ip++;
@@ -555,7 +559,7 @@ public class ErlProcess {
             return null;
         case 100: // fmul
             ErlFloat fmulresult = ErlBif.fmul(getValue(op.args.get(1)), getValue(op.args.get(2)));
-            BeamDebug.warning("fmul result: " + fmulresult); // TODO: remove after testing
+            logger.w("fmul result: " + fmulresult); // TODO: remove after testing
             if (fmulresult == null) {
                 ferror = true;
                 ip++;
@@ -575,7 +579,7 @@ public class ErlProcess {
             ip++;
             return null;
         case 102: // fnegate
-            BeamDebug.warning("fnegate: " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
+            logger.w("fnegate: " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
             ErlFloat fnegateresult = ErlBif.fnegate(getValue(op.args.get(1)));
             if (fnegateresult == null) {
                 ferror = true;
@@ -602,10 +606,10 @@ public class ErlProcess {
             ip++;
             return null;
         case 107: // try_case_end
-            BeamDebug.warning("try_case_end " + getValue(op.args.get(0))); // TODO: remove after testing
+            logger.w("try_case_end " + getValue(op.args.get(0))); // TODO: remove after testing
             return new ErlException(new ErlAtom("try_case_clause"));
         case 108: // raise
-            BeamDebug.warning("raise " + getValue(op.args.get(0)) + " " + getValue(op.args.get(1))); // TODO: remove after testing
+            logger.w("raise " + getValue(op.args.get(0)) + " " + getValue(op.args.get(1))); // TODO: remove after testing
             ErlTuple raise = new ErlTuple();
             raise.add(getValue(op.args.get(1)));
             raise.add(getValue(op.args.get(0)));
@@ -636,7 +640,7 @@ public class ErlProcess {
             jump(op.args.get(0));
             return null;
         case 115: // is_function2
-            BeamDebug.warning("is_function2 " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
+            logger.w("is_function2 " + op.args.get(0) + " " + op.args.get(1) + " " + op.args.get(2)); // TODO: remove after testing
             ErlTerm isf2_fun = getValue(op.args.get(1));
             if (isf2_fun instanceof ErlFun) {
                 if (((ErlFun) isf2_fun).getArity() == ((ErlInt) op.args.get(2)).getValue()) {
@@ -665,12 +669,12 @@ public class ErlProcess {
 	    jump((ErlLabel) op.args.get(0));
 	    return null;
         case 122: // bs_save2
-            BeamDebug.warning("bs_save2 " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            logger.w("bs_save2 " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
             binary_stack.push(binary);
             ip++;
             return null;
         case 123: // bs_restore2
-            BeamDebug.warning("bs_restore2 " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
+            logger.w("bs_restore2 " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
             binary = binary_stack.pop();
             ip++;
             return null;
@@ -786,7 +790,7 @@ public class ErlProcess {
 	    ((ErlBinary) getValue(op.args.get(0))).first = ((ErlInt) getValue(op.args.get(1))).getValue();
 	    ip++;
 	    return null;
-        default: BeamDebug.error("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + "), module: " + file.getModuleName());
+        default: logger.e("UNKNOWN op: " + op.opcode + " (" + OpCode.name(op.opcode) + "), module: " + file.getModuleName());
         }
         ip++; return null;
     }
@@ -802,7 +806,7 @@ public class ErlProcess {
 	    // if ... special functions
 	    return ErlBif.op(function, arg);
         }
-	BeamDebug.info(function + " " + arg);
+	logger.i(function + " " + arg);
         return new ErlException(new ErlAtom("badarg"));
     }
 
@@ -813,7 +817,7 @@ public class ErlProcess {
 	    // if ... special functions
 	    return ErlBif.op(function, arg1, arg2);
         }
-	BeamDebug.info(function + " " + arg1 + " " + arg2);
+	logger.i(function + " " + arg1 + " " + arg2);
         return new ErlException(new ErlAtom("badarg"));
     }
 
@@ -843,7 +847,7 @@ public class ErlProcess {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
         int arity = mfa.getArity();
-        BeamDebug.debug("CALL_EXT: " + mod + " " + function + " " + arity);
+        logger.d("CALL_EXT: " + mod + " " + function + " " + arity);
         if (mod.equals("erlang")) { // replace operators with external calls
             if (function.equals("++")) {
                 mod = "lists";
@@ -895,7 +899,9 @@ public class ErlProcess {
                 return new ErlException(x_reg.get(0));
             } else if (function.equals("register")) {
 		return vm.register((ErlAtom) x_reg.get(0), (ErlPid) x_reg.get(1));
-	    }
+	    } else if (function.equals("unregister")) {
+                return vm.unregister((ErlAtom) x_reg.get(0));
+            }
             x_reg.set(0, new ErlAtom("error"));
             return new ErlException(new ErlAtom("undef"));
         } else if (mod.equals("beamclient")) {
@@ -951,7 +957,7 @@ public class ErlProcess {
 
     private void save_ip(int cp) {
         stack.push(new CP(cp, file));
-        BeamDebug.info("push " + cp + " size " + stack.size());
+        logger.i("push " + cp + " size " + stack.size());
     }
 
     private void restore_ip() {
@@ -963,7 +969,7 @@ public class ErlProcess {
                 CP cp = (CP) stack.pop();
                 ip = cp.value;
                 file = cp.file;
-                BeamDebug.info("pop " + ip + " size " + stack.size());
+                logger.i("pop " + ip + " size " + stack.size());
             } else { // try block, reserved slot for error
                 ip = -1;
             }
@@ -990,13 +996,15 @@ public class ErlProcess {
 class Register {
     ArrayList<ErlTerm> slots;
     int maxindex = -1;
+    Logger logger;
 
-    public Register() {
+    public Register(Logger l) {
         slots = new ArrayList<ErlTerm>();
+        logger = l;
     }
 
     public Register clone() {
-        Register reg = new Register();
+        Register reg = new Register(logger);
         for (int i = 0; i < size(); i++) {
             reg.set(i, get(i));
         }
@@ -1020,7 +1028,7 @@ class Register {
         for (int i = 0; i < slots.size(); i++) {
             debugstr += "\t" + slots.get(i);
         }
-        BeamDebug.debug(debugstr);
+        logger.d(debugstr);
     }
 
     public int size() {
@@ -1037,8 +1045,10 @@ class Register {
 
 class Stack<T> {
     ArrayList<T> items;
-    public Stack() {
+    Logger logger;
+    public Stack(Logger l) {
         items = new ArrayList<T>();
+        logger = l;
     }
 
     public void push(T item) {
@@ -1092,7 +1102,7 @@ class Stack<T> {
         for (int i = 0; i < items.size(); i++) {
             debugstr += "\t" + items.get(i);
         }
-        BeamDebug.debug(debugstr);
+        logger.d(debugstr);
     }
 }
 
