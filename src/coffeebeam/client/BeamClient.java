@@ -3,6 +3,8 @@ package coffeebeam.client;
 import coffeebeam.erts.*;
 import coffeebeam.types.*;
 import coffeebeam.beam.BeamDebug;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 public class BeamClient {
     public BeamVM vm = null;
@@ -15,7 +17,15 @@ public class BeamClient {
     public void stopVM() { vm.halt(); }
     public void attachToVM(BeamVM othervm) { vm = othervm; }
 
-    public void loadModule(String filename) throws Exception { vm.load(filename); }
+    public void loadModule(String filename) throws Exception {
+        InputStream file = new FileInputStream(filename);
+        vm.load(file);
+    }
+
+    public void loadModule(InputStream is) throws Exception {
+        vm.load(is);
+    }
+
     public void apply(String module, String function, ErlList args) {
         ErlProcess p = vm.newProcess(this);
         p.prepare(module, function, args);

@@ -22,8 +22,8 @@ public class BeamVM {
 	scheduler.start();
     }
 
-    public void load(String filename) throws IOException, BeamFormatException {
-        BeamReader br = new BeamReader(filename);
+    public void load(InputStream is) throws IOException, BeamFormatException {
+        BeamReader br = new BeamReader(is);
         BeamFile bf = br.read();
         modules.add(new BeamModule(bf.getModuleName(), bf));
         bf.dump();

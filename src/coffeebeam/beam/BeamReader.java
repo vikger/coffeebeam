@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 public class BeamReader {
@@ -12,13 +13,18 @@ public class BeamReader {
     private final Charset LATIN1_CHARSET = Charset.forName("ISO-8859-1");
 
     private BeamFile beamfile = null;
-    private FileInputStream file = null;
+    private InputStream file = null;
 
     public BeamReader(String filename) {
 	try {
 	    file = new FileInputStream(filename);
 	} catch (Exception e) {}
-	beamfile = new BeamFile(filename);
+	beamfile = new BeamFile();
+    }
+
+    public BeamReader(InputStream f) {
+        file = f;
+        beamfile = new BeamFile();
     }
 
     public static int unsignedToBytes(byte b) {

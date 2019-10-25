@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import coffeebeam.types.*;
 
 public class BeamFile {
-    private String filename;
     private ArrayList<String> atoms;
     private ArrayList<ErlTerm> literals;
     private ArrayList<Import> imports;
@@ -20,9 +19,7 @@ public class BeamFile {
     private ErlTerm attributes;
     private ErlBinary strTable;
 
-    private BeamFile() {}
-    public BeamFile(String fn) {
-        filename = fn;
+    public BeamFile() {
         atoms = new ArrayList<String>();
         literals = new ArrayList<ErlTerm>();
         imports = new ArrayList<Import>();
