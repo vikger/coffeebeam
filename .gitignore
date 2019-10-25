@@ -27,3 +27,6 @@ hs_err_pid*
 
 # Ignore ANT build number
 build.number
+
+# Ignore generated .DS_Store file
+.DS_Store
