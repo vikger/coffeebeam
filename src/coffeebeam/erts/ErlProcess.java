@@ -53,14 +53,18 @@ public class ErlProcess {
 	} else {
 	    file = vm.getModule(module).file;
 	    int label = file.getLabel(function, argc);
-	    ip = file.getLabelRef(label);
-	    logger.i("apply " + module + ":" + function + "/" + argc + " " + arglist);
-	    ErlList args = arglist;
-	    int i = 0;
-	    while (!args.isNil()) {
-		x_reg.set(i, args.head);
-		args = (ErlList) args.tail;
-		i++;
+	    if (label == -1) {
+		result = new ErlException(ErlTerm.parse("{undef,{" + module + "," + function + "," + argc + "}}"));
+	    } else {
+		ip = file.getLabelRef(label);
+		logger.i("apply " + module + ":" + function + "/" + argc + " " + arglist);
+		ErlList args = arglist;
+		int i = 0;
+		while (!args.isNil()) {
+		    x_reg.set(i, args.head);
+		    args = (ErlList) args.tail;
+		    i++;
+		}
 	    }
         }
         state = State.RUNNABLE;
