@@ -12,16 +12,7 @@ public class ErlBif {
 	    return bit_size(arg);
 	else if (op.equals("byte_size"))
 	    return byte_size(arg);
-	ErlTuple funtuple = new ErlTuple();
-	funtuple.add(new ErlAtom("erlang"));
-	funtuple.add(new ErlAtom(op));
-	ErlList funarglist = new ErlList();
-	funarglist.add(arg);
-	funtuple.add(funarglist);
-	ErlTuple extuple = new ErlTuple();
-	extuple.add(new ErlAtom("undef"));
-	extuple.add(funtuple);
-	return new ErlException(extuple);
+	return new ErlException(ErlTerm.parse("{undef,{erlang," + op + ",[" + arg + "]}}"));
     }
 
     public static ErlTerm op(String op, ErlTerm arg1, ErlTerm arg2) {
@@ -57,17 +48,7 @@ public class ErlBif {
             return and(arg1, arg2);
         else if (op.equals("or"))
             return or(arg1, arg2);
-	ErlTuple funtuple = new ErlTuple();
-	funtuple.add(new ErlAtom("erlang"));
-	funtuple.add(new ErlAtom(op));
-	ErlList funarglist = new ErlList();
-	funarglist.add(arg1);
-	funarglist.add(arg2);
-	funtuple.add(funarglist);
-	ErlTuple extuple = new ErlTuple();
-	extuple.add(new ErlAtom("undef"));
-	extuple.add(funtuple);
-	return new ErlException(extuple);
+	return new ErlException(ErlTerm.parse("{undef,{erlang, "+ op + ", [" + arg1 +"," + arg2 + "]}}"));
     }
 
     public static ErlTerm add(ErlTerm a, ErlTerm b) {
