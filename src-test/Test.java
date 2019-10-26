@@ -42,7 +42,8 @@ public class Test extends BeamClient {
                      ErlTerm.parse("{a, {a, b, c, a}, {x, b, c, a}, {x, b, b, a}}")),
         new TestCase("b", "atomnames", ErlTerm.parse("[alma, 'quoted atom', aToM_1]"),
                      ErlTerm.parse("{alma, 'quoted atom', aToM_1}")),
-	new TestCase("b", "no_bif", new ErlList(), new ErlException(ErlTerm.parse("{undef, {erlang, invalidbif, 0}}")))
+	new TestCase("b", "no_bif", new ErlList(), new ErlException(ErlTerm.parse("{undef, {erlang, invalidbif, 0}}"))),
+	new TestCase("notloaded", "invalid", new ErlList(), new ErlException(ErlTerm.parse("{undef, {notloaded, invalid, 0}}")))
     };
 
     public Test() {
