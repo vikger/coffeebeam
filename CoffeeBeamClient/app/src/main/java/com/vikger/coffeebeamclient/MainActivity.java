@@ -106,7 +106,6 @@ public class MainActivity extends Activity {
                 if (resultCode == Activity.RESULT_OK) {
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
-                    String path = uri.getPath();
                     try {
                         InputStream is = getContentResolver().openInputStream(uri);
                         client.loadModule(is);
