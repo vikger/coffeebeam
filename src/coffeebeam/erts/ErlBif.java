@@ -37,14 +37,14 @@ public class ErlBif {
 	Bif1 b = bif1.get(op);
 	if (b != null)
 	    return b.execute(arg);
-	return new ErlException(ErlTerm.parse("{undef,{erlang," + op + ",[" + arg + "]}}"));
+	return new ErlException(ErlTerm.parse("{undef,{erlang," + op + ",1}}"));
     }
 
     public static ErlTerm op(String op, ErlTerm arg1, ErlTerm arg2) {
 	Bif2 b = bif2.get(op);
 	if (b != null)
 	    return b.execute(arg1, arg2);
-	return new ErlException(ErlTerm.parse("{undef,{erlang, "+ op + ", [" + arg1 +"," + arg2 + "]}}"));
+	return new ErlException(ErlTerm.parse("{undef,{erlang, "+ op + ",2}}"));
     }
 
     public static ErlTerm add(ErlTerm a, ErlTerm b) {

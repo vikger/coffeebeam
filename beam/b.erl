@@ -1,7 +1,7 @@
 -module(b).
 
 -export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1, bin3/2, bin4/3, applies/4, atomnames/3,
-         client_call/1]).
+         client_call/1, no_bif/0, ref/0]).
 
 call() ->
     ok.
@@ -59,3 +59,9 @@ atomnames(A, B, C) ->
 
 client_call(X) ->
     beamclient:call(X).
+
+no_bif() ->
+    erlang:invalidbif().
+
+ref() ->
+    make_ref().

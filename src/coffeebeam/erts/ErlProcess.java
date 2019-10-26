@@ -799,6 +799,17 @@ public class ErlProcess {
         timeout = true;
     }
 
+    private ErlTerm bif0(Import mfa) {
+        String mod = file.getAtomName(mfa.getModule());
+        String function = file.getAtomName(mfa.getFunction());
+        if (mod.equals("erlang")) {
+            if (function.equals("self")) {
+                return getPid();
+	    }
+        }
+        return new ErlException(ErlTerm.parse("{undef,{" + mod + "," + function + ",0}}"));
+    }
+
     private ErlTerm bif1(Import mfa, ErlTerm arg) {
         String mod = file.getAtomName(mfa.getModule());
         String function = file.getAtomName(mfa.getFunction());
@@ -818,17 +829,6 @@ public class ErlProcess {
 	    return ErlBif.op(function, arg1, arg2);
         }
 	logger.i(function + " " + arg1 + " " + arg2);
-        return new ErlException(new ErlAtom("badarg"));
-    }
-
-    private ErlTerm bif0(Import mfa) {
-        String mod = file.getAtomName(mfa.getModule());
-        String function = file.getAtomName(mfa.getFunction());
-        if (mod.equals("erlang")) {
-            if (function.equals("self")) {
-                return getPid();
-            }
-        }
         return new ErlException(new ErlAtom("badarg"));
     }
 
@@ -901,9 +901,11 @@ public class ErlProcess {
 		return vm.register((ErlAtom) x_reg.get(0), (ErlPid) x_reg.get(1));
 	    } else if (function.equals("unregister")) {
                 return vm.unregister((ErlAtom) x_reg.get(0));
-            }
+            } else if (function.equals("make_ref")) {
+		return new ErlReference();
+	    }
             x_reg.set(0, new ErlAtom("error"));
-            return new ErlException(new ErlAtom("undef"));
+            return new ErlException(ErlTerm.parse("{undef, {" + mod + "," + function + "," + arity + "}}"));
         } else if (mod.equals("beamclient")) {
             restore_ip();
             if (client != null)

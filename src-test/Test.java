@@ -22,7 +22,7 @@ public class Test extends BeamClient {
         new TestCase("lists", "zip", ErlTerm.parse("[[1,2,3,4],[a,b,c,d]]"),
                      ErlTerm.parse("[{1,a},{2,b},{3,c},{4,d}]")),
         new TestCase("a", "sending", new ErlList(), new ErlAtom("message")),
-        new TestCase("b", "try_catch", new ErlList(), ErlTerm.parse("{error, undef}")),
+        new TestCase("b", "try_catch", new ErlList(), ErlTerm.parse(" {error, {undef, {erlang, unknown_function, 0}}}")),
         new TestCase("b", "old_catch", ErlTerm.parse("[1]"), new ErlInt(2)),
         new TestCase("b", "old_catch", ErlTerm.parse("[a]"), new ErlAtom("badarith")),
 	new TestCase("b", "bin", ErlTerm.parse("[99]"), ErlTerm.parse("<<99,100,101,102>>")),
@@ -41,7 +41,8 @@ public class Test extends BeamClient {
         new TestCase("a", "tuple", ErlTerm.parse("[a]"),
                      ErlTerm.parse("{a, {a, b, c, a}, {x, b, c, a}, {x, b, b, a}}")),
         new TestCase("b", "atomnames", ErlTerm.parse("[alma, 'quoted atom', aToM_1]"),
-                     ErlTerm.parse("{alma, 'quoted atom', aToM_1}"))
+                     ErlTerm.parse("{alma, 'quoted atom', aToM_1}")),
+	new TestCase("b", "no_bif", new ErlList(), new ErlException(ErlTerm.parse("{undef, {erlang, invalidbif, 0}}")))
     };
 
     public Test() {

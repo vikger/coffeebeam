@@ -11,14 +11,16 @@
            {client_call,1},
            {module_info,0},
            {module_info,1},
+           {no_bif,0},
            {old_catch,1},
            {recv_catch,1},
+           {ref,0},
            {throw,0},
            {try_catch,0}]}.
 
 {attributes, []}.
 
-{labels, 39}.
+{labels, 43}.
 
 
 {function, call, 0, 2}.
@@ -262,21 +264,38 @@
     {call_ext_only,1,{extfunc,beamclient,call,1}}.
 
 
-{function, module_info, 0, 36}.
+{function, no_bif, 0, 36}.
   {label,35}.
+    {line,[{location,"b.erl",63}]}.
+    {func_info,{atom,b},{atom,no_bif},0}.
+  {label,36}.
+    {line,[{location,"b.erl",64}]}.
+    {call_ext_only,0,{extfunc,erlang,invalidbif,0}}.
+
+
+{function, ref, 0, 38}.
+  {label,37}.
+    {line,[{location,"b.erl",66}]}.
+    {func_info,{atom,b},{atom,ref},0}.
+  {label,38}.
+    {call_ext_only,0,{extfunc,erlang,make_ref,0}}.
+
+
+{function, module_info, 0, 40}.
+  {label,39}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,36}.
+  {label,40}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 38}.
-  {label,37}.
+{function, module_info, 1, 42}.
+  {label,41}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,38}.
+  {label,42}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
