@@ -19,6 +19,7 @@ public class BeamVM {
         modules = new ArrayList<BeamModule>();
 	scheduler = new Scheduler(this, logger);
 	regs = new HashMap<String, ErlPid>();
+	ErlBif.init();
 	scheduler.start();
     }
 

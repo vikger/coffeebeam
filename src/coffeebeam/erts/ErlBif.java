@@ -1,53 +1,49 @@
 package coffeebeam.erts;
 
 import coffeebeam.types.*;
+import java.util.HashMap;
 
 public class ErlBif {
+    private static HashMap<String, Bif1> bif1;
+    private static HashMap<String, Bif2> bif2;
+
+    public static void init() {
+	bif1 = new HashMap<String, Bif1>();
+	bif1.put("bnot", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.bnot(arg); }});
+	bif1.put("not", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.not(arg); }});
+	bif1.put("bit_size", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.bit_size(arg); }});
+	bif1.put("byte_size", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.byte_size(arg); }});
+
+	bif2 = new HashMap<String, Bif2>();
+	bif2.put("+", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.add(arg1, arg2); }});
+ 	bif2.put("-", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.subtract(arg1, arg2); }});
+	bif2.put("*", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.mul(arg1, arg2); }});
+	bif2.put("div", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.div(arg1, arg2); }});
+	bif2.put("rem", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.rem(arg1, arg2); }});
+	bif2.put("bsl", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.bsl(arg1, arg2); }});
+	bif2.put("bsr", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.bsr(arg1, arg2); }});
+	bif2.put("band", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.band(arg1, arg2); }});
+	bif2.put("bor", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.bor(arg1, arg2); }});
+	bif2.put("bxor", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.bxor(arg1, arg2); }});
+	bif2.put("=<", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return new ErlAtom(ErlBif.compare(arg1, arg2) <= 0); }});
+	bif2.put("<", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return new ErlAtom(ErlBif.compare(arg1, arg2) < 0); }});
+	bif2.put(">=", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return new ErlAtom(ErlBif.compare(arg1, arg2) >= 0); }});
+	bif2.put(">", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return new ErlAtom(ErlBif.compare(arg1, arg2) > 0); }});
+	bif2.put("and", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.and(arg1, arg2); }});
+	bif2.put("or", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.or(arg1, arg2); }});
+   }
+
     public static ErlTerm op(String op, ErlTerm arg) {
-	if (op.equals("bnot"))
-	    return bnot(arg);
-        else if (op.equals("not"))
-            return not(arg);
-	else if (op.equals("bit_size"))
-	    return bit_size(arg);
-	else if (op.equals("byte_size"))
-	    return byte_size(arg);
+	Bif1 b = bif1.get(op);
+	if (b != null)
+	    return b.execute(arg);
 	return new ErlException(ErlTerm.parse("{undef,{erlang," + op + ",[" + arg + "]}}"));
     }
 
     public static ErlTerm op(String op, ErlTerm arg1, ErlTerm arg2) {
-	if (op.equals("+"))
-	    return add(arg1, arg2);
-	else if (op.equals("-"))
-	    return subtract(arg1, arg2);
-	else if (op.equals("*"))
-	    return mul(arg1, arg2);
-	else if (op.equals("div"))
-	    return div(arg1, arg2);
-	else if (op.equals("rem"))
-	    return rem(arg1, arg2);
-	else if (op.equals("bsl"))
-	    return bsl(arg1, arg2);
-	else if (op.equals("bsr"))
-	    return bsr(arg1, arg2);
-	else if (op.equals("band"))
-	    return band(arg1, arg2);
-	else if (op.equals("bor"))
-	    return bor(arg1, arg2);
-	else if (op.equals("bxor"))
-	    return bxor(arg1, arg2);
-        else if (op.equals("=<"))
-            return new ErlAtom(compare(arg1, arg2) <= 0);
-        else if (op.equals("<"))
-            return new ErlAtom(compare(arg1, arg2) < 0);
-        else if (op.equals(">="))
-            return new ErlAtom(compare(arg1, arg2) >= 0);
-        else if (op.equals(">"))
-            return new ErlAtom(compare(arg1, arg2) > 0);
-        else if (op.equals("and"))
-            return and(arg1, arg2);
-        else if (op.equals("or"))
-            return or(arg1, arg2);
+	Bif2 b = bif2.get(op);
+	if (b != null)
+	    return b.execute(arg1, arg2);
 	return new ErlException(ErlTerm.parse("{undef,{erlang, "+ op + ", [" + arg1 +"," + arg2 + "]}}"));
     }
 
@@ -86,7 +82,7 @@ public class ErlBif {
 	return new ErlException(new ErlAtom("badarith"));
     }
 
-    public static ErlInt mul(ErlInt a, ErlInt b) {
+    private static ErlInt mul(ErlInt a, ErlInt b) {
 	return new ErlInt(a.getValue() * b.getValue());
     }
 
@@ -99,7 +95,7 @@ public class ErlBif {
 	return new ErlException(new ErlAtom("badarith"));
     }
 
-    public static ErlInt div(ErlInt a, ErlInt b) {
+    private static ErlInt div(ErlInt a, ErlInt b) {
 	return new ErlInt(a.getValue() / b.getValue());
     }
 
@@ -112,7 +108,7 @@ public class ErlBif {
 	return new ErlException(new ErlAtom("badarith"));
     }
 
-    public static ErlInt rem(ErlInt a, ErlInt b) {
+    private static ErlInt rem(ErlInt a, ErlInt b) {
 	return new ErlInt(a.getValue() % b.getValue());
     }
 
@@ -333,7 +329,7 @@ public class ErlBif {
         return 0;
     }
 
-    private static ErlTerm and(ErlTerm a, ErlTerm b) {
+    public static ErlTerm and(ErlTerm a, ErlTerm b) {
         if (a instanceof ErlAtom && b instanceof ErlAtom) {
             ErlAtom atoma = (ErlAtom) a;
             ErlAtom atomb = (ErlAtom) b;
@@ -350,7 +346,7 @@ public class ErlBif {
         return new ErlException(new ErlAtom("badarg"));
     }
 
-    private static ErlTerm or(ErlTerm a, ErlTerm b) {
+    public static ErlTerm or(ErlTerm a, ErlTerm b) {
         if (a instanceof ErlAtom && b instanceof ErlAtom) {
             ErlAtom atoma = (ErlAtom) a;
             ErlAtom atomb = (ErlAtom) b;
@@ -367,7 +363,7 @@ public class ErlBif {
         return new ErlException(new ErlAtom("badarg"));
     }
 
-    private static ErlTerm not(ErlTerm a) {
+    public static ErlTerm not(ErlTerm a) {
         if (a instanceof ErlAtom) {
             if (((ErlAtom) a).getValue().equals("true"))
                 return new ErlAtom("false");
@@ -377,17 +373,25 @@ public class ErlBif {
         return new ErlException(new ErlAtom("badarg"));
     }
 
-    private static ErlInt bit_size(ErlTerm bin) {
+    public static ErlInt bit_size(ErlTerm bin) {
 	if (bin instanceof ErlBinary) {
 	    return new ErlInt(((ErlBinary) bin).bitSize());
 	}
 	return null;
     }
 
-    private static ErlInt byte_size(ErlTerm bin) {
+    public static ErlInt byte_size(ErlTerm bin) {
 	if (bin instanceof ErlBinary){
 	    return new ErlInt(((ErlBinary) bin).size());
 	}
 	return null;
     }
+}
+
+interface Bif1 {
+    public ErlTerm execute(ErlTerm arg);
+}
+
+interface Bif2 {
+    public ErlTerm execute(ErlTerm arg1, ErlTerm arg2);
 }
