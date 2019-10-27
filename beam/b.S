@@ -9,6 +9,7 @@
            {bin4,3},
            {call,0},
            {client_call,1},
+           {errors,0},
            {module_info,0},
            {module_info,1},
            {no_bif,0},
@@ -20,7 +21,7 @@
 
 {attributes, []}.
 
-{labels, 43}.
+{labels, 47}.
 
 
 {function, call, 0, 2}.
@@ -281,21 +282,49 @@
     {call_ext_only,0,{extfunc,erlang,make_ref,0}}.
 
 
-{function, module_info, 0, 40}.
+{function, errors, 0, 40}.
   {label,39}.
+    {line,[{location,"b.erl",69}]}.
+    {func_info,{atom,b},{atom,errors},0}.
+  {label,40}.
+    {allocate_zero,2,0}.
+    {'try',{y,1},{f,41}}.
+    {move,{atom,exitreason},{x,0}}.
+    {line,[{location,"b.erl",71}]}.
+    {call_ext,1,{extfunc,erlang,exit,1}}.
+  {label,41}.
+    {try_case,{y,1}}.
+    {test_heap,3,2}.
+    {put_tuple2,{x,0},{list,[{x,0},{x,1}]}}.
+    {move,{x,0},{y,0}}.
+    {'try',{y,1},{f,42}}.
+    {move,{atom,throwreason},{x,0}}.
+    {line,[{location,"b.erl",77}]}.
+    {call_ext,1,{extfunc,erlang,throw,1}}.
+  {label,42}.
+    {try_case,{y,1}}.
+    {test_heap,6,2}.
+    {put_tuple2,{x,0},{list,[{x,0},{x,1}]}}.
+    {put_tuple2,{x,0},{list,[{y,0},{x,0}]}}.
+    {deallocate,2}.
+    return.
+
+
+{function, module_info, 0, 44}.
+  {label,43}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},0}.
-  {label,40}.
+  {label,44}.
     {move,{atom,b},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 42}.
-  {label,41}.
+{function, module_info, 1, 46}.
+  {label,45}.
     {line,[]}.
     {func_info,{atom,b},{atom,module_info},1}.
-  {label,42}.
+  {label,46}.
     {move,{x,0},{x,1}}.
     {move,{atom,b},{x,0}}.
     {line,[]}.

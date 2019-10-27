@@ -1,7 +1,7 @@
 -module(b).
 
 -export([call/0, recv_catch/1, old_catch/1, try_catch/0, throw/0, bin/1, bin1/1, bin2/1, bin3/2, bin4/3, applies/4, atomnames/3,
-         client_call/1, no_bif/0, ref/0]).
+         client_call/1, no_bif/0, ref/0, errors/0]).
 
 call() ->
     ok.
@@ -65,3 +65,18 @@ no_bif() ->
 
 ref() ->
     make_ref().
+
+errors() ->
+    Error1 = try
+		 exit(exitreason)
+	     catch
+		 Type1:Reason1 ->
+		     {Type1, Reason1}
+	     end,
+    Error2 = try
+		 throw(throwreason)
+	     catch
+		 Type2:Reason2 ->
+		     {Type2, Reason2}
+	     end,
+    {Error1, Error2}.

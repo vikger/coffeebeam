@@ -100,6 +100,7 @@ public class ErlProcess {
                 if (result instanceof ErlException) {
                     if (!try_catch_stack.isEmpty()) {
                         TryCatch tc = try_catch_stack.pop();
+			x_reg.set(0, ((ErlException) result).getType());
                         set_reg(tc.register, ((ErlException) result).getValue());
                         jump(tc.label);
                     } else
@@ -904,7 +905,9 @@ public class ErlProcess {
                 x_reg.set(0, newtuple);
                 return newtuple;
             } else if (function.equals("throw")) {
-                return new ErlException(x_reg.get(0));
+                return new ErlException(new ErlAtom("throw"), x_reg.get(0));
+	    } else if (function.equals("exit")) {
+		return new ErlException(new ErlAtom("exit"), x_reg.get(0));
             } else if (function.equals("register")) {
 		return vm.register((ErlAtom) x_reg.get(0), (ErlPid) x_reg.get(1));
 	    } else if (function.equals("unregister")) {

@@ -45,7 +45,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="test-compile,test-dist" description="run tests">
+  <target name="run" depends="test-compile,test-dist" description="run tests">
     <java classname="MyClient">
       <arg value="${loglevel}" />
       <classpath>
@@ -53,6 +53,8 @@
         <pathelement location="${test}/CoffeeBeam.jar" />
       </classpath>
     </java>
+  </target>
+  <target name="test" depends="test-compile,test-dist" description="run tests">
     <java classname="Test">
       <arg value="${loglevel}" />
       <classpath>
