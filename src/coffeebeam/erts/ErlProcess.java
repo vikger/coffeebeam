@@ -543,7 +543,6 @@ public class ErlProcess {
             return null;
         case 98: // fadd
             ErlFloat faddresult = ErlBif.fadd(getValue(op.args.get(1)), getValue(op.args.get(2)));
-            logger.w("fadd result: " + faddresult); // TODO: remove after testing
             if (faddresult == null) {
                 ferror = true;
                 ip++;
@@ -885,7 +884,7 @@ public class ErlProcess {
                 x_reg.set(0, intlist);
                 return intlist;
             } else if (function.equals("float_to_list")) {
-                String floatstr = Float.toString(((ErlFloat) x_reg.get(0)).getValue());
+                String floatstr = Double.toString(((ErlFloat) x_reg.get(0)).getValue());
                 ErlList floatlist = string_to_list(floatstr);
                 x_reg.set(0, floatlist);
                 return floatlist;
