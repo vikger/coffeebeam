@@ -38,4 +38,11 @@
 % b client_call ["hello client"]
 % pizza start []
 % pizza order [margherita]
-b errors []
+% b errors []
+% c case_clause [b]
+% c if_clause [2]
+% c is_f [a]
+% c is_f_helper []
+c fadd [1]
+c fadd [1.0, 1.1]
+

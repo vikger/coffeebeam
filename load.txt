@@ -1,6 +1,7 @@
 beam/example.beam
 beam/a.beam
 beam/b.beam
+beam/c.beam
 beam/lists.beam
 beam/add.beam
 beam/numop.beam

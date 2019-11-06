@@ -81,10 +81,10 @@ public abstract class ErlTerm {
         }
         if (!s.isEmpty() && s.charAt(0) == '.') {
             s = s.substring(1);
-            float result = (float) intvalue;
+            double result = (double) intvalue;
             int divider = 10;
             while (!s.isEmpty() && isDigit(s.charAt(0))) {
-                result += (s.charAt(0) - '0') / (float) divider;
+                result += (s.charAt(0) - '0') / (double) divider;
                 divider *= 10;
                 s = s.substring(1);
             }

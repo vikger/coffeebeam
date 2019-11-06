@@ -213,8 +213,8 @@ public class ErlBif {
     }
 
     private static ErlFloat fdiv(ErlFloat a, ErlFloat b) {
-        float result = a.getValue() / b.getValue();
-        if (Float.isInfinite(result))
+        double result = a.getValue() / b.getValue();
+        if (Double.isInfinite(result))
             return null;
         return new ErlFloat(result);
     }
@@ -241,11 +241,11 @@ public class ErlBif {
             if (b instanceof ErlInt) {
                 return compare(((ErlInt) a).getValue(), ((ErlInt) b).getValue());
             } else if (b instanceof ErlFloat) {
-                return compare((float) ((ErlInt) a).getValue(), ((ErlFloat) b).getValue());
+                return compare((double) ((ErlInt) a).getValue(), ((ErlFloat) b).getValue());
             }
         } else if (a instanceof ErlFloat) {
             if (b instanceof ErlInt) {
-                return compare(((ErlFloat) a).getValue(), (float) ((ErlInt) b).getValue());
+                return compare(((ErlFloat) a).getValue(), (double) ((ErlInt) b).getValue());
             } else if (b instanceof ErlFloat) {
                 return compare(((ErlFloat) a).getValue(), ((ErlFloat) b).getValue());
             }
@@ -269,7 +269,7 @@ public class ErlBif {
         return 1;
     }
 
-    private static int compare(float a, float b) {
+    private static int compare(double a, double b) {
         if (a < b) return -1;
         if (a == b) return 0;
         return 1;

@@ -463,10 +463,8 @@ public class ErlProcess {
             logger.w("badmatch " + op.args.get(0)); // TODO: remove after testing
             return new ErlException(new ErlAtom("badmatch"));
         case 73: // if_end
-            logger.w("if_end"); // TODO: remove after testing
             return new ErlException(new ErlAtom("if_clause"));
         case 74: // case_end
-            logger.w("case_end " + getValue(op.args.get(0))); // TODO: remove after testing
             return new ErlException(new ErlAtom("case_clause"));
         case 75: // call_fun
             int fun_arity = ((ErlInt) op.args.get(0)).getValue();
@@ -477,7 +475,6 @@ public class ErlProcess {
             return null;
             // 76 deprecated
         case 77: // is_function
-            logger.w("is_function " + op.args.get(0) + " " + op.args.get(1)); // TODO: remove after testing
             if (getValue(op.args.get(1)) instanceof ErlFun) ip++;
             else jump(op.args.get(0));
             return null;

@@ -1,19 +1,19 @@
 package coffeebeam.types;
 
 public class ErlFloat extends ErlNumber {
-    float value;
+    double value;
 
-    public ErlFloat(float v) {
+    public ErlFloat(double v) {
         super("float");
         value = v;
     }
     public ErlFloat(ErlTerm t) {
         super("float");
         if (t instanceof ErlInt) {
-            value = (float) ((ErlInt) t).getValue();
+            value = (double) ((ErlInt) t).getValue();
         }
     }
-    public String toString() { return Float.toString(value); }
+    public String toString() { return Double.toString(value); }
     public String toId() { return tag + "(" + value + ")"; }
-    public float getValue() { return value; }
+    public double getValue() { return value; }
 }

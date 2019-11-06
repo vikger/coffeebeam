@@ -277,6 +277,10 @@ class ExternalTerm {
     private static ErlTerm read_term() throws IOException {
         int tag = br.readByte();
         switch (tag) {
+	case 70: // NEW_FLOAT_EXT
+	    BeamDebug.warning("NEW_FLOAT_EXT");
+	    br.readBytes(8);
+	    return new ErlFloat(1.0);
         case 82: // atom_cache_ref
             int index = br.readByte();
             BeamDebug.warning("ATOM_CACHE_REF: " + index);
