@@ -38,8 +38,8 @@ public class BeamVM {
         return null;
     }
 
-    public ErlProcess newProcess(BeamClient client) {
-        return scheduler.newProcess(client);
+    public ErlProcess newProcess(BeamClient client, boolean handleResult) {
+        return scheduler.newProcess(client, handleResult);
     }
 
     public void halt() {
@@ -108,17 +108,17 @@ class Scheduler extends Thread {
 	processes = new ArrayList<ErlProcess>();
         timeouts = new ArrayList<Timeout>();
     }
-    public ErlProcess newProcess(BeamClient client) {
-	ErlProcess p = new ErlProcess(vm, new ErlPid(nextPid++), client, logger);
-	processes.add(p);
-	return p;
+    public ErlProcess newProcess(BeamClient client, boolean handleResult) {
+        ErlProcess p = new ErlProcess(vm, new ErlPid(nextPid++), client, handleResult, logger);
+        processes.add(p);
+        return p;
     }
     public ErlProcess getProcess(ErlPid pid) {
-	for (int i = 0; i < processes.size(); i++) {
-	    if (processes.get(i).getPid().getValue() == pid.getValue())
-		return processes.get(i);
+        for (int i = 0; i < processes.size(); i++) {
+            if (processes.get(i).getPid().getValue() == pid.getValue())
+                return processes.get(i);
 	}
-	return null;
+        return null;
     }
     public void removeProcess(ErlProcess p) {
         for (int i = 0; i < processes.size(); i++) {
@@ -157,9 +157,8 @@ class Scheduler extends Thread {
                     } else {
                         logger.i("result: " + result.toString());
                         removeProcess(p);
-                        BeamClient client = p.getClient();
-                        if (client != null)
-                            client.handleResult(result);
+                        if (p.getHandleResult() == true)
+                            p.getClient().handleResult(result);
                     }
                 } else {
                     removeProcess(p);

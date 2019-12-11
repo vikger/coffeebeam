@@ -27,12 +27,11 @@ public class BeamClient {
     }
 
     public void apply(String module, String function, ErlList args) {
-        ErlProcess p = vm.newProcess(this);
+        ErlProcess p = vm.newProcess(this, true);
         p.prepare(module, function, args);
     }
 
     public void handleCall(String function, ErlTerm arg) {
-        BeamDebug.debug("client handleCall " + function + " " + arg);
     }
 
     public void handleResult(ErlTerm r) {
@@ -40,7 +39,7 @@ public class BeamClient {
     }
 
     public ErlTerm test(String module, String function, ErlList args) {
-        ErlProcess p = vm.newProcess(this);
+        ErlProcess p = vm.newProcess(this, true);
         p.prepare(module, function, args);
         ErlTerm r = waitForResult();
         BeamDebug.debug("client result: " + r);

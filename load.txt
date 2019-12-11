@@ -6,3 +6,4 @@ beam/lists.beam
 beam/add.beam
 beam/numop.beam
 beam/pizza.beam
+beam/tictactoe.beam

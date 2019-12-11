@@ -29,9 +29,10 @@ public class ErlProcess {
     private ErlBinary binary = null;
     private ErlRegister put_tuple_dest = null;
     private BeamClient client = null;
+    private boolean handleResult = false;
     private Logger logger;
 
-    public ErlProcess(BeamVM bv, ErlPid p, BeamClient c, Logger l) {
+    public ErlProcess(BeamVM bv, ErlPid p, BeamClient c, boolean hr, Logger l) {
         logger = l;
         vm = bv;
 	pid = p;
@@ -44,6 +45,7 @@ public class ErlProcess {
         try_catch_stack = new Stack<TryCatch>(logger);
         binary_stack = new Stack<ErlBinary>(logger);
         client = c;
+        handleResult = hr;
     }
 
     public void prepare(String module, String function, ErlList arglist) {
@@ -864,15 +866,15 @@ public class ErlProcess {
             if (function.equals("get_module_info")) {
                 return new ErlList("module_info(" + x_reg.get(0).toString() + ")");
             } else if (function.equals("spawn")) {
-		ErlProcess p = vm.newProcess(null);
-		// TODO: check argument input (start / end)
-		int spawnarity = ((ErlFun) x_reg.get(0)).getArity();
-		ErlTerm[] spawnargs = new ErlTerm[spawnarity];
-		for (int i = 0; i < spawnarity; i++)
-		    spawnargs[i] = x_reg.get(i);
-		p.prepare(file, ((ErlFun) x_reg.get(spawnarity)), spawnargs);
-		x_reg.set(0, p.getPid());
-		return p.getPid();
+                ErlProcess p = vm.newProcess(client, false);
+                // TODO: check argument input (start / end)
+                int spawnarity = ((ErlFun) x_reg.get(0)).getArity();
+                ErlTerm[] spawnargs = new ErlTerm[spawnarity];
+                for (int i = 0; i < spawnarity; i++)
+                    spawnargs[i] = x_reg.get(i);
+                p.prepare(file, ((ErlFun) x_reg.get(spawnarity)), spawnargs);
+                x_reg.set(0, p.getPid());
+                return p.getPid();
             } else if (function.equals("atom_to_list")) {
                 String atomstr = ((ErlAtom) x_reg.get(0)).getValue();
                 ErlList atomlist = string_to_list(atomstr);
@@ -1000,6 +1002,7 @@ public class ErlProcess {
         }
     }
     public BeamClient getClient() { return client; }
+    public boolean getHandleResult() { return handleResult; }
 }
 
 class Register {
