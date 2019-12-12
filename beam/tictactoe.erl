@@ -1,3 +1,4 @@
+
 -module(tictactoe).
 
 -export([start/0, new_game/1, put/3]).
@@ -42,7 +43,9 @@ loop(Board, player, N) ->
     end;
 loop(Board, computer, N) ->
     Checks = [check(Board, X, Y) || X <- [1, 2, 3], Y <- [1, 2, 3]],
+    beamclient:debug(Checks),
     {X, Y} = find_max(Checks),
+    beamclient:debug({X, Y}),
     Board1 = put(Board, X, Y, o),
     case is_winner(Board1, o) of
         true ->
