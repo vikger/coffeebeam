@@ -50,7 +50,7 @@ loop(Board, computer, N) ->
     case is_winner(Board1, o) of
         true ->
             update(lose, Board1),
-            loop(init(), player, 0);
+	    end_game();
         false ->
             update(put_computer, Board1),
             loop(Board1, player, N + 1)
