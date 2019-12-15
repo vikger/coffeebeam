@@ -48,76 +48,39 @@ public class ErlBif {
     }
 
     public static ErlTerm add(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return add((ErlInt) a, (ErlInt) b);
-	    }
-	} else if (a instanceof ErlFloat) {
-	    if (b instanceof ErlFloat) {
-		return add((ErlFloat) a, (ErlFloat) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).add(b);
+	else if (a instanceof ErlFloat)
+	    return ((ErlFloat) a).add(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt add(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() + b.getValue());
-    }
-
-    private static ErlFloat add(ErlFloat a, ErlFloat b) {
-	return new ErlFloat(a.getValue() + b.getValue());
     }
 
     public static ErlTerm subtract(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return subtract((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).subtract(b);
+	else if (a instanceof ErlFloat)
+	    return ((ErlFloat) a).subtract(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt subtract(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() - b.getValue());
     }
 
     public static ErlTerm mul(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return mul((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).mul(b);
+	else if (a instanceof ErlFloat)
+	    return ((ErlFloat) a).mul(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt mul(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() * b.getValue());
     }
 
     public static ErlTerm div(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return div((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).div(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt div(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() / b.getValue());
     }
 
     public static ErlTerm rem(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return rem((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).rem(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt rem(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() % b.getValue());
     }
 
     public static ErlTerm bsl(ErlTerm a, ErlTerm b) {
@@ -134,66 +97,33 @@ public class ErlBif {
     }
 
     public static ErlTerm bsr(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return bsr((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).bsr(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt bsr(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() >> b.getValue());
     }
 
     public static ErlTerm band(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return band((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).band(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt band(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() & b.getValue());
     }
 
     public static ErlTerm bor(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return bor((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).bor(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt bor(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() | b.getValue());
     }
 
     public static ErlTerm bxor(ErlTerm a, ErlTerm b) {
-	if (a instanceof ErlInt) {
-	    if (b instanceof ErlInt) {
-		return bxor((ErlInt) a, (ErlInt) b);
-	    }
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).bxor(b);
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt bxor(ErlInt a, ErlInt b) {
-	return new ErlInt(a.getValue() ^ b.getValue());
     }
 
     public static ErlTerm bnot(ErlTerm a) {
-	if (a instanceof ErlInt) {
-	    return bnot((ErlInt) a);
-	}
+	if (a instanceof ErlInt)
+	    return ((ErlInt) a).bnot();
 	return new ErlException(new ErlAtom("badarith"));
-    }
-
-    private static ErlInt bnot(ErlInt a) {
-	return new ErlInt(~(a.getValue()));
     }
 
     public static ErlFloat fadd(ErlTerm a, ErlTerm b) {
@@ -277,9 +207,7 @@ public class ErlBif {
     }
 
     private static int compare_order(ErlTerm a, ErlTerm b) {
-        if (a.getOrder() < b.getOrder()) return -1;
-        if (a.getOrder() == b.getOrder()) return 0;
-        return 1;
+	return Integer.compare(a.getOrder(), b.getOrder());
     }
 
     private static int compare(ErlAtom a, ErlAtom b) {

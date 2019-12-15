@@ -43,6 +43,6 @@
 % cmod if_clause [2]
 % cmod is_f [a]
 % cmod is_f_helper []
-cmod fadd [1]
-cmod fadd [1.0, 1.1]
+% cmod fadd [1]
+% cmod fadd [1.0, 1.1]
 
