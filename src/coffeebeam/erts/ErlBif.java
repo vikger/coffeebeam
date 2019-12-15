@@ -52,12 +52,20 @@ public class ErlBif {
 	    if (b instanceof ErlInt) {
 		return add((ErlInt) a, (ErlInt) b);
 	    }
+	} else if (a instanceof ErlFloat) {
+	    if (b instanceof ErlFloat) {
+		return add((ErlFloat) a, (ErlFloat) b);
+	    }
 	}
 	return new ErlException(new ErlAtom("badarith"));
     }
 
     private static ErlInt add(ErlInt a, ErlInt b) {
 	return new ErlInt(a.getValue() + b.getValue());
+    }
+
+    private static ErlFloat add(ErlFloat a, ErlFloat b) {
+	return new ErlFloat(a.getValue() + b.getValue());
     }
 
     public static ErlTerm subtract(ErlTerm a, ErlTerm b) {

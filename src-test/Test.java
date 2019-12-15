@@ -45,7 +45,8 @@ public class Test extends BeamClient {
 	new TestCase("b", "no_bif", new ErlList(), new ErlException(ErlTerm.parse("{undef, {erlang, invalidbif, 0}}"))),
 	new TestCase("notloaded", "invalid", new ErlList(), new ErlException(ErlTerm.parse("{undef, {notloaded, invalid, 0}}"))),
 	new TestCase("a", "b", new ErlList(), new ErlException(ErlTerm.parse("{undef, {a, b, 0}}"))),
-	new TestCase("b", "errors", new ErlList(), ErlTerm.parse("{{exit, exitreason}, {throw, throwreason}}"))
+	new TestCase("b", "errors", new ErlList(), ErlTerm.parse("{{exit, exitreason}, {throw, throwreason}}")),
+	new TestCase("cmod", "fadd", ErlTerm.parse("[1.0, 1.1]"), new ErlFloat(2.1))
     };
 
     public Test() {
