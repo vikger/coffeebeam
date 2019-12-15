@@ -238,18 +238,33 @@ public class ErlBif {
 
     private static int compare(ErlNumber a, ErlNumber b) {
         if (a instanceof ErlInt) {
+	    ErlInt aint = (ErlInt) a;
             if (b instanceof ErlInt) {
-                return compare(((ErlInt) a).getValue(), ((ErlInt) b).getValue());
+                return compare(aint.getValue(), ((ErlInt) b).getValue());
             } else if (b instanceof ErlFloat) {
-                return compare((double) ((ErlInt) a).getValue(), ((ErlFloat) b).getValue());
-            }
+                return compare((double) aint.getValue(), ((ErlFloat) b).getValue());
+            } else if (b instanceof ErlBigNum) {
+		return compare((long) aint.getValue(), ((ErlBigNum) b).getValue());
+	    }
         } else if (a instanceof ErlFloat) {
+	    ErlFloat afloat = (ErlFloat) a;
             if (b instanceof ErlInt) {
-                return compare(((ErlFloat) a).getValue(), (double) ((ErlInt) b).getValue());
+                return compare(afloat.getValue(), (double) ((ErlInt) b).getValue());
             } else if (b instanceof ErlFloat) {
-                return compare(((ErlFloat) a).getValue(), ((ErlFloat) b).getValue());
-            }
-        }
+                return compare(afloat.getValue(), ((ErlFloat) b).getValue());
+            } else if (b instanceof ErlBigNum) {
+		return compare(afloat.getValue(), (double) ((ErlBigNum) b).getValue());
+	    }
+        } else if (a instanceof ErlBigNum) {
+	    ErlBigNum abig = (ErlBigNum) a;
+	    if (b instanceof ErlInt) {
+		return compare(abig.getValue(), (long) ((ErlInt) b).getValue());
+	    } else if (b instanceof ErlFloat) {
+		return compare((double) abig.getValue(), ((ErlFloat) b).getValue());
+	    } else if (b instanceof ErlBigNum) {
+		return compare(abig.getValue(), ((ErlBigNum) b).getValue());
+	    }
+	}
         return 0;
     }
 
@@ -264,21 +279,15 @@ public class ErlBif {
     }
 
     private static int compare(int a, int b) {
-        if (a < b) return -1;
-        if (a == b) return 0;
-        return 1;
+	return Integer.compare(a, b);
     }
 
     private static int compare(double a, double b) {
-        if (a < b) return -1;
-        if (a == b) return 0;
-        return 1;
+	return Double.compare(a, b);
     }
 
     private static int compare(long a, long b) {
-        if (a < b) return -1;
-        if (a == b) return 0;
-        return 1;
+	return Long.compare(a, b);
     }
 
     private static int compare(ErlFun a, ErlFun b) {

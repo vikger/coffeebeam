@@ -278,9 +278,7 @@ class ExternalTerm {
         int tag = br.readByte();
         switch (tag) {
 	case 70: // NEW_FLOAT_EXT
-	    BeamDebug.warning("NEW_FLOAT_EXT");
-	    br.readBytes(8);
-	    return new ErlFloat(1.0);
+	    return parse_float();
         case 82: // atom_cache_ref
             int index = br.readByte();
             BeamDebug.warning("ATOM_CACHE_REF: " + index);
@@ -358,6 +356,39 @@ class ExternalTerm {
         BeamDebug.warning("UNKNOWN ext_term " + tag);
         return new GenericErlTerm(tag);
     }
+
+    private static ErlFloat parse_float() throws IOException {
+	int b;
+	double res = 1.0;
+	double segment = 1.0;
+	int exp;
+	int fracbit;
+	b = br.readByte();
+	int sign = (b & 0x80) >> 7;
+	exp = b & 0x7f;
+	b = br.readByte();
+	exp = ((exp << 4) | (b >> 4)) - 1023;
+	b = b & 0x0f;
+	for (int i = 0; i < 4; i++) {
+	    segment /= 2;
+	    fracbit = (b & 0x08) >> 3;
+	    res += fracbit * segment;
+	    b <<= 1;
+	}
+	for (int i = 0; i < 6; i++) {
+	    b = br.readByte();
+	    for (int j = 0; j < 8; j++) {
+		segment /= 2;
+		fracbit = (b & 0x80) >> 7;
+		res += fracbit * segment;
+		b <<= 1;
+	    }
+	}
+	res = res * Math.pow(2,  exp);
+	if (sign != 0)
+	    res = -res;
+	return new ErlFloat(res);
+    }
 }
 
 class InternalTerm {
@@ -386,12 +417,13 @@ class InternalTerm {
                 switch (tag) {
                 case 1: // big integer
                     ErlBigNum bigint = new ErlBigNum(0);
+		    BeamDebug.warning(bf.getModuleName() + " BigNum big integer");
                     for (int i = 0; i < following_bytes; i++)
                         bigint.addSegmentFirst(br.readByte());
                     return bigint;
                 }
                 for (int i = 0; i < following_bytes; i++)
-                    BeamDebug.warning("skipped [" + BeamDebug.dec_to_bin(br.readByte()) + "] ");
+                    BeamDebug.warning("skipped [" + BeamDebug.dec_to_bin(br.readByte(), 8) + "] ");
                 BeamDebug.warning("skipped(" + following_bytes + ") ");
             } else { // 1 continuation byte
                 int cont1 = br.readByte();
@@ -445,7 +477,7 @@ class InternalTerm {
                 }
             }
         }
-        BeamDebug.warning("Generic " + tagname + " " + BeamDebug.dec_to_bin(value));
+        BeamDebug.warning("Generic " + tagname + " " + BeamDebug.dec_to_bin(value, 8));
         return new GenericErlTerm(value);
     }
 }

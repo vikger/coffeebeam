@@ -5,9 +5,9 @@ import coffeebeam.erts.Logger;
 public class BeamDebug implements Logger {
     public static int loglevel = 2; // 0: nothing, 1: error, 2: warning, 3: info, 4: debug
 
-    public static String dec_to_bin(int b) {
+    public static String dec_to_bin(int b, int length) {
         String result = "";
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < length; i++) {
             result = Integer.toString((b & (1 << i)) >> i) + result;
         }
         return result;
