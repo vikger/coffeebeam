@@ -184,11 +184,7 @@
     {move,{atom,lose},{x,0}}.
     {line,[{location,"tictactoe.erl",52}]}.
     {call,2,{f,78}}.
-    {line,[{location,"tictactoe.erl",53}]}.
-    {call,0,{f,8}}.
-    {move,{integer,0},{x,2}}.
-    {move,{atom,player},{x,1}}.
-    {call_last,3,{f,10},0}.
+    {call_last,0,{f,21},0}.
   {label,19}.
     {move,{y,2},{x,1}}.
     {move,{atom,put_computer},{x,0}}.

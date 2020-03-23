@@ -4,6 +4,7 @@ import coffeebeam.types.*;
 import coffeebeam.beam.*;
 import coffeebeam.client.BeamClient;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class ErlProcess {
     private BeamVM vm;
@@ -50,24 +51,24 @@ public class ErlProcess {
 
     public void prepare(String module, String function, ErlList arglist) {
         int argc = arglist.size();
-	if (vm.getModule(module) == null) {
-	    result = new ErlException(ErlTerm.parse("{undef,{" + module + "," + function + "," + argc + "}}"));
-	} else {
-	    file = vm.getModule(module).file;
-	    int label = file.getLabel(function, argc);
-	    if (label == -1) {
-		result = new ErlException(ErlTerm.parse("{undef,{" + module + "," + function + "," + argc + "}}"));
-	    } else {
-		ip = file.getLabelRef(label);
-		logger.i("apply " + module + ":" + function + "/" + argc + " " + arglist);
-		ErlList args = arglist;
-		int i = 0;
-		while (!args.isNil()) {
-		    x_reg.set(i, args.head);
-		    args = (ErlList) args.tail;
-		    i++;
-		}
-	    }
+        if (vm.getModule(module) == null) {
+            result = new ErlException(ErlTerm.parse("{undef,{" + module + "," + function + "," + argc + "}}"));
+        } else {
+            file = vm.getModule(module).file;
+            int label = file.getLabel(function, argc);
+            if (label == -1) {
+                result = new ErlException(ErlTerm.parse("{undef,{" + module + "," + function + "," + argc + "}}"));
+            } else {
+                ip = file.getLabelRef(label);
+                logger.i("apply " + module + ":" + function + "/" + argc + " " + arglist);
+                ErlList args = arglist;
+                int i = 0;
+                while (!args.isNil()) {
+                    x_reg.set(i, args.head);
+                    args = (ErlList) args.tail;
+                    i++;
+                }
+            }
         }
         state = State.RUNNABLE;
     }
@@ -482,6 +483,7 @@ public class ErlProcess {
             return null;
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
+            ip = -1;
             return setCallExt(mfa);
             // 79..88 deprecated
 	case 89: // bs_put_integer
@@ -904,15 +906,15 @@ public class ErlProcess {
                 return newtuple;
             } else if (function.equals("throw")) {
                 return new ErlException(new ErlAtom("throw"), x_reg.get(0));
-	    } else if (function.equals("exit")) {
-		return new ErlException(new ErlAtom("exit"), x_reg.get(0));
+            } else if (function.equals("exit")) {
+                return new ErlException(new ErlAtom("exit"), x_reg.get(0));
             } else if (function.equals("register")) {
-		return vm.register((ErlAtom) x_reg.get(0), (ErlPid) x_reg.get(1));
-	    } else if (function.equals("unregister")) {
+                return vm.register((ErlAtom) x_reg.get(0), (ErlPid) x_reg.get(1));
+            } else if (function.equals("unregister")) {
                 return vm.unregister((ErlAtom) x_reg.get(0));
             } else if (function.equals("make_ref")) {
-		return new ErlReference();
-	    }
+                return new ErlReference();
+            }
             x_reg.set(0, new ErlAtom("error"));
             return new ErlException(ErlTerm.parse("{undef, {" + mod + "," + function + "," + arity + "}}"));
         } else if (mod.equals("beamclient")) {
@@ -920,6 +922,18 @@ public class ErlProcess {
             if (client != null)
                 client.handleCall(function, x_reg.get(0));
             return new ErlAtom("ok");
+        } else if (mod.equals("rand")) {
+            if (function.equals("uniform")) {
+                if (arity == 1) {
+                    Random r = new Random();
+                    int input = ((ErlInt) x_reg.get(0)).getValue();
+                    BeamDebug.warning(Integer.toString(input));
+                    ErlInt res = new ErlInt(r.nextInt(input) + 1);
+                    BeamDebug.warning(res.toString());
+                    return res;
+                }
+            }
+            return new ErlException(ErlTerm.parse("{undef, {" + mod + "," + function + "," + arity + "}}"));
         } else {
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);

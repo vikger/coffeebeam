@@ -7,11 +7,12 @@
            {is_f,1},
            {is_f_helper,0},
            {module_info,0},
-           {module_info,1}]}.
+           {module_info,1},
+           {rand,1}]}.
 
 {attributes, []}.
 
-{labels, 22}.
+{labels, 24}.
 
 
 {function, case_clause, 1, 2}.
@@ -84,35 +85,44 @@
     {line,[{location,"cmod.erl",27}]}.
     {func_info,{atom,cmod},{atom,is_f_helper},0}.
   {label,15}.
-    {make_fun2,{f,21},0,0,0}.
+    {make_fun2,{f,23},0,0,0}.
     {call_only,1,{f,8}}.
 
 
-{function, module_info, 0, 17}.
+{function, rand, 1, 17}.
   {label,16}.
+    {line,[{location,"cmod.erl",31}]}.
+    {func_info,{atom,cmod},{atom,rand},1}.
+  {label,17}.
+    {line,[{location,"cmod.erl",32}]}.
+    {call_ext_only,1,{extfunc,rand,uniform,1}}.
+
+
+{function, module_info, 0, 19}.
+  {label,18}.
     {line,[]}.
     {func_info,{atom,cmod},{atom,module_info},0}.
-  {label,17}.
+  {label,19}.
     {move,{atom,cmod},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 19}.
-  {label,18}.
+{function, module_info, 1, 21}.
+  {label,20}.
     {line,[]}.
     {func_info,{atom,cmod},{atom,module_info},1}.
-  {label,19}.
+  {label,21}.
     {move,{x,0},{x,1}}.
     {move,{atom,cmod},{x,0}}.
     {line,[]}.
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-is_f_helper/0-fun-0-', 0, 21}.
-  {label,20}.
+{function, '-is_f_helper/0-fun-0-', 0, 23}.
+  {label,22}.
     {line,[{location,"cmod.erl",28}]}.
     {func_info,{atom,cmod},{atom,'-is_f_helper/0-fun-0-'},0}.
-  {label,21}.
+  {label,23}.
     {move,{atom,ok},{x,0}}.
     return.

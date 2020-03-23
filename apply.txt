@@ -45,4 +45,8 @@
 % cmod is_f_helper []
 % cmod fadd [1]
 % cmod fadd [1.0, 1.1]
-
+% Elixir.ExApp start []
+% Elixir.ExApp state []
+% sudoku start []
+% sudoku_logic generate_grid [30]
+cmod rand [10]

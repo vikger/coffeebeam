@@ -55,8 +55,9 @@ public class BeamFile {
                 terms.add(InternalTerm.read(br, this));
             }
             codeTable.add(new ErlOp(opcode, terms));
-            if (opcode == 1)
+            if (opcode == 1) {
                 labelRefs.add(codeTable.size() - 1);
+            }
         }
     }
 
@@ -163,7 +164,7 @@ public class BeamFile {
     private void printCodeTable() {
         for (int i = 0; i < codeTable.size(); i++) {
             ErlOp erlop = codeTable.get(i);
-            BeamDebug.debug("-- " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
+            BeamDebug.debug("-- [" + Integer.toString(i) + "] " + OpCode.name(erlop.opcode) + " / " + OpCode.arity(erlop.opcode));
             for (int j = 0; j < erlop.args.size(); j++) {
                 ErlTerm arg = erlop.args.get(j);
                 BeamDebug.debug("---- " + arg.toString());
@@ -209,7 +210,7 @@ public class BeamFile {
     }
 
     public ErlOp getOp(int index) {
-        return codeTable.get(index);
+         return codeTable.get(index);
     }
 
     public ErlFun getLocalFunction(int index) {
@@ -477,7 +478,7 @@ class InternalTerm {
                 }
             }
         }
-        BeamDebug.warning("Generic " + tagname + " " + BeamDebug.dec_to_bin(value, 8));
+        BeamDebug.warning("Generic " + tagname + " " + BeamDebug.dec_to_bin(b, 8) + " " + BeamDebug.dec_to_bin(value, 8));
         return new GenericErlTerm(value);
     }
 }

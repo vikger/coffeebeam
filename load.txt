@@ -7,3 +7,5 @@ beam/add.beam
 beam/numop.beam
 beam/pizza.beam
 beam/tictactoe.beam
+beam/sudoku.beam
+beam/sudoku_logic.beam

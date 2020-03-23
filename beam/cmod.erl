@@ -1,5 +1,5 @@
 -module(cmod).
--export([case_clause/1, if_clause/1, is_f/1, fadd/1, fadd/2, is_f_helper/0]).
+-export([case_clause/1, if_clause/1, is_f/1, fadd/1, fadd/2, is_f_helper/0, rand/1]).
 
 case_clause(X) ->
     case X of
@@ -27,3 +27,6 @@ fadd(X, Y) ->
 is_f_helper() ->
     F = fun() -> ok end,
     is_f(F).
+
+rand(N) ->
+    rand:uniform(N).
