@@ -927,9 +927,7 @@ public class ErlProcess {
                 if (arity == 1) {
                     Random r = new Random();
                     int input = ((ErlInt) x_reg.get(0)).getValue();
-                    BeamDebug.warning(Integer.toString(input));
                     ErlInt res = new ErlInt(r.nextInt(input) + 1);
-                    BeamDebug.warning(res.toString());
                     return res;
                 }
             }
