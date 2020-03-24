@@ -19,7 +19,6 @@
          foldl/3,
          foldr/3,
          map/2,
-         nth/2,
          reverse/1,
          reverse/2,
          seq/2,
@@ -46,13 +45,8 @@ append11([[] | LL], Acc) ->
 append11([], Acc) ->
     reverse(Acc).
 
-append(L1, L) ->
-    append21(reverse(L1), L).
-
-append21([H|T], L) ->
-    append21(T, [H | L]);
-append21([], L) ->
-    L.
+append(L1, L2) ->
+    L1 ++ L2.
 
 concat([H|T]) when is_atom(H) ->
     append(atom_to_list(H), concat(T));
@@ -146,10 +140,7 @@ map(F, [H|T]) ->
 map(_, []) ->
     [].
 
-nth(1, [Item | _]) ->
-    Item;
-nth(N, [_ | List]) ->
-    nth(N - 1, List).
+% nth BIF
 
 reverse(L) ->
     reverse(L, []).

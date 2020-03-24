@@ -4,7 +4,6 @@ import coffeebeam.types.*;
 import coffeebeam.beam.*;
 import coffeebeam.client.BeamClient;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class ErlProcess {
     private BeamVM vm;
@@ -856,12 +855,6 @@ public class ErlProcess {
         String function = file.getAtomName(mfa.getFunction());
         int arity = mfa.getArity();
         logger.d("CALL_EXT: " + mod + " " + function + " " + arity);
-        if (mod.equals("erlang")) { // replace operators with external calls
-            if (function.equals("++")) {
-                mod = "lists";
-                function = "append";
-            }
-        }
         if (mod.equals("erlang")) {
             restore_ip(); // BIF, remove CP as not real external call
             if (function.equals("get_module_info")) {
@@ -876,6 +869,10 @@ public class ErlProcess {
                 p.prepare(file, ((ErlFun) x_reg.get(spawnarity)), spawnargs);
                 x_reg.set(0, p.getPid());
                 return p.getPid();
+            } else if (function.equals("++")) {
+                ErlTerm append_result = Lists.append(x_reg.get(0), x_reg.get(1));
+                x_reg.set(0, append_result);
+                return append_result;
             } else if (function.equals("atom_to_list")) {
                 String atomstr = ((ErlAtom) x_reg.get(0)).getValue();
                 ErlList atomlist = string_to_list(atomstr);
@@ -925,18 +922,25 @@ public class ErlProcess {
             restore_ip();
             if (function.equals("uniform")) {
                 if (arity == 1) {
-                    Random r = new Random();
                     int input = ((ErlInt) x_reg.get(0)).getValue();
-                    ErlInt res = new ErlInt(r.nextInt(input) + 1);
+                    int randint = (int) (Math.random() * input) + 1;
+                    ErlInt res = new ErlInt(randint);
+                    x_reg.set(0, res);
                     return res;
                 }
             }
             return new ErlException(ErlTerm.parse("{undef, {" + mod + "," + function + "," + arity + "}}"));
-        } else {
-            file = vm.getModule(mod).file;
-            int label = file.getLabel(function, arity);
-            ip = file.getLabelRef(label);
+        } else if (mod.equals("lists")) {
+            if (function.equals("nth")) {
+                restore_ip();
+                ErlTerm res = Lists.nth(x_reg.get(0), x_reg.get(1));
+                x_reg.set(0, res);
+                return res;
+            }
         }
+        file = vm.getModule(mod).file;
+        int label = file.getLabel(function, arity);
+        ip = file.getLabelRef(label);
         return null;
     }
 
