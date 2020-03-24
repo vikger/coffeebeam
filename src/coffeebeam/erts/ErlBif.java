@@ -13,6 +13,7 @@ public class ErlBif {
 	bif1.put("not", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.not(arg); }});
 	bif1.put("bit_size", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.bit_size(arg); }});
 	bif1.put("byte_size", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.byte_size(arg); }});
+	bif1.put("length", new Bif1() { public ErlTerm execute(ErlTerm arg) { return ErlBif.length(arg); }});
 
 	bif2 = new HashMap<String, Bif2>();
 	bif2.put("+", new Bif2() { public ErlTerm execute(ErlTerm arg1, ErlTerm arg2) { return ErlBif.add(arg1, arg2); }});
@@ -319,17 +320,33 @@ public class ErlBif {
     }
 
     public static ErlInt bit_size(ErlTerm bin) {
-	if (bin instanceof ErlBinary) {
-	    return new ErlInt(((ErlBinary) bin).bitSize());
-	}
-	return null;
+        if (bin instanceof ErlBinary) {
+            return new ErlInt(((ErlBinary) bin).bitSize());
+        }
+        return null;
     }
 
     public static ErlInt byte_size(ErlTerm bin) {
-	if (bin instanceof ErlBinary){
-	    return new ErlInt(((ErlBinary) bin).size());
-	}
-	return null;
+        if (bin instanceof ErlBinary) {
+            return new ErlInt(((ErlBinary) bin).size());
+        }
+        return null;
+    }
+
+    public static ErlTerm length(ErlTerm term) {
+        if (term instanceof ErlList) {
+            ErlList list = (ErlList) term;
+            int length = 0;
+            while (!list.isNil()) {
+                length++;
+                if (list.tail instanceof ErlList)
+                    list = (ErlList) list.tail;
+                else
+                    return new ErlException(new ErlAtom("badarg"));
+            }
+            return new ErlInt(length);
+        }
+        return new ErlException(new ErlAtom("badarg"));
     }
 }
 

@@ -19,8 +19,10 @@
          foldl/3,
          foldr/3,
          map/2,
+         nth/2,
          reverse/1,
          reverse/2,
+         seq/2,
          zip/2
         ]).
 
@@ -144,6 +146,11 @@ map(F, [H|T]) ->
 map(_, []) ->
     [].
 
+nth(1, [Item | _]) ->
+    Item;
+nth(N, [_ | List]) ->
+    nth(N - 1, List).
+
 reverse(L) ->
     reverse(L, []).
 
@@ -151,6 +158,11 @@ reverse([H|T], R) ->
     reverse(T, [H|R]);
 reverse([], R) ->
     R.
+
+seq(N, N) ->
+    [N];
+seq(N, M) ->
+    [N | seq(N + 1, M)].
 
 zip([H1|T1], [H2|T2]) ->
     [{H1, H2} | zip(T1, T2)];

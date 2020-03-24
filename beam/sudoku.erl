@@ -1,26 +1,35 @@
 -module(sudoku).
 
--export([start/0, new_game/1, put/4, values/3]).
+-export([start/0, new_game/0, put/3, values/2, grid/0]).
 
 start() ->
-    spawn(fun () -> init() end).
+    Pid = spawn(fun () -> init() end),
+    register(sudoku, Pid),
+    ok.
 
-new_game(GamePid) ->
-    GamePid ! {self(), new_game},
+new_game() ->
+    sudoku ! {self(), new_game},
     receive
         Grid ->
             Grid
     end.
 
-put(GamePid, Row, Col, Value) ->
-    GamePid ! {self(), {put, Row, Col, Value}},
+put(Row, Col, Value) ->
+    sudoku ! {self(), {put, Row, Col, Value}},
     receive
         Response ->
             Response
     end.
 
-values(GamePid, Row, Col) ->
-    GamePid ! {self(), {values, Row, Col}},
+values(Row, Col) ->
+    sudoku ! {self(), {values, Row, Col}},
+    receive
+        Response ->
+            Response
+    end.
+
+grid() ->
+    sudoku ! {self(), grid},
     receive
         Response ->
             Response
@@ -36,7 +45,7 @@ loop({Grid, Solution} = Exercise, Spare) ->
             case sudoku_logic:is_valid(Grid, Row, Col, Value) of
                 true ->
                     NewGrid = sudoku_logic:put(Grid, Row, Col, Value),
-                    Pid ! NewGrid,
+                    Pid ! ok,
                     loop({NewGrid, Solution}, Spare);
                 false ->
                     Pid ! invalid,
@@ -55,5 +64,8 @@ loop({Grid, Solution} = Exercise, Spare) ->
         {Pid, new_game} ->
             Pid ! Spare,
             self() ! generate_spare,
-            loop(Spare, no_spare)
+            loop(Spare, no_spare);
+        {Pid, grid} ->
+            Pid ! Grid,
+            loop(Exercise, Spare)
     end.

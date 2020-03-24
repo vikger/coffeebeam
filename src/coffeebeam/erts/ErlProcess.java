@@ -483,7 +483,6 @@ public class ErlProcess {
             return null;
         case 78: // call_ext_only
             mfa = file.getImport(((ErlInt) op.args.get(1)).getValue());
-            ip = -1;
             return setCallExt(mfa);
             // 79..88 deprecated
 	case 89: // bs_put_integer
@@ -923,6 +922,7 @@ public class ErlProcess {
                 client.handleCall(function, x_reg.get(0));
             return new ErlAtom("ok");
         } else if (mod.equals("rand")) {
+            restore_ip();
             if (function.equals("uniform")) {
                 if (arity == 1) {
                     Random r = new Random();
@@ -936,6 +936,7 @@ public class ErlProcess {
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);
             ip = file.getLabelRef(label);
+            BeamDebug.warning("call ext " + file.getModuleName().toString() + " " + function);
         }
         return null;
     }

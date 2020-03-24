@@ -13,7 +13,7 @@
 
 {attributes, []}.
 
-{labels, 103}.
+{labels, 100}.
 
 
 {function, get, 3, 2}.
@@ -353,7 +353,7 @@
     {'%',{type_info,{x,0},cons}}.
     {move,{y,0},{x,2}}.
     {move,{y,1},{x,1}}.
-    {call_last,3,{f,96},2}.
+    {call_last,3,{f,93},2}.
 
 
 {function, filter, 2, 42}.
@@ -381,78 +381,66 @@
     {line,[{location,"sudoku_logic.erl",75}]}.
     {func_info,{atom,sudoku_logic},{atom,square_range},1}.
   {label,45}.
-    {select_val,{x,0},
-                {f,44},
-                {list,[{integer,9},
-                       {f,48},
-                       {integer,8},
-                       {f,48},
-                       {integer,7},
-                       {f,48},
-                       {integer,6},
-                       {f,47},
-                       {integer,5},
-                       {f,47},
-                       {integer,4},
-                       {f,47},
-                       {integer,3},
-                       {f,46},
-                       {integer,2},
-                       {f,46},
-                       {integer,1},
-                       {f,46}]}}.
+    {line,[{location,"sudoku_logic.erl",76}]}.
+    {gc_bif,'-',{f,0},1,[{x,0},{integer,1}],{x,0}}.
+    {line,[{location,"sudoku_logic.erl",76}]}.
+    {gc_bif,'div',{f,0},1,[{x,0},{integer,3}],{x,0}}.
+    {line,[{location,"sudoku_logic.erl",76}]}.
+    {gc_bif,'*',{f,0},1,[{x,0},{integer,3}],{x,0}}.
+    {line,[{location,"sudoku_logic.erl",76}]}.
+    {gc_bif,'+',{f,0},1,[{x,0},{integer,1}],{x,0}}.
+    {line,[{location,"sudoku_logic.erl",77}]}.
+    {gc_bif,'+',{f,0},1,[{x,0},{integer,1}],{x,1}}.
+    {line,[{location,"sudoku_logic.erl",77}]}.
+    {gc_bif,'+',{f,0},2,[{x,0},{integer,2}],{x,2}}.
+    {test_heap,6,3}.
+    {put_list,{x,2},nil,{x,2}}.
+    {put_list,{x,1},{x,2},{x,1}}.
+    {put_list,{x,0},{x,1},{x,0}}.
+    return.
+
+
+{function, solution, 1, 47}.
   {label,46}.
-    {move,{literal,[1,2,3]},{x,0}}.
-    return.
-  {label,47}.
-    {move,{literal,[4,5,6]},{x,0}}.
-    return.
-  {label,48}.
-    {move,{literal,[7,8,9]},{x,0}}.
-    return.
-
-
-{function, solution, 1, 50}.
-  {label,49}.
-    {line,[{location,"sudoku_logic.erl",94}]}.
+    {line,[{location,"sudoku_logic.erl",79}]}.
     {func_info,{atom,sudoku_logic},{atom,solution},1}.
-  {label,50}.
+  {label,47}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {line,[{location,"sudoku_logic.erl",95}]}.
-    {call,1,{f,68}}.
+    {line,[{location,"sudoku_logic.erl",80}]}.
+    {call,1,{f,65}}.
     {'%',{type_info,{x,0},list}}.
     {move,{x,0},{x,1}}.
     {move,{y,0},{x,0}}.
-    {call_last,2,{f,54},1}.
+    {call_last,2,{f,51},1}.
 
 
-{function, all_solutions, 1, 52}.
-  {label,51}.
-    {line,[{location,"sudoku_logic.erl",97}]}.
+{function, all_solutions, 1, 49}.
+  {label,48}.
+    {line,[{location,"sudoku_logic.erl",82}]}.
     {func_info,{atom,sudoku_logic},{atom,all_solutions},1}.
-  {label,52}.
+  {label,49}.
     {'%',{type_info,{x,0},cons}}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {line,[{location,"sudoku_logic.erl",98}]}.
-    {call,1,{f,68}}.
+    {line,[{location,"sudoku_logic.erl",83}]}.
+    {call,1,{f,65}}.
     {'%',{type_info,{x,0},list}}.
     {move,{x,0},{x,1}}.
     {move,nil,{x,2}}.
     {move,{y,0},{x,0}}.
-    {call_last,3,{f,62},1}.
+    {call_last,3,{f,59},1}.
 
 
-{function, check, 2, 54}.
-  {label,53}.
-    {line,[{location,"sudoku_logic.erl",100}]}.
+{function, check, 2, 51}.
+  {label,50}.
+    {line,[{location,"sudoku_logic.erl",85}]}.
     {func_info,{atom,sudoku_logic},{atom,check},2}.
-  {label,54}.
-    {test,is_nonempty_list,{f,55},[{x,1}]}.
+  {label,51}.
+    {test,is_nonempty_list,{f,52},[{x,1}]}.
     {get_list,{x,1},{x,2},{x,3}}.
-    {test,is_tuple,{f,53},[{x,2}]}.
-    {test,test_arity,{f,53},[{x,2},2]}.
+    {test,is_tuple,{f,50},[{x,2}]}.
+    {test,test_arity,{f,50},[{x,2},2]}.
     {allocate,4,4}.
     {move,{x,3},{y,2}}.
     {move,{x,0},{y,3}}.
@@ -460,27 +448,27 @@
     {get_tuple_element,{x,2},1,{y,0}}.
     {move,{y,0},{x,2}}.
     {move,{y,1},{x,1}}.
-    {line,[{location,"sudoku_logic.erl",101}]}.
+    {line,[{location,"sudoku_logic.erl",86}]}.
     {call,3,{f,31}}.
     {test_heap,5,1}.
     {put_tuple2,{x,0},{list,[{y,1},{y,0},{x,0},{y,3}]}}.
     {move,{y,2},{x,1}}.
-    {call_last,2,{f,57},4}.
-  {label,55}.
-    {test,is_nil,{f,53},[{x,1}]}.
+    {call_last,2,{f,54},4}.
+  {label,52}.
+    {test,is_nil,{f,50},[{x,1}]}.
     {test_heap,3,1}.
     {put_tuple2,{x,0},{list,[{atom,ok},{x,0}]}}.
     return.
 
 
-{function, solve, 2, 57}.
-  {label,56}.
-    {line,[{location,"sudoku_logic.erl",105}]}.
+{function, solve, 2, 54}.
+  {label,53}.
+    {line,[{location,"sudoku_logic.erl",90}]}.
     {func_info,{atom,sudoku_logic},{atom,solve},2}.
-  {label,57}.
+  {label,54}.
     {'%',{type_info,{x,0},{tuple,4,#{}}}}.
     {get_tuple_element,{x,0},2,{x,2}}.
-    {test,is_nonempty_list,{f,59},[{x,2}]}.
+    {test,is_nonempty_list,{f,56},[{x,2}]}.
     {allocate,5,3}.
     {move,{x,1},{y,4}}.
     {get_list,{x,2},{x,3},{y,3}}.
@@ -490,41 +478,41 @@
     {move,{y,1},{x,2}}.
     {move,{y,2},{x,1}}.
     {move,{y,0},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",106}]}.
+    {line,[{location,"sudoku_logic.erl",91}]}.
     {call,4,{f,4}}.
     {'%',{type_info,{x,0},cons}}.
     {move,{y,4},{x,1}}.
-    {line,[{location,"sudoku_logic.erl",106}]}.
-    {call,2,{f,54}}.
-    {test,is_tuple,{f,58},[{x,0}]}.
-    {test,is_tagged_tuple,{f,60},[{x,0},2,{atom,ok}]}.
+    {line,[{location,"sudoku_logic.erl",91}]}.
+    {call,2,{f,51}}.
+    {test,is_tuple,{f,55},[{x,0}]}.
+    {test,is_tagged_tuple,{f,57},[{x,0},2,{atom,ok}]}.
     {deallocate,5}.
     return.
-  {label,58}.
-    {test,is_eq_exact,{f,60},[{x,0},{atom,error}]}.
+  {label,55}.
+    {test,is_eq_exact,{f,57},[{x,0},{atom,error}]}.
     {test_heap,5,0}.
     {put_tuple2,{x,0},{list,[{y,2},{y,1},{y,3},{y,0}]}}.
     {move,{y,4},{x,1}}.
-    {call_last,2,{f,57},5}.
-  {label,59}.
-    {test,is_nil,{f,56},[{x,2}]}.
+    {call_last,2,{f,54},5}.
+  {label,56}.
+    {test,is_nil,{f,53},[{x,2}]}.
     {move,{atom,error},{x,0}}.
     return.
-  {label,60}.
-    {line,[{location,"sudoku_logic.erl",106}]}.
+  {label,57}.
+    {line,[{location,"sudoku_logic.erl",91}]}.
     {case_end,{x,0}}.
 
 
-{function, check, 3, 62}.
-  {label,61}.
-    {line,[{location,"sudoku_logic.erl",115}]}.
+{function, check, 3, 59}.
+  {label,58}.
+    {line,[{location,"sudoku_logic.erl",100}]}.
     {func_info,{atom,sudoku_logic},{atom,check},3}.
-  {label,62}.
+  {label,59}.
     {'%',{type_info,{x,0},cons}}.
-    {test,is_nonempty_list,{f,63},[{x,1}]}.
+    {test,is_nonempty_list,{f,60},[{x,1}]}.
     {get_list,{x,1},{x,3},{x,4}}.
-    {test,is_tuple,{f,61},[{x,3}]}.
-    {test,test_arity,{f,61},[{x,3},2]}.
+    {test,is_tuple,{f,58},[{x,3}]}.
+    {test,test_arity,{f,58},[{x,3},2]}.
     {allocate,5,5}.
     {move,{x,4},{y,2}}.
     {move,{x,2},{y,3}}.
@@ -533,28 +521,28 @@
     {get_tuple_element,{x,3},1,{y,0}}.
     {move,{y,0},{x,2}}.
     {move,{y,1},{x,1}}.
-    {line,[{location,"sudoku_logic.erl",116}]}.
+    {line,[{location,"sudoku_logic.erl",101}]}.
     {call,3,{f,31}}.
     {test_heap,5,1}.
     {put_tuple2,{x,0},{list,[{y,1},{y,0},{x,0},{y,4}]}}.
     {move,{y,2},{x,1}}.
     {move,{y,3},{x,2}}.
-    {call_last,3,{f,65},5}.
-  {label,63}.
-    {test,is_nil,{f,61},[{x,1}]}.
+    {call_last,3,{f,62},5}.
+  {label,60}.
+    {test,is_nil,{f,58},[{x,1}]}.
     {test_heap,2,3}.
     {put_list,{x,0},{x,2},{x,0}}.
     return.
 
 
-{function, solve, 3, 65}.
-  {label,64}.
-    {line,[{location,"sudoku_logic.erl",120}]}.
+{function, solve, 3, 62}.
+  {label,61}.
+    {line,[{location,"sudoku_logic.erl",105}]}.
     {func_info,{atom,sudoku_logic},{atom,solve},3}.
-  {label,65}.
+  {label,62}.
     {'%',{type_info,{x,0},{tuple,4,#{}}}}.
     {get_tuple_element,{x,0},2,{x,3}}.
-    {test,is_nonempty_list,{f,66},[{x,3}]}.
+    {test,is_nonempty_list,{f,63},[{x,3}]}.
     {allocate,6,4}.
     {move,{x,2},{y,4}}.
     {move,{x,1},{y,5}}.
@@ -565,45 +553,45 @@
     {move,{y,1},{x,2}}.
     {move,{y,2},{x,1}}.
     {move,{y,0},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",121}]}.
+    {line,[{location,"sudoku_logic.erl",106}]}.
     {call,4,{f,4}}.
     {'%',{type_info,{x,0},cons}}.
     {move,{y,4},{x,2}}.
     {move,{y,5},{x,1}}.
     {kill,{y,4}}.
-    {line,[{location,"sudoku_logic.erl",121}]}.
-    {call,3,{f,62}}.
+    {line,[{location,"sudoku_logic.erl",106}]}.
+    {call,3,{f,59}}.
     {test_heap,5,1}.
     {put_tuple2,{x,1},{list,[{y,2},{y,1},{y,3},{y,0}]}}.
     {move,{x,0},{x,2}}.
     {move,{x,1},{x,0}}.
     {move,{y,5},{x,1}}.
-    {call_last,3,{f,65},6}.
-  {label,66}.
-    {test,is_nil,{f,64},[{x,3}]}.
+    {call_last,3,{f,62},6}.
+  {label,63}.
+    {test,is_nil,{f,61},[{x,3}]}.
     {move,{x,2},{x,0}}.
     return.
 
 
-{function, empty, 1, 68}.
-  {label,67}.
-    {line,[{location,"sudoku_logic.erl",126}]}.
+{function, empty, 1, 65}.
+  {label,64}.
+    {line,[{location,"sudoku_logic.erl",111}]}.
     {func_info,{atom,sudoku_logic},{atom,empty},1}.
-  {label,68}.
+  {label,65}.
     {move,nil,{x,2}}.
     {move,{integer,1},{x,1}}.
-    {call_only,3,{f,70}}.
+    {call_only,3,{f,67}}.
 
 
-{function, empty, 3, 70}.
-  {label,69}.
-    {line,[{location,"sudoku_logic.erl",129}]}.
+{function, empty, 3, 67}.
+  {label,66}.
+    {line,[{location,"sudoku_logic.erl",114}]}.
     {func_info,{atom,sudoku_logic},{atom,empty},3}.
-  {label,70}.
+  {label,67}.
     {'%',{type_info,{x,1},number}}.
-    {test,is_nonempty_list,{f,71},[{x,0}]}.
+    {test,is_nonempty_list,{f,68},[{x,0}]}.
     {get_list,{x,0},{x,3},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",132}]}.
+    {line,[{location,"sudoku_logic.erl",117}]}.
     {gc_bif,'+',{f,0},4,[{x,1},{integer,1}],{x,4}}.
     {allocate,3,5}.
     {move,{x,0},{y,0}}.
@@ -612,226 +600,226 @@
     {move,{integer,1},{x,2}}.
     {move,{x,3},{x,0}}.
     {move,nil,{x,3}}.
-    {line,[{location,"sudoku_logic.erl",132}]}.
-    {call,4,{f,73}}.
+    {line,[{location,"sudoku_logic.erl",117}]}.
+    {call,4,{f,70}}.
     {move,{y,2},{x,1}}.
     {kill,{y,2}}.
-    {line,[{location,"sudoku_logic.erl",132}]}.
+    {line,[{location,"sudoku_logic.erl",117}]}.
     {call_ext,2,{extfunc,erlang,'++',2}}.
     {move,{y,1},{x,1}}.
     {move,{x,0},{x,2}}.
     {move,{y,0},{x,0}}.
-    {call_last,3,{f,70},3}.
-  {label,71}.
-    {test,is_nil,{f,69},[{x,0}]}.
+    {call_last,3,{f,67},3}.
+  {label,68}.
+    {test,is_nil,{f,66},[{x,0}]}.
     {move,{x,2},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",130}]}.
+    {line,[{location,"sudoku_logic.erl",115}]}.
     {call_ext_only,1,{extfunc,lists,reverse,1}}.
 
 
-{function, empty_row, 4, 73}.
-  {label,72}.
-    {line,[{location,"sudoku_logic.erl",134}]}.
+{function, empty_row, 4, 70}.
+  {label,69}.
+    {line,[{location,"sudoku_logic.erl",119}]}.
     {func_info,{atom,sudoku_logic},{atom,empty_row},4}.
-  {label,73}.
+  {label,70}.
     {'%',{type_info,{x,2},number}}.
-    {test,is_nonempty_list,{f,75},[{x,0}]}.
+    {test,is_nonempty_list,{f,72},[{x,0}]}.
     {get_list,{x,0},{x,4},{x,0}}.
-    {test,is_eq_exact,{f,74},[{x,4},{integer,0}]}.
-    {line,[{location,"sudoku_logic.erl",135}]}.
+    {test,is_eq_exact,{f,71},[{x,4},{integer,0}]}.
+    {line,[{location,"sudoku_logic.erl",120}]}.
     {gc_bif,'+',{f,0},4,[{x,2},{integer,1}],{x,4}}.
     {test_heap,5,5}.
     {put_tuple2,{x,2},{list,[{x,1},{x,2}]}}.
     {put_list,{x,2},{x,3},{x,3}}.
     {move,{x,4},{x,2}}.
-    {call_only,4,{f,73}}.
-  {label,74}.
-    {line,[{location,"sudoku_logic.erl",137}]}.
+    {call_only,4,{f,70}}.
+  {label,71}.
+    {line,[{location,"sudoku_logic.erl",122}]}.
     {gc_bif,'+',{f,0},4,[{x,2},{integer,1}],{x,2}}.
-    {call_only,4,{f,73}}.
-  {label,75}.
-    {test,is_nil,{f,72},[{x,0}]}.
+    {call_only,4,{f,70}}.
+  {label,72}.
+    {test,is_nil,{f,69},[{x,0}]}.
     {move,{x,3},{x,0}}.
     return.
 
 
-{function, exercise, 1, 77}.
-  {label,76}.
-    {line,[{location,"sudoku_logic.erl",141}]}.
+{function, exercise, 1, 74}.
+  {label,73}.
+    {line,[{location,"sudoku_logic.erl",126}]}.
     {func_info,{atom,sudoku_logic},{atom,exercise},1}.
-  {label,77}.
+  {label,74}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {line,[{location,"sudoku_logic.erl",142}]}.
-    {call,1,{f,81}}.
-    {line,[{location,"sudoku_logic.erl",143}]}.
-    {call,1,{f,50}}.
-    {test,is_tuple,{f,78},[{x,0}]}.
-    {test,is_tagged_tuple,{f,79},[{x,0},2,{atom,ok}]}.
+    {line,[{location,"sudoku_logic.erl",127}]}.
+    {call,1,{f,78}}.
+    {line,[{location,"sudoku_logic.erl",128}]}.
+    {call,1,{f,47}}.
+    {test,is_tuple,{f,75},[{x,0}]}.
+    {test,is_tagged_tuple,{f,76},[{x,0},2,{atom,ok}]}.
     {get_tuple_element,{x,0},1,{y,0}}.
     {move,{y,0},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",145}]}.
-    {call,1,{f,88}}.
+    {line,[{location,"sudoku_logic.erl",130}]}.
+    {call,1,{f,85}}.
     {test_heap,3,1}.
     {put_tuple2,{x,0},{list,[{x,0},{y,0}]}}.
     {deallocate,1}.
     return.
-  {label,78}.
-    {test,is_eq_exact,{f,79},[{x,0},{atom,error}]}.
-    {line,[{location,"sudoku_logic.erl",147}]}.
+  {label,75}.
+    {test,is_eq_exact,{f,76},[{x,0},{atom,error}]}.
+    {line,[{location,"sudoku_logic.erl",132}]}.
     {gc_bif,'-',{f,0},0,[{y,0},{integer,1}],{x,0}}.
-    {call_last,1,{f,77},1}.
-  {label,79}.
-    {line,[{location,"sudoku_logic.erl",143}]}.
+    {call_last,1,{f,74},1}.
+  {label,76}.
+    {line,[{location,"sudoku_logic.erl",128}]}.
     {case_end,{x,0}}.
 
 
-{function, generate_grid, 1, 81}.
-  {label,80}.
-    {line,[{location,"sudoku_logic.erl",150}]}.
+{function, generate_grid, 1, 78}.
+  {label,77}.
+    {line,[{location,"sudoku_logic.erl",135}]}.
     {func_info,{atom,sudoku_logic},{atom,generate_grid},1}.
-  {label,81}.
+  {label,78}.
     {allocate,1,1}.
     {move,{x,0},{y,0}}.
-    {line,[{location,"sudoku_logic.erl",151}]}.
+    {line,[{location,"sudoku_logic.erl",136}]}.
     {call,0,{f,21}}.
     {'%',{type_info,{x,0},list}}.
     {move,{y,0},{x,1}}.
-    {call_last,2,{f,83},1}.
+    {call_last,2,{f,80},1}.
 
 
-{function, generate_grid, 2, 83}.
-  {label,82}.
-    {line,[{location,"sudoku_logic.erl",153}]}.
+{function, generate_grid, 2, 80}.
+  {label,79}.
+    {line,[{location,"sudoku_logic.erl",138}]}.
     {func_info,{atom,sudoku_logic},{atom,generate_grid},2}.
-  {label,83}.
-    {test,is_eq_exact,{f,84},[{x,1},{integer,0}]}.
+  {label,80}.
+    {test,is_eq_exact,{f,81},[{x,1},{integer,0}]}.
     return.
-  {label,84}.
+  {label,81}.
     {allocate_zero,4,2}.
     {move,{x,1},{y,2}}.
     {move,{x,0},{y,3}}.
     {move,{integer,9},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",156}]}.
+    {line,[{location,"sudoku_logic.erl",141}]}.
     {call_ext,1,{extfunc,rand,uniform,1}}.
     {move,{x,0},{y,1}}.
     {move,{integer,9},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",157}]}.
+    {line,[{location,"sudoku_logic.erl",142}]}.
     {call_ext,1,{extfunc,rand,uniform,1}}.
     {move,{y,1},{x,2}}.
     {move,{x,0},{y,0}}.
     {move,{y,3},{x,0}}.
     {move,{x,2},{x,1}}.
     {move,{y,0},{x,2}}.
-    {line,[{location,"sudoku_logic.erl",158}]}.
+    {line,[{location,"sudoku_logic.erl",143}]}.
     {call,3,{f,2}}.
-    {test,is_eq_exact,{f,85},[{x,0},{integer,0}]}.
+    {test,is_eq_exact,{f,82},[{x,0},{integer,0}]}.
     {move,{y,0},{x,2}}.
     {move,{y,1},{x,1}}.
     {move,{y,3},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",160}]}.
+    {line,[{location,"sudoku_logic.erl",145}]}.
     {call,3,{f,31}}.
-    {test,is_ne_exact,{f,85},[{x,0},nil]}.
-    {line,[{location,"sudoku_logic.erl",164}]}.
+    {test,is_ne_exact,{f,82},[{x,0},nil]}.
+    {line,[{location,"sudoku_logic.erl",149}]}.
     {call,1,{f,11}}.
     {'%',{type_info,{x,0},list}}.
-    {test,is_nonempty_list,{f,86},[{x,0}]}.
+    {test,is_nonempty_list,{f,83},[{x,0}]}.
     {get_hd,{x,0},{x,3}}.
     {move,{y,0},{x,2}}.
     {move,{y,1},{x,1}}.
     {move,{y,3},{x,0}}.
     {move,{y,2},{y,3}}.
     {trim,3,1}.
-    {line,[{location,"sudoku_logic.erl",165}]}.
+    {line,[{location,"sudoku_logic.erl",150}]}.
     {call,4,{f,4}}.
     {'%',{type_info,{x,0},cons}}.
-    {line,[{location,"sudoku_logic.erl",166}]}.
+    {line,[{location,"sudoku_logic.erl",151}]}.
     {gc_bif,'-',{f,0},1,[{y,0},{integer,1}],{x,1}}.
-    {call_last,2,{f,83},1}.
-  {label,85}.
+    {call_last,2,{f,80},1}.
+  {label,82}.
     {move,{y,2},{x,1}}.
     {move,{y,3},{x,0}}.
-    {call_last,2,{f,83},4}.
-  {label,86}.
-    {line,[{location,"sudoku_logic.erl",164}]}.
+    {call_last,2,{f,80},4}.
+  {label,83}.
+    {line,[{location,"sudoku_logic.erl",149}]}.
     {badmatch,{literal,[]}}.
 
 
-{function, generalize_grid, 1, 88}.
-  {label,87}.
-    {line,[{location,"sudoku_logic.erl",172}]}.
+{function, generalize_grid, 1, 85}.
+  {label,84}.
+    {line,[{location,"sudoku_logic.erl",157}]}.
     {func_info,{atom,sudoku_logic},{atom,generalize_grid},1}.
-  {label,88}.
+  {label,85}.
     {allocate_zero,3,1}.
     {move,{x,0},{y,2}}.
     {move,{integer,9},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",173}]}.
+    {line,[{location,"sudoku_logic.erl",158}]}.
     {call_ext,1,{extfunc,rand,uniform,1}}.
     {move,{x,0},{y,1}}.
     {move,{integer,9},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",174}]}.
+    {line,[{location,"sudoku_logic.erl",159}]}.
     {call_ext,1,{extfunc,rand,uniform,1}}.
     {move,{y,1},{x,2}}.
     {move,{x,0},{y,0}}.
     {move,{y,2},{x,0}}.
     {move,{x,2},{x,1}}.
     {move,{y,0},{x,2}}.
-    {line,[{location,"sudoku_logic.erl",175}]}.
+    {line,[{location,"sudoku_logic.erl",160}]}.
     {call,3,{f,2}}.
-    {test,is_eq_exact,{f,89},[{x,0},{integer,0}]}.
+    {test,is_eq_exact,{f,86},[{x,0},{integer,0}]}.
     {move,{y,2},{x,0}}.
-    {call_last,1,{f,88},3}.
-  {label,89}.
+    {call_last,1,{f,85},3}.
+  {label,86}.
     {move,{y,0},{x,2}}.
     {move,{y,1},{x,1}}.
     {move,{integer,0},{x,3}}.
     {kill,{y,0}}.
     {kill,{y,1}}.
     {move,{y,2},{x,0}}.
-    {line,[{location,"sudoku_logic.erl",179}]}.
+    {line,[{location,"sudoku_logic.erl",164}]}.
     {call,4,{f,4}}.
     {'%',{type_info,{x,0},cons}}.
     {move,{x,0},{y,1}}.
-    {line,[{location,"sudoku_logic.erl",180}]}.
-    {call,1,{f,52}}.
-    {test,is_nonempty_list,{f,90},[{x,0}]}.
+    {line,[{location,"sudoku_logic.erl",165}]}.
+    {call,1,{f,49}}.
+    {test,is_nonempty_list,{f,87},[{x,0}]}.
     {get_tl,{x,0},{x,0}}.
-    {test,is_nil,{f,90},[{x,0}]}.
+    {test,is_nil,{f,87},[{x,0}]}.
     {move,{y,1},{x,0}}.
-    {call_last,1,{f,88},3}.
-  {label,90}.
+    {call_last,1,{f,85},3}.
+  {label,87}.
     {move,{y,2},{x,0}}.
     {deallocate,3}.
     return.
 
 
-{function, module_info, 0, 92}.
-  {label,91}.
+{function, module_info, 0, 89}.
+  {label,88}.
     {line,[]}.
     {func_info,{atom,sudoku_logic},{atom,module_info},0}.
-  {label,92}.
+  {label,89}.
     {move,{atom,sudoku_logic},{x,0}}.
     {line,[]}.
     {call_ext_only,1,{extfunc,erlang,get_module_info,1}}.
 
 
-{function, module_info, 1, 94}.
-  {label,93}.
+{function, module_info, 1, 91}.
+  {label,90}.
     {line,[]}.
     {func_info,{atom,sudoku_logic},{atom,module_info},1}.
-  {label,94}.
+  {label,91}.
     {move,{x,0},{x,1}}.
     {move,{atom,sudoku_logic},{x,0}}.
     {line,[]}.
     {call_ext_only,2,{extfunc,erlang,get_module_info,2}}.
 
 
-{function, '-get_square/3-lc$^0/1-0-', 3, 96}.
-  {label,95}.
+{function, '-get_square/3-lc$^0/1-0-', 3, 93}.
+  {label,92}.
     {line,[{location,"sudoku_logic.erl",68}]}.
     {func_info,{atom,sudoku_logic},{atom,'-get_square/3-lc$^0/1-0-'},3}.
-  {label,96}.
-    {test,is_nonempty_list,{f,97},[{x,0}]}.
+  {label,93}.
+    {test,is_nonempty_list,{f,94},[{x,0}]}.
     {allocate,4,3}.
     {move,{x,2},{y,2}}.
     {move,{x,1},{y,3}}.
@@ -844,11 +832,11 @@
     {move,{y,1},{x,4}}.
     {move,{y,2},{x,2}}.
     {move,{y,3},{x,1}}.
-    {call_last,5,{f,100},4}.
-  {label,97}.
-    {test,is_nil,{f,98},[{x,0}]}.
+    {call_last,5,{f,97},4}.
+  {label,94}.
+    {test,is_nil,{f,95},[{x,0}]}.
     return.
-  {label,98}.
+  {label,95}.
     {test_heap,2,1}.
     {put_list,{x,0},nil,{x,1}}.
     {move,{atom,function_clause},{x,0}}.
@@ -856,12 +844,12 @@
     {call_ext,2,{extfunc,erlang,error,2}}.
 
 
-{function, '-get_square/3-lc$^1/1-1-', 5, 100}.
-  {label,99}.
+{function, '-get_square/3-lc$^1/1-1-', 5, 97}.
+  {label,96}.
     {line,[{location,"sudoku_logic.erl",68}]}.
     {func_info,{atom,sudoku_logic},{atom,'-get_square/3-lc$^1/1-1-'},5}.
-  {label,100}.
-    {test,is_nonempty_list,{f,101},[{x,0}]}.
+  {label,97}.
+    {test,is_nonempty_list,{f,98},[{x,0}]}.
     {allocate,5,5}.
     {move,{x,4},{y,1}}.
     {move,{x,3},{y,2}}.
@@ -884,16 +872,16 @@
     {move,{x,5},{x,4}}.
     {trim,4,1}.
     {line,[{location,"sudoku_logic.erl",68}]}.
-    {call,5,{f,100}}.
+    {call,5,{f,97}}.
     {test_heap,2,1}.
     {put_list,{y,0},{x,0},{x,0}}.
     {deallocate,1}.
     return.
-  {label,101}.
-    {test,is_nil,{f,102},[{x,0}]}.
+  {label,98}.
+    {test,is_nil,{f,99},[{x,0}]}.
     {move,{x,3},{x,0}}.
-    {call_only,3,{f,96}}.
-  {label,102}.
+    {call_only,3,{f,93}}.
+  {label,99}.
     {test_heap,2,1}.
     {put_list,{x,0},nil,{x,1}}.
     {move,{atom,function_clause},{x,0}}.
