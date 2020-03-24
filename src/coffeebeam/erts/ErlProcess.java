@@ -936,7 +936,6 @@ public class ErlProcess {
             file = vm.getModule(mod).file;
             int label = file.getLabel(function, arity);
             ip = file.getLabelRef(label);
-            BeamDebug.warning("call ext " + file.getModuleName().toString() + " " + function);
         }
         return null;
     }
