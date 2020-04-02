@@ -1,16 +1,13 @@
 {module, sudoku_logic}.  %% version = 0
 
 {exports, [{check_grid,1},
-           {empty,1},
            {exercise,1},
-           {generate_grid,1},
            {get,3},
            {is_valid,4},
            {module_info,0},
            {module_info,1},
            {possible_values,3},
-           {put,4},
-           {solution,1}]}.
+           {put,4}]}.
 
 {attributes, []}.
 

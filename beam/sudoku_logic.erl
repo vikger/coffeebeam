@@ -1,6 +1,6 @@
 -module(sudoku_logic).
 
--export([get/3, put/4, is_valid/4, check_grid/1, solution/1, possible_values/3, exercise/1, generate_grid/1, empty/1]).
+-export([get/3, put/4, is_valid/4, possible_values/3, exercise/1, check_grid/1]).
 
 get(Grid, Row, Col) ->
     lists:nth(Col, lists:nth(Row, Grid)).
